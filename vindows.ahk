@@ -104,6 +104,15 @@ return
   Send, #{Down}#{Down}
 return
 
+;--------------------;
+; IS TILED FUNCTIONS ;
+;--------------------;
+IsTiledLeft(Grace){
+  WinGetPos, X, Y, W, H, A
+  SysGet, Mon, Monitor
+  return ((X+W <= MonRight/2+Grace and X+W > MonRight/2-Grace) and (X <= 0 and X > 0-Grace))
+}
+
 ;--------------;
 ; RANDOM TESTS ;
 ;--------------;
