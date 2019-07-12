@@ -18,33 +18,28 @@ Grace = 20
 ; then tiles it up. It also limits the ability to move the window
 ; if it is already tiled.
 #k:: ; Win+K
-  WinGetPos, X, Y, W, H, A ; Get the position and dimension of active
-                           ; window
-  SysGet, Mon, Monitor ; Get the screen resolution (assumes there is
-                       ; only one screen)
+  Send, {Win up}
   ; Todo: Fix a middle variable
   ; Todo: Fix so that  non-tiled windows that are partly outside the
   ;       screen are handled correctly
-  ; If the window is already tiled, it does not have to be sent
-  ; left or right
-  if (X <= 0 or (X+W >= MonRight and X >= MonRight/2)) {
-    ; However, if the windows is in ; a top corner, it should not be
-    ; maximized. The minus 100 is arbetrary to correctly find the bottom
-    ; edge
-    if (Y <= 0 and H <= MonBottom-100) {      
-      return
-    }
+  ; If the windows is already "top-tiled", do nothing
+  if (IsTiledTop() and (IsTiledLeft() or IsTiledRight()))
+    return
+  ; Else, if it is tiled to the right or left (and to the bottom),
+  ; send the windows "up" with out first sending it to either
+  ; side
+  else if (IsTiledLeft() or IsTiledRight())
     Send, #{Up}
-  }
   ; In the last two cases, where windows are not tiled, we determine if
   ; they are mostly to the left or right side of the screen. The 
   ; windows are positioned accordingly
+  ; Todo: Currently this is done by only evaulating the x coordinate; it
+  ;       should determine if the whole windows is mostly to the right
+  ;       or left
   else if (X <= MonRight/2) {
-    Send, {Win up}
     Send, #{Left}#{Up}
   }
   else if (X > MonRight/2) {
-    Send, {Win up}
     Send, #{Right}#{Up}
   }
 return
@@ -53,13 +48,9 @@ return
 ; MOVE WINDOW RIGHT ;
 ;-------------------;
 #l:: ; Win+l
-  WinGetPos, X, Y, W, H, A
-  SysGet, Mon, Monitor
-  ; MsgBox, X=%X%, W=%W%, MonRight=%MonRight%
   Send, {Win up}
-  if ((X+W >= MonRight and X+W < MonRight+Grace) and (X+Grace >= MonRight/2 and X < MonRight/2+Grace)) {
+  if (IsTiledRight())
     return
-  }
   Send, #{Right}
 
 return
@@ -68,13 +59,9 @@ return
 ; MOVE WINDOW LEFT ;
 ;------------------;
 #h:: ; Win+h
-  WinGetPos, X, Y, W, H, A
-  SysGet, Mon, Monitor
   Send, {Win up}
-  if ((X+W <= MonRight/2+Grace and X+W > MonRight/2-Grace) and (X <= 0 and X > 0-Grace)) {
-    ; MsgBox, Here!
+  if (IsTiledLeft())
     return
-  }
   Send, #{Left}
 return
 
@@ -82,10 +69,8 @@ return
 ; MOVE WINDOW DOWN ;
 ;------------------;
 #j:: ; Win+j
-  WinGetPos, X, Y, W, H, A
-  SysGet, Mon, Monitor
   Send, {Win up}
-  if ((Y >= MonBottom/2 and  Y < MonBottom/2+Grace) and (Y+H >= MonBottom and Y+H < MonBottom+Grace))
+  if (IsTiledBottom())
     return
   Send, #{Down}
 return
@@ -107,17 +92,52 @@ return
 ;--------------------;
 ; IS TILED FUNCTIONS ;
 ;--------------------;
-IsTiledLeft(Grace){
+; Currently, these functions can only identify quarter tiles. Half-screen
+; tiles show up as top plus right or left. I do not know if this needs
+; fixing
+
+;--LEFT--;
+IsTiledLeft(){
+  global Grace
   WinGetPos, X, Y, W, H, A
   SysGet, Mon, Monitor
   return ((X+W <= MonRight/2+Grace and X+W > MonRight/2-Grace) and (X <= 0 and X > 0-Grace))
+}
+
+;--RIGHT--;
+IsTiledRight(){
+  global Grace
+  WinGetPos, X, Y, W, H, A
+  SysGet, Mon, Monitor
+  return ((X+W >= MonRight and X+W < MonRight+Grace) and (X+Grace >= MonRight/2 and X < MonRight/2+Grace))
+}
+
+;--TOP--;
+IsTiledTop() {
+  global Grace
+  WinGetPos, X, Y, W, H, A
+  SysGet, Mon, Monitor
+  return (Y <= 0 and (Y+H >= MonBottom/2-Grace and Y+H <= Y+H <= MonBottom/2+Grace))
+}
+
+
+;--BOTTOM--;
+IsTiledBottom() {
+  global Grace
+  WinGetPos, X, Y, W, H, A
+  SysGet, Mon, Monitor
+  return ((Y >= MonBottom/2 and  Y < MonBottom/2+Grace) and (Y+H >= MonBottom and Y+H < MonBottom+Grace))
 }
 
 ;--------------;
 ; RANDOM TESTS ;
 ;--------------;
 #t::
-  MsgBox, %Grace%
+  TLeft := IsTiledLeft()
+  TRight := IsTiledRight()
+  TTop := IsTiledTop()
+  TBottom := IsTiledBottom()
+  MsgBox, Left: %TLeft%`nRight: %TRight%`nTop: %TTop%`nBottom: %TBottom%
 return
 
 ;-------------------;
