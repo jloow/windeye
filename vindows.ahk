@@ -54,11 +54,13 @@ return
 #l:: ; Win+l
   WinGetPos, X, Y, W, H, A
   SysGet, Mon, Monitor
-  if (X+W >= MonRight and X >= MonRight/2) {
+  ; MsgBox, X=%X%, W=%W%, MonRight=%MonRight%
+  Send, {Win up}
+  if ((X+W >= MonRight and X+W < MonRight+Grace) and (X+Grace >= MonRight/2 and X < MonRight/2+Grace)) {
     return
   }
-  Send, {Win up}
   Send, #{Right}
+
 return
 
 ;------------------;
@@ -67,10 +69,12 @@ return
 #h:: ; Win+h
   WinGetPos, X, Y, W, H, A
   SysGet, Mon, Monitor
-  else if (X <= MonRight/2) {
+  Send, {Win up}
+  if ((X+W <= MonRight/2+Grace and X+W > MonRight/2-Grace) and (X <= 0 and X > 0-Grace)) {
+    ; MsgBox, Here!
     return
   }
-  SendInput, #{Left}
+  Send, #{Left}
 return
 
 ;------------------;
@@ -80,9 +84,23 @@ return
   WinGetPos, X, Y, W, H, A
   SysGet, Mon, Monitor
   Send, {Win up}
-  if ((Y >= MonBottom/2 and  Y < MonBottom/2+Grace) and (Y+H >= MonBottom and Y+H < MonBottom+Grace)
+  if ((Y >= MonBottom/2 and  Y < MonBottom/2+Grace) and (Y+H >= MonBottom and Y+H < MonBottom+Grace))
     return
   Send, #{Down}
+return
+
+;-----------------;
+; MAXIMIZE WINDOW ;
+;-----------------;
+#f:: ; Win+f
+  Send, #{Up}#{Up}
+return
+
+;-----------------;
+; MINIMIZE WINDOW ;
+;-----------------;
+#m:: ; Win+m
+  Send, #{Down}#{Down}
 return
 
 ;--------------;
