@@ -3,6 +3,13 @@
 ; For these key bindings to for (specifically, Win+l), the windows
 ; lock workstation function must be disabled
 
+; Because the positions of the tiled windows do not always round
+; to e.g. exactly half of the monitor resolution (it happens that a
+; top-tiled windows has an x-coordinate of -4, for example) we must
+; definee an area in which a window is considered tiled, even if it
+; is not.
+Grace = 20
+
 ;----------------;
 ; MOVE WINDOW UP ;
 ;----------------;
@@ -26,7 +33,7 @@
     if (Y <= 0 and H <= MonBottom-100) {      
       return
     }
-    SendInput, #{Up}
+    Send, #{Up}
   }
   ; In the last two cases, where windows are not tiled, we determine if
   ; they are mostly to the left or right side of the screen. The 
@@ -45,23 +52,49 @@ return
 ; MOVE WINDOW RIGHT ;
 ;-------------------;
 #l:: ; Win+l
-  SendInput, #{Right}
+  WinGetPos, X, Y, W, H, A
+  SysGet, Mon, Monitor
+  if (X+W >= MonRight and X >= MonRight/2) {
+    return
+  }
+  Send, {Win up}
+  Send, #{Right}
 return
 
 ;------------------;
 ; MOVE WINDOW LEFT ;
 ;------------------;
-#h:: ; Win+H
+#h:: ; Win+h
+  WinGetPos, X, Y, W, H, A
+  SysGet, Mon, Monitor
+  else if (X <= MonRight/2) {
+    return
+  }
   SendInput, #{Left}
 return
 
 ;------------------;
 ; MOVE WINDOW DOWN ;
 ;------------------;
-#j:: ; Win+J
-  SendInput, #{Down}
+#j:: ; Win+j
+  WinGetPos, X, Y, W, H, A
+  SysGet, Mon, Monitor
+  Send, {Win up}
+  if ((Y >= MonBottom/2 and  Y < MonBottom/2+Grace) and (Y+H >= MonBottom and Y+H < MonBottom+Grace)
+    return
+  Send, #{Down}
 return
 
+;--------------;
+; RANDOM TESTS ;
+;--------------;
+#t::
+  MsgBox, %Grace%
+return
+
+;-------------------;
+; RELOAD THE SCRIPT ;
+;-------------------;
 #r::
   Reload
 return
