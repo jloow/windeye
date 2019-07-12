@@ -15,7 +15,8 @@ Grace = 20
 ;----------------;
 ; This functions in such a way that, depending on whether the window
 ; is on the left or right side already, it tiles it to that side and
-; then tiles it up.
+; then tiles it up. It also limits the ability to move the window
+; if it is already tiled.
 #k:: ; Win+K
   WinGetPos, X, Y, W, H, A ; Get the position and dimension of active
                            ; window
