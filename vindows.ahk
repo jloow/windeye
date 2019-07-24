@@ -1,18 +1,9 @@
-﻿; Rebind the tiling system
-
-;------------;
+﻿;------------;
 ; SOME NOTES ;
 ;------------;
 
 ; I've tried using `SendInput` in favor of `Send` but this seems
 ; to work less frequently. I don't know why.
-
-; Because the positions of the tiled windows do not always rounded
-; to e.g. exactly half of the monitor resolution (it happens that a
-; top-tiled windows has an x-coordinate of -4, for example) we must
-; define an area in which a window is considered tiled, even if it
-; is not. This is the `Grace` variable
-Grace = 20
 
 ; The general idea is the following. The screen is divided into
 ; quadrants, like such:
@@ -23,124 +14,96 @@ Grace = 20
 ; | 3 | 4 |
 ; +---+---+
 
-;------------------------;
-; SEND TO FIRST QUADRANT ;
-;------------------------;
-#1:: ; Win+1
+;------------;
+; SOME SETUP ;
+;------------;
+
+; Because the positions of the tiled windows do not always rounded
+; to e.g. exactly half of the monitor resolution (it happens that a
+; top-tiled windows has an x-coordinate of -4, for example) we must
+; define an area in which a window is considered tiled, even if it
+; is not. This is the `Grace` variable
+
+Grace = 20
+
+;----------------;
+; DEFINE HOTKEYS ;
+;----------------;
+
+; Move to q1
+#+1:: ; Win+Shift+1
   MoveTo(1)
 return
 
-#2:: ; Win+2
+; Move to q2
+#+2:: ; Win+Shift+2
   MoveTo(2)
 return
 
-#3:: ; Win+3
+; Move to q3
+#+3:: ; Win+Shift+3
   MoveTo(3)
 return
 
-#4:: ; Win+4
+; Move to q4
+#+4:: ; Win+Shift+4
   MoveTo(4)
 return
 
+; Move to h1
+#+§:: ; Win+Shift+§
+  MoveTo(1.5)
+return
+
+; Move to h2
+#+5:: ; Win+Shift+5
+  MoveTo(2.5)
+return
+
+; Select in and cycle through q1
+#1:: ; Win+1
+  SelectCycle(1)
+return
+
+; Select in and cycle through q2
+#2:: ; Win+2
+  SelectCycle(2)
+return
+
+; Select in and cycle through q3
+#3:: ; Win+3
+  SelectCycle(3)
+return
+
+; Select in and cycle through q4
+#4:: ; Win+4
+  SelectCycle(1)
+return
+
+; Select in and cycle through h1
 #§:: ; Win+§
-  MoveTo(13)
+  SelectCycle(1.5)
 return
 
+; Select in and cycle through h2
 #5:: ; Win+5
-  MoveTo(24)
+  SelectCycle(2.5)
 return
 
-
-;----------------;
-; MOVE WINDOW UP ;
-;----------------;
-; This functions in such a way that, depending on whether the window
-; is on the left or right side already, it tiles it to that side and
-; then tiles it up. It also limits the ability to move the window
-; if it is already tiled.
-#k:: ; Win+k
-  Send, {Win up}
-  ; Todo: Fix so that  non-tiled windows that are partly outside the
-  ;       screen are handled correctly
-  ; If the windows is already "top-tiled", do nothing
-  if (IsTiledTop() and (IsTiledLeft() or IsTiledRight()) not TouchesBottom)
-    return
-  ; Else, if it is tiled to the right or left (and to the bottom),
-  ; send the windows "up" with out first sending it to either
-  ; side
-  else if (IsTiledLeft() or IsTiledRight())
-    Send, #{Up}
-  ; In the last two cases, where windows are not tiled, we determine if
-  ; they are mostly to the left or right side of the screen. The
-  ; windows are positioned accordingly
-  ; Todo: Currently this is done by only evaulating the x coordinate; it
-  ;       should determine if the whole windows is mostly to the right
-  ;       or left
-  else if (X <= MonRight/2) {
-    Send, #{Left}#{Up}
-  }
-  else if (X > MonRight/2) {
-    Send, #{Right}#{Up}
-  }
-  ; Sometimes when tiling up, Windows asks us if we want to tile another
-  ; window. We do not...
-  Send, {Esc}
-return
-
-;-------------------;
-; MOVE WINDOW RIGHT ;
-;-------------------;
-#l:: ; Win+l
-  Send, {Win up}
-  if (IsTiledRight())
-    return
-  Send, #{Right}
-  ; The "double-check" here and for moving window left is needed
-  ; because Windows does not move the window from on side to
-  ; another directly; first, the windows "floats". This does not
-  ; work all the time
-  if (!IsTiledRight())
-    Send, #{Right}
-return
-
-;------------------;
-; MOVE WINDOW LEFT ;
-;------------------;
-#h:: ; Win+h
-  Send, {Win up}
-  if (IsTiledLeft())
-    return
-  Send, #{Left}
-  if (!IsTiledLeft())
-    Send, #{Left}
-return
-
-;------------------;
-; MOVE WINDOW DOWN ;
-;------------------;
-#j:: ; Win+j
-  Send, {Win up}
-  if (IsTiledBottom())
-    return
-  Send, #{Down}
-return
-
-; Maximizing and minimizing this way does not work reliably.
-
-;-----------------;
-; MAXIMIZE WINDOW ;
-;-----------------;
+;; Maximize
 #f:: ; Win+f
-  Send, #{Up}#{Up}
+  WinMaximize, A
 return
 
-;-----------------;
-; MINIMIZE WINDOW ;
-;-----------------;
+;; Minimize  
 #m:: ; Win+m
-  Send, #{Down}#{Down}
+  WinMinimize, A
 return
 
+;------------------------;
+; CHECK AND MOVE WINDOWS ;
+;------------------------;
+; Returns the current location
 CurrentLocation() {
   ; Top left (1st q)
   if (IsTiledLeft() and IsTiledTop() and !TouchesBottom())
@@ -156,265 +119,112 @@ CurrentLocation() {
     return 4
   ; Left half-screen (1st and 3rd q)
   else if (IsTiledLeft() and IsTiledTop())
-    return 5
+    return 1.5
   ; Right half-screen (2nd and 4th q)
   else if (IsTiledRight() and IsTiledTop())
-    return 6
+    return 2.5
   ; If floating or otherwise
   else
     return 0
 }
 
-MoveTo(q) {
-  ; Move from floating
-  if (CurrentLocation() == 0){
-    if (q == 1) {
-      Send, #{Left}
-      Sleep, 10
-      Send, #{Up}
-    }
-    else if (q == 2) {
-      Send, #{Right}
-      Sleep, 10
-      Send, #{Up}
-    }
-    else if (q == 3) {
-      Send, #{Left}
-      Sleep, 10
-      Send, #{Down}
-    }
-    else if (q == 4) {
-      Send, #{Right}
-      Sleep, 10
-      Send, #{Bottom}
-    }
-    else if (q == 13) {
-      Send, #{Left}
-    }
-    else if (q == 24) {
-      Send, #{Right}
-    }
-  }
-  ; Move from first quadrant
-  else if (CurrentLocation() == 1){
-    if (q == 1) {
-      return ; For now, just return
-    }
-    else if (q == 2) {
-      Send, #{Right}
-    }
-    else if (q == 3) {
-      Send, #{Down}
-      Sleep, 10
-      Send, #{Down}
-    }
-    else if (q == 4) {
-      Send, #{Right}
-      Sleep, 10
-      Send, #{Down}
-      Sleep, 10
-      Send, #{Down}
-    }
-    else if (q == 13) {
-      Send, #{Down}
-    }
-    else if (q == 24) {
-      Send, #{Right}
-      Sleep, 10
-      Send, #{Down}
-    }
-  }
-  ; Move from 2nd quadrant
-  else if (CurrentLocation() == 2){
-    if (q == 1) {
-      Send, #{Left}
-    }
-    else if (q == 2) {
-      return
-    }
-    else if (q == 3) {
-      Send, #{Left}
-      Sleep, 10
-      Send, #{Down}
-      Sleep, 10
-      Send, #{Down}
-    }
-    else if (q == 4) {
-      Send, #{Down}
-      Sleep, 10
-      Send, #{Down}
-    }
-    else if (q == 13) {
-      Send, #{Left}
-      Sleep, 10
-      Send, #{Down}
-    }
-    else if (q == 24) {
-      Send, #{Down}
-    }
-  }
-  ; Move from 3rd quadrant
-  else if (CurrentLocation() == 3) {
-    if (q == 1) {
-      Send, #{Up}
-      Sleep, 10
-      Send, #{Up}
-    }
-    else if (q == 2) {
-      Send, #{Up}
-      Sleep, 10
-      Send, #{Up}
-      Sleep, 10
-      Send, #{Right}
-    }
-    else if (q == 3) {
-      return
-    }
-    else if (q == 4) {
-      Send, #{Right}
-    }
-    else if (q == 13) {
-      Send, #{Up}
-    }
-    else if (q == 24) {
-      Send, #{Right}
-      Sleep, 10
-      Send, #{Up}
-    }
-  }
-  ; Move from 4th quadrant
-  else if (CurrentLocation() == 4) {
-    if (q == 1) {
-      Send, #{Up}
-      Sleep, 10
-      Send, #{Up}
-      Sleep, 10
-      Send, #{Left}
-    }
-    else if (q == 2) {
-      Send, #{Up}
-      Sleep, 10
-      Send, #{Up}
-    }
-    else if (q == 3) {
-      Send, {Left}
-    }
-    else if (q == 4) {
-      return
-    }
-    else if (q == 13) {
-      Send, #{Left}
-      Sleep, 10
-      Send, #{Up}
-    }
-    else if (q == 24) {
-      Send, #{Up}
-    }
-  }
-  ; Move from left half-screen
-  else if (CurrentLocation() == 13) {
-    if (q == 1) {
-      Send, #{Up}
-    }
-    else if (q == 2) {
-      Send, #{Up}
-      Sleep, 10
-      Send, #{Left}
-    }
-    else if (q == 3) {
-      Send, #{Down}
-    }
-    else if (q == 4) {
-      Send, #{Down}
-      Sleep, 10
-      Send, #{Right}
-    }
-    else if (q == 13) {
-      return
-    }
-    else if (q == 24) {
-      Send, #{Right}
-      Sleep, 10
-      Send, #{Right}
-    }
-  }
-  ; Move from right half-screen
-  else if (CurrentLocation() == 24) {
-    if (q == 1) {
-      Send, #{Up}
-      Sleep, 10
-      Send, #{Left}
-    }
-    else if (q == 2) {
-      Send, #{Up}
-    }
-    else if (q == 3) {
-      Send, #{Down}
-      Sleep, 10
-      Send, #{Left}
-    }
-    else if (q == 4) {
-      Send, #{Down}
-    }
-    else if (q == 13) {
-      Send, #{Left}
-      Sleep, 10
-      Send, #{Left}
-    }
-    else if (q == 24) {
-      return
-    }
-  }
-}
-
+; Is the window at the correct side of the screen?
 CorrectSide(d) {
   c := CurrentLocation()
-  return Mod(d, 2) == Mod(c, 2) and d != 0
+  if ((c == 1 or c == 1.5 or c == 3) and (d == 1 or d == 1.5 or d == 3))
+    return true
+  else if ((c == 2 or c == 2.5 or c == 4) and (d == 2 or d == 2.5 or d == 4))
+    return true
+  else
+    return false    
+  ; Left side is represented by odd numbers and the right
+  ; side by even numbers. Thus, as long as the destination
+  ; and current location aren't 0, by divinding these
+  ; by two and comparing the "rest" we can determine
+  ; if we are on the same. This could be made to work
+  ; with `Floor`
 }
 
-Mover(d) {
-  c := CurrentLocation()
-  ; Determine if we are on the correct side
-  if (Mod(d, 2) == Mod(c, 2) and d != 0
-) {
-    a := c - d
-    ; Possible combinations:
-    ; 1 - 3 = -2 d
-    ; 1 - 5 = -4 d
-    ; 3 - 1 = 2 u
-    ; 3 - 5 = -2 u
-    ; 5 - 1 = 4 u
-    ; 5 - 3 = 2 d
-    ; ------------
-    ; 1 - 13 = -12 d (2 - 24 = -22)
-    ; 3 - 13 = -10 u (4 - 24 = -20)
-    if (d > 4)
-      if (...
-    if (a == -2)
-      Send, #{Down}
-    else if (a == 2)
-      Send, #{Up}
-    else if (a == 4)
-      Send, #{Up}
-    else if (a == 3)
-      
+; Moves the windows to the desired location
+MoveTo(d) {
+  WinGetTitle, title, A
+  Loop {  
+    if (CorrectSide(d)) {
+      c := CurrentLocation()
+      a := c - d
+
+      ; Let's assume half-screen is denoted by the upper
+      ; quadrant plus .5 and that a negative results means
+      ; the window goes down and a positive that it goes
+      ; up
+      ;
+      ; | Cur. pos. | Dest. | Calc. | Res. dir. | Des. dir. |
+      ; +-----------+-------+-------+-----------+-----------+
+      ; | 1         | 3     | -2    | Down      | Down      |
+      ; | 2         | 4     | -2    | Down      | Down      |
+      ; | 3         | 1     | 2     | Up        | Up        |
+      ; | 4         | 2     | 2     | Up        | Up        |
+      ; | 1.5       | 1     | 0.5   | Up        | Up        |
+      ; | 2.5       | 2     | 0.5   | Up        | Up        |
+      ; | 1         | 1.5   | -0.5  | Down      | Down      |
+      ; | 2         | 2.5   | -0.5  | Down      | Down      |
+      ; | 3         | 1.5   | 2.5   | Up        | Up        |
+      ; | 4         | 1.5   | 2.5   | Up        | Up        |
+
+      ; If we are in the right position, do nothing
+      if (a == 0) ; This may not be needed as the `Until`-conditions should prevent such a situation
+        return
+      ; Diff positive, move up
+      else if (a > 0)
+        Send, #{Up}
+      ; Diff negative, move down
+      else if (a < 0)
+        Send, #{Down}
+    }
+    ; If we are not at the correct side, send either left or right
+    else if (Mod(d, 2) == 0) {
+      Send, #{Left}
+    }
+    else if (Mod(d, 2) > 0) {
+      Send, #{Right}
+    }
+    Send, {Esc}
   }
-  else if (Mod(d, 2) == 0) {
-    Send, #{Left}
+  Until (CurrentLocation() == d)
+  ; Sometimes after tiling, we are asked if we automatically
+  ; want to tile another window relative to it. We do not.
+  ; The loop below fixes this.
+  Loop {
+    WinActivate, %title%
   }
-  else if (Mod(d, 2) > 0) {
-    Send, #{Right}
+  Until (WinActive(title))
+}
+
+; Select the top window in a quadrant or side; cycle through the
+; section if a window in the section is already selected
+SelectCycle(q) {
+  WinGet, win, List
+  if (q == CurrentLocation()) {
+    MsgBox, Test!
+  }
+  else {
+    Loop, %win% {
+      this_win := win%A_Index%
+      WinActivate, ahk_id %this_win% ; There might a nice way than WinActivate to do this
+      if (CurrentLocation() == q)
+        break
+    }
   }
 }
 
-;--------------------;
-; IS TILED FUNCTIONS ;
-;--------------------;
+;----------------------;
+; `IS TILED` FUNCTIONS ;
+;----------------------;
 ; Currently, these functions can only identify quarter tiles. Half-screen
 ; tiles show up as top plus right or left.
 ; Todo: Fix so that large but untiled windows are identified correctly
 
-;--LEFT--;
+; Left
 IsTiledLeft(){
   global Grace
   WinGetPos, X, Y, W, H, A
@@ -422,7 +232,7 @@ IsTiledLeft(){
   return ((X+W <= MonRight/2+Grace and X+W > MonRight/2-Grace) and (X <= 0 and X > 0-Grace))
 }
 
-;--RIGHT--;
+; Right
 IsTiledRight(){
   global Grace
   WinGetPos, X, Y, W, H, A
@@ -430,7 +240,7 @@ IsTiledRight(){
   return ((X+W >= MonRight and X+W < MonRight+Grace) and (X+Grace >= MonRight/2 and X < MonRight/2+Grace))
 }
 
-;--TOP--;
+; Top
 IsTiledTop() {
   global Grace
   WinGetPos, X, Y, W, H, A
@@ -438,7 +248,7 @@ IsTiledTop() {
   return (Y <= 0 and (Y+H >= MonBottom/2-Grace and Y+H <= Y+H <= MonBottom/2+Grace))
 }
 
-;--BOTTOM--;
+; Bottom
 IsTiledBottom() {
   global Grace
   WinGetPos, X, Y, W, H, A
@@ -446,18 +256,19 @@ IsTiledBottom() {
   return ((Y >= MonBottom/2 and  Y < MonBottom/2+Grace) and (Y+H >= MonBottom and Y+H < MonBottom+Grace))
 }
 
-;--TOUCHES BOTTOM?--;
-; This function is to determine if the window touches to bottom of the
-; screen. It is used to determined if a windows covers half the screen.
+; Touches bottom?
+;; This function is to determine if the window touches to bottom of the
+;; screen. It is used to determined if a windows covers half the screen.
 TouchesBottom() {
   WinGetPos, , Y, , H, A
   SysGet, Mon, Monitor
   return (Y+H >= MonBottom)
 }
 
-;--------------;
-; RANDOM TESTS ;
-;--------------;
+;-------------;
+; OTHER STUFF ;
+;-------------;
+; Random tests
 #t::
   TLeft := IsTiledLeft()
   TRight := IsTiledRight()
@@ -465,31 +276,14 @@ TouchesBottom() {
   TBottom := IsTiledBottom()
   TsBottom := TouchesBottom()
   CL := CurrentLocation()
-  MsgBox, Left: %TLeft%`nRight: %TRight%`nTop: %TTop%`nBottom: %TBottom%`nTouchesBottom: %TsBottom%`nCurrentLocation: %CL%
-
-  ; WinGet, id, List
-  ; Loop, %id% {
-  ;   this_id := id%A_Index%
-  ;   WinGetTitle, this_title, ahk_id %this_id%
-  ;   MsgBox, %this_title%
-  ; }
+  WinGetTitle, title, A
+  MsgBox, Left: %TLeft%`nRight: %TRight%`nTop: %TTop%`nBottom: %TBottom%`nTouchesBottom: %TsBottom%`nCurrentLocation: %CL%`nTitle: %title%
 return
 
-; This is how moving focus will work:
-; 1. Determine if we want to move focus left, right, up or down (keypress)
-; 2. Determine where we are, i.e. which quadrant. Depending on this, we
-;    will exclude some options. First one half of the screen is exluded.
-;    Then, all windows in the wrong direction (e.g. below when we want
-;    to move focus up) are excluded.
-; 3.
-
-;-------------------;
-; RELOAD THE SCRIPT ;
-;-------------------;
+; Reload the script
 #r::
   Reload
 return
-
 
 ; Some help and references
 ;
