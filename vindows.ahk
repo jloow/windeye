@@ -22,10 +22,6 @@ Grace = 20
 ; +---+---+
 ; | 3 | 4 |
 ; +---+---+
-;
-; Mod1+1, for example, sends the active window, regardless of its
-; current location, to the first quadrant. Mod1+! sends a window to
-; the first and third quandrant.
 
 ;------------------------;
 ; SEND TO FIRST QUADRANT ;
@@ -150,7 +146,7 @@ CurrentLocation() {
   if (IsTiledLeft() and IsTiledTop() and !TouchesBottom())
     return 1
   ; Top right (2nd q)
-  else if (ISTiledRight() and IsTiledTop() and !TouchesBottom())
+  else if (IsTiledRight() and IsTiledTop() and !TouchesBottom())
     return 2
   ; Bottom left (3rd q)
   else if (IsTiledLeft() and IsTiledBottom())
@@ -160,10 +156,10 @@ CurrentLocation() {
     return 4
   ; Left half-screen (1st and 3rd q)
   else if (IsTiledLeft() and IsTiledTop())
-    return 13
+    return 5
   ; Right half-screen (2nd and 4th q)
   else if (IsTiledRight() and IsTiledTop())
-    return 24
+    return 6
   ; If floating or otherwise
   else
     return 0
@@ -368,6 +364,46 @@ MoveTo(q) {
     else if (q == 24) {
       return
     }
+  }
+}
+
+CorrectSide(d) {
+  c := CurrentLocation()
+  return Mod(d, 2) == Mod(c, 2) and d != 0
+}
+
+Mover(d) {
+  c := CurrentLocation()
+  ; Determine if we are on the correct side
+  if (Mod(d, 2) == Mod(c, 2) and d != 0
+) {
+    a := c - d
+    ; Possible combinations:
+    ; 1 - 3 = -2 d
+    ; 1 - 5 = -4 d
+    ; 3 - 1 = 2 u
+    ; 3 - 5 = -2 u
+    ; 5 - 1 = 4 u
+    ; 5 - 3 = 2 d
+    ; ------------
+    ; 1 - 13 = -12 d (2 - 24 = -22)
+    ; 3 - 13 = -10 u (4 - 24 = -20)
+    if (d > 4)
+      if (...
+    if (a == -2)
+      Send, #{Down}
+    else if (a == 2)
+      Send, #{Up}
+    else if (a == 4)
+      Send, #{Up}
+    else if (a == 3)
+      
+  }
+  else if (Mod(d, 2) == 0) {
+    Send, #{Left}
+  }
+  else if (Mod(d, 2) > 0) {
+    Send, #{Right}
   }
 }
 
