@@ -66,6 +66,9 @@ Grace = 20
 ; Select in and cycle through h2
 #5:: SelectCycle(2.5)
 
+; Selects an untiled window
+#+c:: SelectCycle(0)
+
 ; Next virtual desktop
 #n:: Send, #^{Right}
 
@@ -201,7 +204,7 @@ SelectCycle(q) {
     skipFirst := true
   Loop, %win% {
     this_win := win%A_Index%
-    if (Selectable(this_win, q)) { ; Selectable probably isnt needed
+    if (CurrentLocation(this_win) == q) { 
       if (skipFirst) {
         skipFirst := false
         continue
@@ -226,7 +229,8 @@ Selectable(id, q) {
 ;----------------------;
 ; Currently, these functions can only identify quarter tiles. Half-screen
 ; tiles show up as top plus right or left.
-; Todo: Fix so that large but untiled windows are identified correctly
+; Todo: Fix so that large but untiled windows are identified correctly. Fkxed?
+; Todo: Can SysGet be global?
 
 ; Left
 IsTiledLeft(id := "") {
@@ -303,14 +307,10 @@ TouchesBottom(id := "") {
 return
 
 ; Reload the script
-#r::
-  Reload
-return
+#r:: Reload
 
 ; Exit script
-#x::
-  Exit
-return
+#x:: Exit
 
 ; Some help and references
 ;
