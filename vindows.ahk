@@ -77,7 +77,7 @@ return
 
 ; Select in and cycle through q4
 #4:: ; Win+4
-  SelectCycle(1)
+  SelectCycle(4)
 return
 
 ; Select in and cycle through h1
@@ -89,6 +89,23 @@ return
 #5:: ; Win+5
   SelectCycle(2.5)
 return
+
+; Next virtual desktop
+#n:: ; Win+n
+  Send, #^{Right}
+return
+
+; Previous virtual desktop
+#+n:: ; Win+Shift+n -- is it appropriate?
+  Send, #^{Left}
+return
+
+; Close the active window
+#q:: ; Win+q
+  WinClose, A
+return
+
+; Todo: Create new virtual desktop if it doesn't exist (Win+Shift+d creates new)
 
 ;; Maximize
 #f:: ; Win+f
@@ -104,24 +121,24 @@ return
 ; CHECK AND MOVE WINDOWS ;
 ;------------------------;
 ; Returns the current location
-CurrentLocation() {
+CurrentLocation(id := "") {
   ; Top left (1st q)
-  if (IsTiledLeft() and IsTiledTop() and !TouchesBottom())
+  if (IsTiledLeft(id) and IsTiledTop(id) and !TouchesBottom(id))
     return 1
   ; Top right (2nd q)
-  else if (IsTiledRight() and IsTiledTop() and !TouchesBottom())
+  else if (IsTiledRight(id) and IsTiledTop(id) and !TouchesBottom(id))
     return 2
   ; Bottom left (3rd q)
-  else if (IsTiledLeft() and IsTiledBottom())
+  else if (IsTiledLeft(id) and IsTiledBottom(id))
     return 3
   ; Bottom right (4th q)
-  else if (IsTiledRight() and IsTiledBottom())
+  else if (IsTiledRight(id) and IsTiledBottom(id))
     return 4
   ; Left half-screen (1st and 3rd q)
-  else if (IsTiledLeft() and IsTiledTop())
+  else if (IsTiledLeft(id) and IsTiledTop(id))
     return 1.5
   ; Right half-screen (2nd and 4th q)
-  else if (IsTiledRight() and IsTiledTop())
+  else if (IsTiledRight(id) and IsTiledTop(id))
     return 2.5
   ; If floating or otherwise
   else
@@ -195,7 +212,7 @@ MoveTo(d) {
   ; want to tile another window relative to it. We do not.
   ; The loop below fixes this.
   Loop {
-    WinActivate, %title%
+    WinActivate, %title% ; For this and similar situations it might be better to use ahk_id
   }
   Until (WinActive(title))
 }
@@ -204,17 +221,29 @@ MoveTo(d) {
 ; section if a window in the section is already selected
 SelectCycle(q) {
   WinGet, win, List
-  if (q == CurrentLocation()) {
-    MsgBox, Test!
-  }
-  else {
-    Loop, %win% {
-      this_win := win%A_Index%
-      WinActivate, ahk_id %this_win% ; There might a nice way than WinActivate to do this
-      if (CurrentLocation() == q)
-        break
+  firstLap := true
+  if (q == CurrentLocation())
+    skipFirst := true
+  Loop, %win% {
+    this_win := win%A_Index%
+    if (Selectable(this_win, q)) {
+      if (skipFirst) {
+        skipFirst := false
+        continue
+      }
+      WinActivate, ahk_id %this_win%
+      break
     }
   }
+}
+
+; Determines if a window should be selectable
+Selectable(id, q) {
+  ; Floating windows etc. shouldn't aren't eligable
+  if (CurrentLocation(id) == q)
+    return true
+  else 
+    return false
 }
 
 ;----------------------;
@@ -225,33 +254,45 @@ SelectCycle(q) {
 ; Todo: Fix so that large but untiled windows are identified correctly
 
 ; Left
-IsTiledLeft(){
+IsTiledLeft(id := "") {
   global Grace
-  WinGetPos, X, Y, W, H, A
+  if (id)
+    WinGetPos, X, Y, W, H, ahk_id %id%
+  else
+    WinGetPos, X, Y, W, H, A
   SysGet, Mon, Monitor
   return ((X+W <= MonRight/2+Grace and X+W > MonRight/2-Grace) and (X <= 0 and X > 0-Grace))
 }
 
 ; Right
-IsTiledRight(){
+IsTiledRight(id := "") {
   global Grace
-  WinGetPos, X, Y, W, H, A
+  if (id)
+    WinGetPos, X, Y, W, H, ahk_id %id%
+  else
+    WinGetPos, X, Y, W, H, A
   SysGet, Mon, Monitor
   return ((X+W >= MonRight and X+W < MonRight+Grace) and (X+Grace >= MonRight/2 and X < MonRight/2+Grace))
 }
 
 ; Top
-IsTiledTop() {
+IsTiledTop(id := "") {
   global Grace
-  WinGetPos, X, Y, W, H, A
+  if (id)
+    WinGetPos, X, Y, W, H, ahk_id %id%
+  else
+    WinGetPos, X, Y, W, H, A
   SysGet, Mon, Monitor
   return (Y <= 0 and (Y+H >= MonBottom/2-Grace and Y+H <= Y+H <= MonBottom/2+Grace))
 }
 
 ; Bottom
-IsTiledBottom() {
+IsTiledBottom(id := "") {
   global Grace
-  WinGetPos, X, Y, W, H, A
+  if (id)
+    WinGetPos, X, Y, W, H, ahk_id %id%
+  else
+    WinGetPos, X, Y, W, H, A
   SysGet, Mon, Monitor
   return ((Y >= MonBottom/2 and  Y < MonBottom/2+Grace) and (Y+H >= MonBottom and Y+H < MonBottom+Grace))
 }
@@ -259,8 +300,11 @@ IsTiledBottom() {
 ; Touches bottom?
 ;; This function is to determine if the window touches to bottom of the
 ;; screen. It is used to determined if a windows covers half the screen.
-TouchesBottom() {
-  WinGetPos, , Y, , H, A
+TouchesBottom(id := "") {
+  if (id)
+    WinGetPos, X, Y, W, H, ahk_id %id%
+  else
+    WinGetPos, , Y, , H, A
   SysGet, Mon, Monitor
   return (Y+H >= MonBottom)
 }
@@ -278,11 +322,19 @@ TouchesBottom() {
   CL := CurrentLocation()
   WinGetTitle, title, A
   MsgBox, Left: %TLeft%`nRight: %TRight%`nTop: %TTop%`nBottom: %TBottom%`nTouchesBottom: %TsBottom%`nCurrentLocation: %CL%`nTitle: %title%
+  id := ""
+  if (id)
+    MsgBox, id
 return
 
 ; Reload the script
 #r::
   Reload
+return
+
+; Exit script
+#x::
+  Exit
 return
 
 ; Some help and references
