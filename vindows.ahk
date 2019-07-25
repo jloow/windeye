@@ -96,7 +96,7 @@ return
 return
 
 ; Previous virtual desktop
-#+n:: ; Win+Shift+n -- is it appropriate?
+#+n:: ; Win+Shift+n -- is it appropriate? It is hard to reach with onr hand
   Send, #^{Left}
 return
 
@@ -221,12 +221,11 @@ MoveTo(d) {
 ; section if a window in the section is already selected
 SelectCycle(q) {
   WinGet, win, List
-  firstLap := true
   if (q == CurrentLocation())
     skipFirst := true
   Loop, %win% {
     this_win := win%A_Index%
-    if (Selectable(this_win, q)) {
+    if (Selectable(this_win, q)) { ; Selectable probably isnt needed
       if (skipFirst) {
         skipFirst := false
         continue
