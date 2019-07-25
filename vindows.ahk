@@ -25,6 +25,8 @@
 ; is not. This is the `Grace` variable
 
 Grace = 20
+SendMode, Input ; Todo: Check so that this works
+SetKeyDelay, 20 ; Todo: Experiment to find a good value
 
 ;----------------;
 ; DEFINE HOTKEYS ;
