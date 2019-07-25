@@ -117,6 +117,12 @@ return
   WinMinimize, A
 return
 
+; Toggles decoration
+#h:: ; Win+h
+  WinSet, Style, ^0xC00000, A ; Hide title bar
+  WinSet, Style, ^0x200000, A ; Hide scrollbar
+return
+
 ;------------------------;
 ; CHECK AND MOVE WINDOWS ;
 ;------------------------;
