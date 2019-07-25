@@ -31,97 +31,67 @@ Grace = 20
 ;----------------;
 
 ; Move to q1
-#+1:: ; Win+Shift+1
-  MoveTo(1)
-return
+#+1:: MoveTo(1)
 
 ; Move to q2
-#+2:: ; Win+Shift+2
-  MoveTo(2)
-return
+#+2:: MoveTo(2)
 
 ; Move to q3
-#+3:: ; Win+Shift+3
-  MoveTo(3)
-return
+#+3:: MoveTo(3)
 
 ; Move to q4
-#+4:: ; Win+Shift+4
-  MoveTo(4)
-return
+#+4:: MoveTo(4)
 
 ; Move to h1
-#+§:: ; Win+Shift+§
-  MoveTo(1.5)
-return
+#+§:: MoveTo(1.5)
 
 ; Move to h2
-#+5:: ; Win+Shift+5
-  MoveTo(2.5)
-return
+#+5:: MoveTo(2.5)
 
 ; Select in and cycle through q1
-#1:: ; Win+1
-  SelectCycle(1)
-return
+#1:: SelectCycle(1)
 
 ; Select in and cycle through q2
-#2:: ; Win+2
-  SelectCycle(2)
-return
+#2:: SelectCycle(2)
 
 ; Select in and cycle through q3
-#3:: ; Win+3
-  SelectCycle(3)
-return
+#3:: SelectCycle(3)
 
 ; Select in and cycle through q4
-#4:: ; Win+4
-  SelectCycle(4)
-return
+#4:: SelectCycle(4)
 
 ; Select in and cycle through h1
-#§:: ; Win+§
-  SelectCycle(1.5)
-return
+#§:: SelectCycle(1.5)
 
 ; Select in and cycle through h2
-#5:: ; Win+5
-  SelectCycle(2.5)
-return
+#5:: SelectCycle(2.5)
 
 ; Next virtual desktop
-#n:: ; Win+n
-  Send, #^{Right}
-return
+#n:: Send, #^{Right}
 
 ; Previous virtual desktop
-#+n:: ; Win+Shift+n -- is it appropriate? It is hard to reach with onr hand
-  Send, #^{Left}
-return
+; Is it appropriate? It is hard to reach with onr hand
+#+n:: Send, #^{Left}
 
 ; Close the active window
-#q:: ; Win+q
-  WinClose, A
-return
+#q:: WinClose, A
 
 ; Todo: Create new virtual desktop if it doesn't exist (Win+Shift+d creates new)
 
 ;; Maximize
-#f:: ; Win+f
-  WinMaximize, A
-return
+#f:: WinMaximize, A
 
 ;; Minimize  
-#m:: ; Win+m
-  WinMinimize, A
-return
+#m:: WinMinimize, A
 
 ; Toggles decoration
 #h:: ; Win+h
   WinSet, Style, ^0xC00000, A ; Hide title bar
   WinSet, Style, ^0x200000, A ; Hide scrollbar
 return
+
+; Alt Tab
+Win & c::AltTab
 
 ;------------------------;
 ; CHECK AND MOVE WINDOWS ;
