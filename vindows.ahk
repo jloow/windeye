@@ -179,15 +179,15 @@ MoveTo(d) {
     else if (Mod(d, 2) > 0) {
       Send, #{Right}
     }
+    ; Sometimes after tiling, we are asked if we automatically
+    ; want to tile another window relative to it. We do not.
+    ; The loop below fixes this.
+    Loop {
+      WinActivate, %title% ; For this and similar situations it might be better to use ahk_id
+    }
+    Until (WinActive(title))
   }
   Until (CurrentLocation() == d)
-  ; Sometimes after tiling, we are asked if we automatically
-  ; want to tile another window relative to it. We do not.
-  ; The loop below fixes this.
-  Loop {
-    WinActivate, %title% ; For this and similar situations it might be better to use ahk_id
-  }
-  Until (WinActive(title))
 }
 
 ; Select the top window in a quadrant or side; cycle through the
