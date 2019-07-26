@@ -140,6 +140,7 @@ CorrectSide(d) {
 ; Moves the windows to the desired location
 MoveTo(d) {
   WinGetTitle, title, A
+  Send, {Win up}
   Loop {  
     if (CorrectSide(d)) {
       c := CurrentLocation()
