@@ -1,20 +1,4 @@
 ﻿;------------;
-; SOME NOTES ;
-;------------;
-
-; I've tried using `SendInput` in favor of `Send` but this seems
-; to work less frequently. I don't know why.
-
-; The general idea is the following. The screen is divided into
-; quadrants, like such:
-;
-; +---+---+
-; | 1 | 2 |
-; +---+---+
-; | 3 | 4 |
-; +---+---+
-
-;------------;
 ; SOME SETUP ;
 ;------------;
 
@@ -25,8 +9,11 @@
 ; is not. This is the `Grace` variable
 
 Grace = 20
-SendMode, Input ; Todo: Check so that this works
-SetKeyDelay, 20 ; Todo: Experiment to find a good value
+
+; I've tried using `SendInput` in favor of `Send` but this seems
+; to work less frequently. I don't know why.
+; SendMode, Input ; Todo: Check so that this works -- it does not
+; SetKeyDelay, 20 ; Todo: Experiment to find a good value -- is it needed?
 
 ;----------------;
 ; DEFINE HOTKEYS ;
@@ -69,7 +56,7 @@ SetKeyDelay, 20 ; Todo: Experiment to find a good value
 #5:: SelectCycle(2.5)
 
 ; Selects an untiled window
-#+c:: SelectCycle(0)
+#v:: SelectCycle(0)
 
 ; Next virtual desktop
 #n:: Send, #^{Right}
@@ -82,6 +69,7 @@ SetKeyDelay, 20 ; Todo: Experiment to find a good value
 #q:: WinClose, A
 
 ; Todo: Create new virtual desktop if it doesn't exist (Win+Shift+d creates new)
+;       Use windows-desktop-switcher
 
 ;; Maximize
 #f:: WinMaximize, A
@@ -156,7 +144,6 @@ MoveTo(d) {
     if (CorrectSide(d)) {
       c := CurrentLocation()
       a := c - d
-
       ; Let's assume half-screen is denoted by the upper
       ; quadrant plus .5 and that a negative results means
       ; the window goes down and a positive that it goes
@@ -174,7 +161,6 @@ MoveTo(d) {
       ; | 2         | 2.5   | -0.5  | Down      | Down      |
       ; | 3         | 1.5   | 2.5   | Up        | Up        |
       ; | 4         | 1.5   | 2.5   | Up        | Up        |
-
       ; If we are in the right position, do nothing
       if (a == 0) ; This may not be needed as the `Until`-conditions should prevent such a situation
         return
@@ -192,7 +178,6 @@ MoveTo(d) {
     else if (Mod(d, 2) > 0) {
       Send, #{Right}
     }
-    Send, {Esc}
   }
   Until (CurrentLocation() == d)
   ; Sometimes after tiling, we are asked if we automatically
@@ -213,6 +198,14 @@ SelectCycle(q) {
   Loop, %win% {
     this_win := win%A_Index%
     if (CurrentLocation(this_win) == q) { 
+      ; Some windows are hidden and get selected when q == 0. Thus
+      ; if q == 0 and the window has no title, we shouldn't select it.
+      ; Todo: Make it possible to cycle through un-tiled windows
+      if (q == 0) {
+        WinGetTitle, t, ahk_id %this_win%
+        if (t == "")
+          continue
+      }
       if (skipFirst) {
         skipFirst := false
         continue
@@ -221,15 +214,6 @@ SelectCycle(q) {
       break
     }
   }
-}
-
-; Determines if a window should be selectable
-Selectable(id, q) {
-  ; Floating windows etc. shouldn't aren't eligable
-  if (CurrentLocation(id) == q)
-    return true
-  else 
-    return false
 }
 
 ;----------------------;
