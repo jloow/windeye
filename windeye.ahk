@@ -12,8 +12,8 @@ Grace = 20
 
 ; I've tried using `SendInput` in favor of `Send` but this seems
 ; to work less frequently. I don't know why.
-; SendMode, Input ; Todo: Check so that this works -- it does not
-; SetKeyDelay, 20 ; Todo: Experiment to find a good value -- is it needed?
+SendMode, Input ; Todo: Check so that this works -- it does not
+SetKeyDelay, 10 ; Todo: Experiment to find a good value -- is it needed?
 
 ;----------------;
 ; DEFINE HOTKEYS ;
