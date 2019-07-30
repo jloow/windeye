@@ -80,7 +80,8 @@ SetKeyDelay, 10 ; Todo: Experiment to find a good value -- is it needed?
 ; Turns on decoration
 #h:: ; Win+h
   WinSet, Style, -0xC00000, A ; Hide title bar
-  WinSet, Style, -0x200000, A ; Hide scrollbar
+  WinSet, Style, -0x200000, A ; Hide vertical scroll bar
+  WinSet, Style, -0x100000, A ; Hide horizontal scroll bar
 return
 
 ; Turns off decoration
