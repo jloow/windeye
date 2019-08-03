@@ -10,10 +10,10 @@
 
 Grace = 20
 
-; I've tried using `SendInput` in favor of `Send` but this seems
-; to work less frequently. I don't know why.
-SendMode, Input ; Todo: Check so that this works -- it does not
-SetKeyDelay, 10 ; Todo: Experiment to find a good value -- is it needed?
+SendMode, Input
+SetKeyDelay, 10 ; Todo: Experiment to find a good value
+
+Decoration := false
 
 ;----------------;
 ; DEFINE HOTKEYS ;
@@ -78,17 +78,13 @@ SetKeyDelay, 10 ; Todo: Experiment to find a good value -- is it needed?
 #m:: WinMinimize, A
 
 ; Turns on decoration
-#h:: ; Win+h
-  WinSet, Style, -0xC00000, A ; Hide title bar
-  WinSet, Style, -0x200000, A ; Hide vertical scroll bar
-  WinSet, Style, -0x100000, A ; Hide horizontal scroll bar
-return
+#h:: RemoveDecoration()
 
 ; Turns off decoration
-#+h:: ; Win+h
-  WinSet, Style, +0xC00000, A ; Hide title bar
-  WinSet, Style, +0x200000, A ; Hide scrollbar
-return
+#+h:: RestoreDecoration()
+
+; Toggle automatic decoration control
+#g:: ToggleDecoration()
 
 ; Alt Tab
 LWin & c::AltTab
@@ -216,6 +212,31 @@ SelectCycle(q) {
       break
     }
   }
+}
+
+RemoveDecoration() {
+  c := CurrentPosition()
+  WinSet, Style, -0xC00000, A ; Hide title bar
+  WinSet, Style, -0x200000, A ; Hide vertical scroll bar
+  WinSet, Style, -0x100000, A ; Hide horizontal scroll bar
+  ; Sometimes the window dimensions change when removing decoration. Thus we need to make sure the window gets back to where it started
+  Loop
+    MoveTo(c)
+  Until c == CurrentPosition()
+}
+
+RestoreDecoration() {
+  WinSet, Style, +0xC00000, A ; Hide title bar
+  WinSet, Style, +0x200000, A ; Hide scrollbar
+  WinSet, Style, +0x100000, A ; Hide horizontal scroll bar
+}
+
+ToggleDecoration() {
+  global Decoration
+  if Decoration
+    Decoration := false
+  else
+    Decoration := false
 }
 
 ;----------------------;
