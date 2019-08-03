@@ -84,7 +84,17 @@ Decoration := false
 #+h:: RestoreDecoration()
 
 ; Toggle automatic decoration control
-#g:: ToggleDecoration()
+#g::
+ToggleDecoration()
+ChangeAllDecoration()
+return
+
+; Everytime the windows button is pressed, see remove or restore all
+; decoration
+#::
+ChangeAllDecoration()
+Send, #   
+return
 
 ; Alt Tab
 LWin & c::AltTab
@@ -214,29 +224,55 @@ SelectCycle(q) {
   }
 }
 
-RemoveDecoration() {
-  c := CurrentPosition()
-  WinSet, Style, -0xC00000, A ; Hide title bar
-  WinSet, Style, -0x200000, A ; Hide vertical scroll bar
-  WinSet, Style, -0x100000, A ; Hide horizontal scroll bar
-  ; Sometimes the window dimensions change when removing decoration. Thus we need to make sure the window gets back to where it started
+RemoveDecoration(id := "") {
+  c := CurrentPosition(id)
+  if (id) {
+    WinSet, Style, -0xC00000, ahk_id %id% ; Hide title bar
+    WinSet, Style, -0x200000, ahk_id %id% ; Hide vertical scroll bar
+    WinSet, Style, -0x100000, ahk_id %id% ; Hide horizontal scroll bar
+  }
+  else {
+    WinSet, Style, -0xC00000, A
+    WinSet, Style, -0x200000, A
+    WinSet, Style, -0x100000, A
+  }
+  ; Sometimes the window dimensions change when removing decoration.
+  ; Thus we need to make sure the window gets back to where it started
   Loop
     MoveTo(c)
-  Until c == CurrentPosition()
+  Until c == CurrentPosition(id)
 }
 
-RestoreDecoration() {
-  WinSet, Style, +0xC00000, A ; Hide title bar
-  WinSet, Style, +0x200000, A ; Hide scrollbar
-  WinSet, Style, +0x100000, A ; Hide horizontal scroll bar
+RestoreDecoration(id := "") {
+  Wif (id) {
+    WinSet, Style, +0xC00000, ahk_id %id% ; Hide title bar
+    WinSet, Style, +0x200000, ahk_id %id% ; Hide vertical scroll bar
+    WinSet, Style, +0x100000, ahk_id %id% ; Hide horizontal scroll bar
+  }
+  else {
+    WinSet, Style, +0xC00000, A
+    WinSet, Style, +0x200000, A
+    WinSet, Style, +0x100000, A
+  }
 }
 
 ToggleDecoration() {
   global Decoration
-  if Decoration
+  if (Decoration)
     Decoration := false
   else
-    Decoration := false
+    Decoration := true
+}
+
+ChangeAllDecoration() {
+  WinGet, win, List
+  Loop, %win% {
+    this_win := win%A_Index%
+    if (Decoration)
+      RestoreDecoration(this_win)
+    else
+      RemoveDecoration(this_win)
+  }
 }
 
 ;----------------------;
