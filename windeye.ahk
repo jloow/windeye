@@ -23,10 +23,10 @@ SetKeyDelay, 10 ; Todo: Experiment to find a good value -- is it needed?
 #+1:: MoveTo(1)
 
 ; Move to q2
-#+2:: MoveTo(2)
+#+2:: MoveTo(3)
 
 ; Move to q3
-#+3:: MoveTo(3)
+#+3:: MoveTo(2)
 
 ; Move to q4
 #+4:: MoveTo(4)
@@ -41,10 +41,10 @@ SetKeyDelay, 10 ; Todo: Experiment to find a good value -- is it needed?
 #1:: SelectCycle(1)
 
 ; Select in and cycle through q2
-#2:: SelectCycle(2)
+#2:: SelectCycle(3)
 
 ; Select in and cycle through q3
-#3:: SelectCycle(3)
+#3:: SelectCycle(2)
 
 ; Select in and cycle through q4
 #4:: SelectCycle(4)
