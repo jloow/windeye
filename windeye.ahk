@@ -74,6 +74,12 @@ Decoration := false
 ;; Maximize
 #f:: WinMaximize, A
 
+; Super full-screen
+#+f::
+RemoveDecoration()
+WinMaximize, A
+return
+
 ;; Minimize  
 #m:: WinMinimize, A
 
