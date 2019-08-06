@@ -92,10 +92,10 @@ return
 #+h:: RestoreDecoration()
 
 ; Toggle automatic decoration control
-#g::
-ToggleDecoration()
-ChangeAllDecoration()
-return
+; #g::
+; ToggleDecoration()
+; ChangeAllDecoration()
+; return
 
 ; Start terminal
 #e:: Run, pwsh
@@ -242,10 +242,7 @@ RemoveDecoration(id := "") {
   }
   ; Sometimes the window dimensions change when removing decoration.
   ; Thus we need to make sure the window gets back to where it started
-  Loop
-    if (c == CurrentLocation(id))
-      break
-    MoveTo(c)
+  MoveTo(c)
 }
 
 RestoreDecoration(id := "") {
