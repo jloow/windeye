@@ -97,6 +97,9 @@ ToggleDecoration()
 ChangeAllDecoration()
 return
 
+; Start terminal
+#e:: Run, pwsh
+
 ; Alt Tab
 LWin & c::AltTab
 
