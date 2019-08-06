@@ -39,22 +39,22 @@ Decoration := false
 ; Move to h2
 #+5:: MoveTo(2.5)
 
-; Select in and cycle through q1
+; Select and cycle through q1
 #1:: SelectCycle(1)
 
-; Select in and cycle through q2
+; Select and cycle through q2
 #2:: SelectCycle(2)
 
-; Select in and cycle through q3
+; Select and cycle through q3
 #3:: SelectCycle(3)
 
-; Select in and cycle through q4
+; Select and cycle through q4
 #4:: SelectCycle(4)
 
-; Select in and cycle through h1
+; Select and cycle through h1
 #§:: SelectCycle(1.5)
 
-; Select in and cycle through h2
+; Select and cycle through h2
 #5:: SelectCycle(2.5)
 
 ; Selects an untiled window
@@ -64,16 +64,16 @@ Decoration := false
 #n:: Send, #^{Right}
 
 ; Previous virtual desktop
-; Is it appropriate? It is hard to reach with onr hand
+; Is it appropriate? It is hard to reach with one hand
 #+n:: Send, #^{Left}
 
 ; Close the active window
 #q:: WinClose, A
 
-; Todo: Create new virtual desktop if it doesn't exist (Win+Shift+d creates new)
-;       Use windows-desktop-switcher
+; Todo: implement windows-desktop-switcher
 
-;; Maximize
+; Maximize
+; Todo: For min and max, implement restore
 #f:: WinMaximize, A
 
 ; Super full-screen
@@ -82,7 +82,7 @@ RemoveDecoration()
 WinMaximize, A
 return
 
-;; Minimize  
+; Minimize  
 #m:: WinMinimize, A
 
 ; Turns on decoration
@@ -98,10 +98,22 @@ return
 ; return
 
 ; Start terminal
-#e:: Run, pwsh
+#r:: Run, pwsh
+
+; Start double commander
+#e:: Run, doublecmd
+
+; Start wsl through cmd
+#w:: Run, cmd wsl
 
 ; Alt Tab
 LWin & c::AltTab
+
+; Reload the script
+#+r:: Reload
+
+; Exit script
+#+x:: Exit
 
 ;------------------------;
 ; CHECK AND MOVE WINDOWS ;
@@ -358,12 +370,6 @@ TouchesBottom(id := "") {
   if (id)
     MsgBox, id
 return
-
-; Reload the script
-#r:: Reload
-
-; Exit script
-#x:: Exit
 
 ; Some help and references
 ;
