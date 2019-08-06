@@ -10,6 +10,8 @@
 
 Grace = 20
 
+#SingleInstance
+
 SendMode, Input
 SetKeyDelay, 10 ; Todo: Experiment to find a good value
 
@@ -23,10 +25,10 @@ Decoration := false
 #+1:: MoveTo(1)
 
 ; Move to q2
-#+2:: MoveTo(3)
+#+2:: MoveTo(2)
 
 ; Move to q3
-#+3:: MoveTo(2)
+#+3:: MoveTo(3)
 
 ; Move to q4
 #+4:: MoveTo(4)
@@ -41,10 +43,10 @@ Decoration := false
 #1:: SelectCycle(1)
 
 ; Select in and cycle through q2
-#2:: SelectCycle(3)
+#2:: SelectCycle(2)
 
 ; Select in and cycle through q3
-#3:: SelectCycle(2)
+#3:: SelectCycle(3)
 
 ; Select in and cycle through q4
 #4:: SelectCycle(4)
@@ -93,13 +95,6 @@ return
 #g::
 ToggleDecoration()
 ChangeAllDecoration()
-return
-
-; Everytime the windows button is pressed, see remove or restore all
-; decoration
-#::
-ChangeAllDecoration()
-Send, #   
 return
 
 ; Alt Tab
@@ -231,7 +226,7 @@ SelectCycle(q) {
 }
 
 RemoveDecoration(id := "") {
-  c := CurrentPosition(id)
+  c := CurrentLocation(id)
   if (id) {
     WinSet, Style, -0xC00000, ahk_id %id% ; Hide title bar
     WinSet, Style, -0x200000, ahk_id %id% ; Hide vertical scroll bar
@@ -245,12 +240,13 @@ RemoveDecoration(id := "") {
   ; Sometimes the window dimensions change when removing decoration.
   ; Thus we need to make sure the window gets back to where it started
   Loop
+    if (c == CurrentLocation(id))
+      break
     MoveTo(c)
-  Until c == CurrentPosition(id)
 }
 
 RestoreDecoration(id := "") {
-  Wif (id) {
+  if (id) {
     WinSet, Style, +0xC00000, ahk_id %id% ; Hide title bar
     WinSet, Style, +0x200000, ahk_id %id% ; Hide vertical scroll bar
     WinSet, Style, +0x100000, ahk_id %id% ; Hide horizontal scroll bar
