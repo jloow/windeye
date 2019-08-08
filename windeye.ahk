@@ -106,6 +106,12 @@ return
 ; Start wsl through cmd
 #w:: Run, pwsh /C wsl
 
+; Start qutebrowser
+#t:: Run, "C:\Program Files\qutebrowser\qutebrowser.exe"
+
+; Start firefox
+#+t:: Run, "C:\Program Files\Mozilla Firefox\firefox.exe"
+
 ; Alt Tab
 LWin & c::AltTab
 
