@@ -101,10 +101,10 @@ return
 #r:: Run, pwsh
 
 ; Start double commander
-#e:: Run, doublecmd
+#e:: Run, "C:\Program Files\Double Commander\doublecmd.exe"
 
 ; Start wsl through cmd
-#w:: Run, cmd wsl
+#w:: Run, pwsh /C wsl
 
 ; Alt Tab
 LWin & c::AltTab
