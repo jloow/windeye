@@ -363,7 +363,7 @@ TouchesBottom(id := "") {
 ; OTHER STUFF ;
 ;-------------;
 ; Random tests
-#t::
+#^t::
   TLeft := IsTiledLeft()
   TRight := IsTiledRight()
   TTop := IsTiledTop()
