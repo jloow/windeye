@@ -2,20 +2,23 @@
 ; SOME SETUP ;
 ;------------;
 
+#SingleInstance Force
+#NoEnv
+SetWorkingDir %A_ScriptDir%
+SendMode, Input
+SetKeyDelay, 10
+
+; Todo: Experiment to find a good value
 ; Because the positions of the tiled windows do not always rounded
 ; to e.g. exactly half of the monitor resolution (it happens that a
 ; top-tiled windows has an x-coordinate of -4, for example) we must
 ; define an area in which a window is considered tiled, even if it
 ; is not. This is the `Grace` variable
-
 Grace = 20
 
-#SingleInstance
+#Include %A_ScriptDir%\desktop_switcher.ahk
 
-SendMode, Input
-SetKeyDelay, 10 ; Todo: Experiment to find a good value
-
-Decoration := false
+; Decoration := false
 
 ;----------------;
 ; DEFINE HOTKEYS ;
@@ -61,11 +64,11 @@ Decoration := false
 #v:: SelectCycle(0)
 
 ; Next virtual desktop
-#n:: Send, #^{Right}
+; #n:: Send, #^{Right}
 
 ; Previous virtual desktop
 ; Is it appropriate? It is hard to reach with one hand
-#+n:: Send, #^{Left}
+; #+n:: Send, #^{Left}
 
 ; Close the active window
 #q:: WinClose, A
