@@ -6,9 +6,8 @@
 #NoEnv
 SetWorkingDir %A_ScriptDir%
 SendMode, Input
-SetKeyDelay, 10
+SetKeyDelay, 10 ; Todo: Experiment to find a good value
 
-; Todo: Experiment to find a good value
 ; Because the positions of the tiled windows do not always rounded
 ; to e.g. exactly half of the monitor resolution (it happens that a
 ; top-tiled windows has an x-coordinate of -4, for example) we must
@@ -239,7 +238,6 @@ SelectAndCycle(q) {
     if (CurrentLocation(this_win) == q) { 
       ; Some windows are hidden and get selected when q == 0. Thus
       ; if q == 0 and the window has no title, we shouldn't select it.
-      ; Todo: Make it possible to cycle through un-tiled windows
       if (q == 0) {
         WinGetTitle, t, ahk_id %this_win%
         if (t == "")
@@ -265,7 +263,7 @@ SelectNext() {
     start := 1
   n := start
   Loop {
-    n := n == 4 ? 1 : n + 1
+    n := n == 4 ? 1 : n + 0.5
     SelectAndCycle(n) 
   }
   Until (n == start or n == CurrentLocation())
@@ -277,7 +275,7 @@ SelectPrev() {
     start := 4
   n := start
   Loop {
-    n := n == 1 ? 4 : n - 1
+    n := n == 1 ? 4 : n - 0.5
     SelectAndCycle(n) 
   }
   Until (n == start or n == CurrentLocation())
