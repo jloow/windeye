@@ -43,25 +43,31 @@ Grace = 20
 #+5:: MoveTo(2.5)
 
 ; Select and cycle through q1
-#1:: SelectCycle(1)
+#1:: SelectAndCycle(1)
 
 ; Select and cycle through q2
-#2:: SelectCycle(2)
+#2:: SelectAndCycle(2)
 
 ; Select and cycle through q3
-#3:: SelectCycle(3)
+#3:: SelectAndCycle(3)
 
 ; Select and cycle through q4
-#4:: SelectCycle(4)
+#4:: SelectAndCycle(4)
 
 ; Select and cycle through h1
-#§:: SelectCycle(1.5)
+#§:: SelectAndCycle(1.5)
 
 ; Select and cycle through h2
-#5:: SelectCycle(2.5)
+#5:: SelectAndCycle(2.5)
 
 ; Selects an untiled window
-#v:: SelectCycle(0)
+#v:: SelectAndCycle(0)
+
+; Walk left to right, row by row, to select windows
+#tab:: SelectNext()
+
+; Walk right to left, row by row, to select windows
+#+Tab:: SelectPrev()
 
 ; Next virtual desktop
 ; #n:: Send, #^{Right}
@@ -224,7 +230,7 @@ MoveTo(d) {
 
 ; Select the top window in a quadrant or side; cycle through the
 ; section if a window in the section is already selected
-SelectCycle(q) {
+SelectAndCycle(q) {
   WinGet, win, List
   if (q == CurrentLocation())
     skipFirst := true
@@ -241,12 +247,40 @@ SelectCycle(q) {
       }
       if (skipFirst) {
         skipFirst := false
+        WinSet, Bottom, , ahk_id %this_win% ; If there are more than two windows we want the
+                                            ; the one that was found first to get sent to
+                                            ; the bottom so that we don't just switch between
+                                            ; two windows 
         continue
       }
       WinActivate, ahk_id %this_win%
       break
     }
   }
+}
+
+SelectNext() {
+  start := CurrentLocation()
+  if (start == 0)
+    start := 1
+  n := start
+  Loop {
+    n := n == 4 ? 1 : n + 1
+    SelectAndCycle(n) 
+  }
+  Until (n == start or n == CurrentLocation())
+}
+
+SelectPrev() {
+  start := CurrentLocation()
+  if (start == 0)
+    start := 4
+  n := start
+  Loop {
+    n := n == 1 ? 4 : n - 1
+    SelectAndCycle(n) 
+  }
+  Until (n == start or n == CurrentLocation())
 }
 
 RemoveDecoration(id := "") {
