@@ -2,20 +2,22 @@
 ; SOME SETUP ;
 ;------------;
 
-#SingleInstance Force
-#NoEnv
-SetWorkingDir %A_ScriptDir%
-SendMode, Input
-SetKeyDelay, 10 ; Todo: Experiment to find a good value
+  #SingleInstance Force
+  #NoEnv
+  SetWorkingDir %A_ScriptDir%
+  SendMode, Input
+  SetKeyDelay, 10 ; Todo: Experiment to find a good value
 
-; Because the positions of the tiled windows do not always rounded
-; to e.g. exactly half of the monitor resolution (it happens that a
-; top-tiled windows has an x-coordinate of -4, for example) we must
-; define an area in which a window is considered tiled, even if it
-; is not. This is the `Grace` variable
-Grace = 20
+  ; Because the positions of the tiled windows do not always rounded
+  ; to e.g. exactly half of the monitor resolution (it happens that a
+  ; top-tiled windows has an x-coordinate of -4, for example) we must
+  ; define an area in which a window is considered tiled, even if it
+  ; is not. This is the `Grace` variable
+  Grace = 20
 
-#Include %A_ScriptDir%\desktop_switcher.ahk
+  #Include %A_ScriptDir%\desktop_switcher.ahk
+
+Return
 
 ; Decoration := false
 
@@ -129,6 +131,18 @@ LWin & c::AltTab
 ; Exit script
 #+x:: Exit
 
+#IfWinActive, ahk_exe doublecmd.exe
+  l:: Send, {Right}
+  h:: Send, {Left}
+  j:: Send, {Down}
+  k:: Send, {Up}
+  /:: Send, ^f
+  !l:: Send, l
+  !h:: Send, h
+  !j:: Send, j
+  !k:: Send, k
+Return
+
 ;------------------------;
 ; CHECK AND MOVE WINDOWS ;
 ;------------------------;
@@ -176,8 +190,8 @@ CorrectSide(d) {
 
 ; Moves the windows to the desired location
 MoveTo(d) {
-  WinGetTitle, title, A
-  Send, {Win up}
+  WinGet, id, ID, A
+  ; Send, {Win up}
   Loop {  
     if (CorrectSide(d)) {
       c := CurrentLocation()
@@ -220,9 +234,9 @@ MoveTo(d) {
     ; want to tile another window relative to it. We do not.
     ; The loop below fixes this.
     Loop {
-      WinActivate, %title% ; For this and similar situations it might be better to use ahk_id
+      WinActivate, ahk_id %id% ; For this and similar situations it might be better to use ahk_id
     }
-    Until (WinActive(title))
+    Until (WinActive("ahk_id" . id))
   }
   Until (CurrentLocation() == d)
 }
@@ -235,6 +249,8 @@ SelectAndCycle(q) {
     skipFirst := true
   Loop, %win% {
     this_win := win%A_Index%
+
+
     if (CurrentLocation(this_win) == q) { 
       ; Some windows are hidden and get selected when q == 0. Thus
       ; if q == 0 and the window has no title, we shouldn't select it.
@@ -251,8 +267,15 @@ SelectAndCycle(q) {
                                             ; two windows 
         continue
       }
-      WinActivate, ahk_id %this_win%
-      break
+      ; The list contains all windows, regardless of which desktop they're
+      ; on. Therefore we need to check if the window is on the correct desktop
+      ; or not (borrowed from desktop_switcher.ahk)
+      global CurrentDesktop
+      windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, this_win, UInt, CurrentDesktop - 1)
+      if (windowIsOnDesktop == 1) {
+        WinActivate, ahk_id %this_win%
+        break
+      }
     }
   }
 }
