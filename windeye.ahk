@@ -137,8 +137,6 @@ SelectAndCycle(q) {
     skipFirst := true
   Loop, %win% {
     this_win := win%A_Index%
-
-
     if (CurrentLocation(this_win) == q) { 
       ; Some windows are hidden and get selected when q == 0. Thus
       ; if q == 0 and the window has no title, we shouldn't select it.
@@ -166,6 +164,12 @@ SelectAndCycle(q) {
       }
     }
   }
+  ; If we get to this point, it means that there is no window in the quadrant.
+  ; Sometimes, this is because a half-screened window is mistaken for a
+  ; quarter-screened window. Thus, to be nice, we let ahk select the
+  ; half-screen window
+  if (q == Floor(q))
+    SelectAndCycle(q <= 2 ? q + 0.5 : q - 0.5)
 }
 
 SelectNext() {
