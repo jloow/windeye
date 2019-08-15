@@ -4,6 +4,7 @@
 
   #SingleInstance Force
   #NoEnv
+  #Persistent
   SetWorkingDir %A_ScriptDir%
   SendMode, Input
   SetKeyDelay, 10 ; Todo: Experiment to find a good value
@@ -16,131 +17,18 @@
   Grace = 20
 
   #Include %A_ScriptDir%\desktop_switcher.ahk
+  #Include %A_ScriptDir%\keybindings.ahk
+  #Include %A_ScriptDir%\applications.ahk
 
-Return
+  ; I want a message telling me when the script has been automatically started by windows
+  ; Doesn't work
+  ToolTip, windeye started
+  SetTimer, RemoveToolTip, -3000
 
-; Decoration := false
+  RemoveToolTip:
+  ToolTip
+  return
 
-;----------------;
-; DEFINE HOTKEYS ;
-;----------------;
-
-; Move to q1
-#+1:: MoveTo(1)
-
-; Move to q2
-#+2:: MoveTo(2)
-
-; Move to q3
-#+3:: MoveTo(3)
-
-; Move to q4
-#+4:: MoveTo(4)
-
-; Move to h1
-#+§:: MoveTo(1.5)
-
-; Move to h2
-#+5:: MoveTo(2.5)
-
-; Select and cycle through q1
-#1:: SelectAndCycle(1)
-
-; Select and cycle through q2
-#2:: SelectAndCycle(2)
-
-; Select and cycle through q3
-#3:: SelectAndCycle(3)
-
-; Select and cycle through q4
-#4:: SelectAndCycle(4)
-
-; Select and cycle through h1
-#§:: SelectAndCycle(1.5)
-
-; Select and cycle through h2
-#5:: SelectAndCycle(2.5)
-
-; Selects an untiled window
-#v:: SelectAndCycle(0)
-
-; Walk left to right, row by row, to select windows
-#tab:: SelectNext()
-
-; Walk right to left, row by row, to select windows
-#+Tab:: SelectPrev()
-
-; Next virtual desktop
-; #n:: Send, #^{Right}
-
-; Previous virtual desktop
-; Is it appropriate? It is hard to reach with one hand
-; #+n:: Send, #^{Left}
-
-; Close the active window
-#q:: WinClose, A
-
-; Todo: implement windows-desktop-switcher
-
-; Maximize
-; Todo: For min and max, implement restore
-#f:: WinMaximize, A
-
-; Super full-screen
-#+f::
-RemoveDecoration()
-WinMaximize, A
-return
-
-; Minimize  
-#m:: WinMinimize, A
-
-; Turns on decoration
-#h:: RemoveDecoration()
-
-; Turns off decoration
-#+h:: RestoreDecoration()
-
-; Toggle automatic decoration control
-; #g::
-; ToggleDecoration()
-; ChangeAllDecoration()
-; return
-
-; Start terminal
-#r:: Run, pwsh
-
-; Start double commander
-#e:: Run, "C:\Program Files\Double Commander\doublecmd.exe"
-
-; Start wsl through cmd
-#w:: Run, pwsh /C wsl
-
-; Start qutebrowser
-#t:: Run, "C:\Program Files\qutebrowser\qutebrowser.exe"
-
-; Start firefox
-#+t:: Run, "C:\Program Files\Mozilla Firefox\firefox.exe"
-
-; Alt Tab
-LWin & c::AltTab
-
-; Reload the script
-#+r:: Reload
-
-; Exit script
-#+x:: Exit
-
-#IfWinActive, ahk_exe doublecmd.exe
-  l:: Send, {Right}
-  h:: Send, {Left}
-  j:: Send, {Down}
-  k:: Send, {Up}
-  /:: Send, ^f
-  !l:: Send, l
-  !h:: Send, h
-  !j:: Send, j
-  !k:: Send, k
 Return
 
 ;------------------------;
