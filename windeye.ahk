@@ -20,15 +20,6 @@
   #Include %A_ScriptDir%\keybindings.ahk
   #Include %A_ScriptDir%\applications.ahk
 
-  ; I want a message telling me when the script has been automatically started by windows
-  ; Doesn't work
-  ToolTip, windeye started
-  SetTimer, RemoveToolTip, -3000
-
-  RemoveToolTip:
-  ToolTip
-  return
-
 Return
 
 ;------------------------;
@@ -133,6 +124,7 @@ MoveTo(d) {
 ; section if a window in the section is already selected
 SelectAndCycle(q) {
   WinGet, win, List
+  found := false
   if (q == CurrentLocation())
     skipFirst := true
   Loop, %win% {
@@ -159,6 +151,7 @@ SelectAndCycle(q) {
       global CurrentDesktop
       windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, this_win, UInt, CurrentDesktop - 1)
       if (windowIsOnDesktop == 1) {
+        found := true
         WinActivate, ahk_id %this_win%
         break
       }
@@ -168,8 +161,8 @@ SelectAndCycle(q) {
   ; Sometimes, this is because a half-screened window is mistaken for a
   ; quarter-screened window. Thus, to be nice, we let ahk select the
   ; half-screen window
-  if (q == Floor(q))
-    SelectAndCycle(q <= 2 ? q + 0.5 : q - 0.5)
+  if (q == Floor(q) and not found)
+    SelectAndCycle(Mod(q, 2) == 0 ? 2.5 : 1.5)
 }
 
 SelectNext() {
@@ -313,7 +306,7 @@ TouchesBottom(id := "") {
 ; OTHER STUFF ;
 ;-------------;
 ; Random tests
-#^t::
+#u::
   TLeft := IsTiledLeft()
   TRight := IsTiledRight()
   TTop := IsTiledTop()
@@ -322,9 +315,6 @@ TouchesBottom(id := "") {
   CL := CurrentLocation()
   WinGetTitle, title, A
   MsgBox, Left: %TLeft%`nRight: %TRight%`nTop: %TTop%`nBottom: %TBottom%`nTouchesBottom: %TsBottom%`nCurrentLocation: %CL%`nTitle: %title%
-  id := ""
-  if (id)
-    MsgBox, id
 return
 
 ; Some help and references
