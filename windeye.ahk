@@ -19,6 +19,8 @@
   ; The amount of which to change transparency
   TrnspStep = 10
 
+  MakeTransparent := false
+
   #Include %A_ScriptDir%\desktop_switcher.ahk
   #Include %A_ScriptDir%\keybindings.ahk
   #Include %A_ScriptDir%\applications.ahk
@@ -166,6 +168,9 @@ SelectAndCycle(q) {
   ; half-screen window
   if (q == Floor(q) and not found)
     SelectAndCycle(Mod(q, 2) == 0 ? 2.5 : 1.5)
+  global MakeTransparent
+  if (found and MakeTransparent)
+    MakeAllTransparent()
 }
 
 SelectNext() {
@@ -232,6 +237,48 @@ DecreaseTransparency() {
   global TrnspStep
   WinGet, trnsp, Transparent, A
   WinSet, Transparent, % trnsp - TrnspStep, A 
+}
+
+ToggleTransparency() {
+  global MakeTransparent
+  if (MakeTransparent) {
+    MakeTransparent := false
+    MakeAllSolid()
+  }
+  else {
+    MakeTransparent := true
+    MakeAllTransparent()
+  }
+}
+
+
+MakeAllTransparent() {
+  WinGet, win, List
+  global CurrentDesktop
+  WinGet, cWin, ID, A
+  Loop, %win% {
+    this_win := win%A_Index%
+    windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, this_win, UInt, CurrentDesktop - 1)
+    if (windowIsOnDesktop) {
+      if (this_win == cWin)
+        WinSet, Transparent, 240, ahk_id %cWin%
+      else
+        WinSet, Transparent, 200, ahk_id %this_win%
+    }
+  }
+}
+
+MakeAllSolid() {
+  WinGet, win, List
+  global CurrentDesktop
+  Loop, %win% {
+    this_win := win%A_Index%
+    windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, this_win, UInt, CurrentDesktop - 1)
+    if (windowIsOnDesktop) {
+      WinSet, Transparent, 255, ahk_id %this_win%
+      WinSet, Transparent, Off, ahk_id %this_win%
+    }
+  }
 }
 
 ; ToggleDecoration() {

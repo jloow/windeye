@@ -2,6 +2,8 @@
 ; DEFINE HOTKEYS ;
 ;----------------;
 
+#s:: ToggleTransparency()
+
 ; Move to q1
 #+1:: MoveTo(1)
 
