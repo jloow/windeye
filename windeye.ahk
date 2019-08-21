@@ -25,6 +25,9 @@
   #Include %A_ScriptDir%\keybindings.ahk
   #Include %A_ScriptDir%\applications.ahk
 
+  updater = Update()
+
+
 Return
 
 ;------------------------;
@@ -74,8 +77,8 @@ CorrectSide(d) {
 
 ; Moves the windows to the desired location
 MoveTo(d) {
+  Send, {Win up}
   WinGet, id, ID, A
-  ; Send, {Win up}
   Loop {  
     if (CorrectSide(d)) {
       c := CurrentLocation()
@@ -128,6 +131,7 @@ MoveTo(d) {
 ; Select the top window in a quadrant or side; cycle through the
 ; section if a window in the section is already selected
 SelectAndCycle(q) {
+  Send, {Win up}
   WinGet, win, List
   found := false
   if (q == CurrentLocation())
@@ -197,6 +201,9 @@ SelectPrev() {
   Until (n == start or n == CurrentLocation())
 }
 
+;-------------;
+; FANCY STUFF ;
+;-------------;
 RemoveDecoration(id := "") {
   c := CurrentLocation(id)
   if (id) {
@@ -244,13 +251,14 @@ ToggleTransparency() {
   if (MakeTransparent) {
     MakeTransparent := false
     MakeAllSolid()
+    SetTimer, Update, Off
   }
   else {
     MakeTransparent := true
     MakeAllTransparent()
+    SetTimer, Update, 1000
   }
 }
-
 
 MakeAllTransparent() {
   WinGet, win, List
@@ -299,6 +307,17 @@ MakeAllSolid() {
 ;       RemoveDecoration(this_win)
 ;   }
 ; }
+
+;-------------;
+; OTHER STUFF ;
+;-------------;
+Update() {
+  global MakeTransparent
+  if (MakeTransparent)
+    MakeAllTransparent()
+  else
+    MakeAllSolid()
+}
 
 ;----------------------;
 ; `IS TILED` FUNCTIONS ;
