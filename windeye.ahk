@@ -16,6 +16,9 @@
   ; is not. This is the `Grace` variable
   Grace = 20
 
+  ; The amount of which to change transparency
+  TrnspStep = 10
+
   #Include %A_ScriptDir%\desktop_switcher.ahk
   #Include %A_ScriptDir%\keybindings.ahk
   #Include %A_ScriptDir%\applications.ahk
@@ -219,24 +222,36 @@ RestoreDecoration(id := "") {
   }
 }
 
-ToggleDecoration() {
-  global Decoration
-  if (Decoration)
-    Decoration := false
-  else
-    Decoration := true
+IncreaseTransparency() {
+  global TrnspStep
+  WinGet, trnsp, Transparent, A
+  WinSet, Transparent, % trnsp + TrnspStep, A 
 }
 
-ChangeAllDecoration() {
-  WinGet, win, List
-  Loop, %win% {
-    this_win := win%A_Index%
-    if (Decoration)
-      RestoreDecoration(this_win)
-    else
-      RemoveDecoration(this_win)
-  }
+DecreaseTransparency() {
+  global TrnspStep
+  WinGet, trnsp, Transparent, A
+  WinSet, Transparent, % trnsp - TrnspStep, A 
 }
+
+; ToggleDecoration() {
+;   global Decoration
+;   if (Decoration)
+;     Decoration := false
+;   else
+;     Decoration := true
+; }
+
+; ChangeAllDecoration() {
+;   WinGet, win, List
+;   Loop, %win% {
+;     this_win := win%A_Index%
+;     if (Decoration)
+;       RestoreDecoration(this_win)
+;     else
+;       RemoveDecoration(this_win)
+;   }
+; }
 
 ;----------------------;
 ; `IS TILED` FUNCTIONS ;

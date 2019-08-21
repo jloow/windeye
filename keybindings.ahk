@@ -47,17 +47,8 @@
 ; Walk right to left, row by row, to select windows
 #+Tab:: SelectPrev()
 
-; Next virtual desktop
-; #n:: Send, #^{Right}
-
-; Previous virtual desktop
-; Is it appropriate? It is hard to reach with one hand
-; #+n:: Send, #^{Left}
-
 ; Close the active window
 #q:: WinClose, A
-
-; Todo: implement windows-desktop-switcher
 
 ; Maximize
 ; Todo: For min and max, implement restore
@@ -77,6 +68,12 @@ return
 
 ; Turns off decoration
 #+h:: RestoreDecoration()
+
+; Decrease transparency
+#j:: DecreaseTransparency()
+
+; Increase transparency
+#k:: IncreaseTransparency()
 
 ; Toggle automatic decoration control
 ; #g::
