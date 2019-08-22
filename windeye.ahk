@@ -77,7 +77,6 @@ CorrectSide(d) {
 
 ; Moves the windows to the desired location
 MoveTo(d) {
-  Send, {Win up}
   WinGet, id, ID, A
   Loop {  
     if (CorrectSide(d)) {
@@ -131,7 +130,6 @@ MoveTo(d) {
 ; Select the top window in a quadrant or side; cycle through the
 ; section if a window in the section is already selected
 SelectAndCycle(q) {
-  Send, {Win up}
   WinGet, win, List
   found := false
   if (q == CurrentLocation())
