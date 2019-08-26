@@ -4,23 +4,17 @@
 
 #s:: ToggleTransparency()
 
-; Move to q1
-#+1:: MoveTo(1)
+; Move up
+#+Up:: MoveTo(-2)
 
-; Move to q2
-#+2:: MoveTo(2)
+; Move down
+#+Down:: MoveTo(2)
 
-; Move to q3
-#+3:: MoveTo(3)
+; Move left
+#+Left:: MoveTo(-1)
 
-; Move to q4
-#+4:: MoveTo(4)
-
-; Move to h1
-#+§:: MoveTo(1.5)
-
-; Move to h2
-#+5:: MoveTo(2.5)
+; Move right
+#+Right:: MoveTo(1)
 
 ; Select and cycle through q1
 #1:: SelectAndCycle(1)

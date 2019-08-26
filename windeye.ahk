@@ -1,4 +1,11 @@
 ﻿;------------;
+; SOME NOTES ;
+;------------;
+
+; Currently, the script flips out if the taskbar is not hidden.
+; I think this has to do with how the screen size is determined.
+
+;------------;
 ; SOME SETUP ;
 ;------------;
 
@@ -23,7 +30,7 @@
 
   #Include %A_ScriptDir%\desktop_switcher.ahk
   #Include %A_ScriptDir%\keybindings.ahk
-  #Include %A_ScriptDir%\applications.ahk
+  ;#Include %A_ScriptDir%\applications.ahk
 
   updater = Update()
 
@@ -75,6 +82,19 @@ CorrectSide(d) {
   ; with `Floor`
 }
 
+; The key is the following:
+; up = -2 (because 3 - 2 = 1 and 4 - 2 = 2)
+; down = 2 (because 1 + 2 = and 2 + 2 = 4)
+; left = -1 (because 2 - 1 = 1 and 4 - 1 = 3)
+; right = 1 (because 1 + 1 = 2 and 3 + 1 = 4)
+MoveTo(d) {
+  c := Floor(CurrentLocation())
+  destination := c + d
+  if (destination >= 1 and destination <= 4)
+    SelectAndCycle(destination)
+}
+
+/* Lets disable this for now
 ; Moves the windows to the desired location
 MoveTo(d) {
   WinGet, id, ID, A
@@ -125,7 +145,13 @@ MoveTo(d) {
     Until (WinActive("ahk_id" . id))
   }
   Until (CurrentLocation() == d)
+  ; Sometimes the tiling window still pop-up. Therefore we will try to
+  ; wait a short while, and then check the location again
+  Sleep, 1000
+  if (CurrentLocation() != d)
+    MoveTo(d)
 }
+*/
 
 ; Select the top window in a quadrant or side; cycle through the
 ; section if a window in the section is already selected
@@ -222,13 +248,13 @@ RemoveDecoration(id := "") {
 RestoreDecoration(id := "") {
   if (id) {
     WinSet, Style, +0xC00000, ahk_id %id% ; Hide title bar
-    WinSet, Style, +0x200000, ahk_id %id% ; Hide vertical scroll bar
-    WinSet, Style, +0x100000, ahk_id %id% ; Hide horizontal scroll bar
+    ; WinSet, Style, +0x200000, ahk_id %id% ; Hide vertical scroll bar
+    ; WinSet, Style, +0x100000, ahk_id %id% ; Hide horizontal scroll bar
   }
   else {
     WinSet, Style, +0xC00000, A
-    WinSet, Style, +0x200000, A
-    WinSet, Style, +0x100000, A
+    ; WinSet, Style, +0x200000, A
+    ; WinSet, Style, +0x100000, A
   }
 }
 
