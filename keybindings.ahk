@@ -5,16 +5,29 @@
 #s:: ToggleTransparency()
 
 ; Move up
-#+Up:: MoveTo(-2)
+#+Up:: Send, #{Up}
 
 ; Move down
-#+Down:: MoveTo(2)
+#+Down:: Send, #{Down}
 
 ; Move left
-#+Left:: MoveTo(-1)
+#+Left:: Send, #{Left}
 
 ; Move right
-#+Right:: MoveTo(1)
+#+Right:: Send, #{Right}
+
+
+; Move up
+#Up:: MoveTo(-2)
+
+;Move down
+#Down:: MoveTo(2)
+
+;Move left
+#Left:: MoveTo(-1)
+
+;Move right
+#Right:: MoveTo(1)
 
 ; Select and cycle through q1
 #1:: SelectAndCycle(1)
