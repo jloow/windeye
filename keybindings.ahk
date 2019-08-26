@@ -2,32 +2,17 @@
 ; DEFINE HOTKEYS ;
 ;----------------;
 
-#s:: ToggleTransparency()
-
 ; Move up
-#+Up:: Send, #{Up}
-
-; Move down
-#+Down:: Send, #{Down}
-
-; Move left
-#+Left:: Send, #{Left}
-
-; Move right
-#+Right:: Send, #{Right}
-
-
-; Move up
-#Up:: MoveTo(-2)
-
+#+Up:: MoveTo(-2)
+ 
 ;Move down
-#Down:: MoveTo(2)
-
+#+Down:: MoveTo(2)
+ 
 ;Move left
-#Left:: MoveTo(-1)
-
+#+Left:: MoveTo(-1)
+ 
 ;Move right
-#Right:: MoveTo(1)
+#+Right:: MoveTo(1)
 
 ; Select and cycle through q1
 #1:: SelectAndCycle(1)
