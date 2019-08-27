@@ -14,7 +14,7 @@
   #Persistent
   SetWorkingDir %A_ScriptDir%
   SendMode, Input
-  SetKeyDelay, 10 ; Todo: Experiment to find a good value
+  SetKeyDelay, 20 ; Todo: Experiment to find a good value
 
   ; Because the positions of the tiled windows do not always rounded
   ; to e.g. exactly half of the monitor resolution (it happens that a
@@ -31,9 +31,6 @@
   #Include %A_ScriptDir%\desktop_switcher.ahk
   #Include %A_ScriptDir%\keybindings.ahk
   ;#Include %A_ScriptDir%\applications.ahk
-
-  updater = Update()
-
 
 Return
 

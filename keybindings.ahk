@@ -2,17 +2,37 @@
 ; DEFINE HOTKEYS ;
 ;----------------;
 
+$#+Up::
+Send, #{Up}
+Send, {Esc}
+return
+
+$#+Down::
+Send, #{Down}
+Send, {Esc}
+return
+
+$#+Left::
+Send, #{Left}
+Send, {Esc}
+return
+
+$#+Right::
+Send, #{Right}
+Send, {Esc}
+return
+
 ; Move up
-#+Up:: MoveTo(-2)
+#Up:: MoveTo(-2)
  
 ;Move down
-#+Down:: MoveTo(2)
+#Down:: MoveTo(2)
  
 ;Move left
-#+Left:: MoveTo(-1)
+#Left:: MoveTo(-1)
  
 ;Move right
-#+Right:: MoveTo(1)
+#Right:: MoveTo(1)
 
 ; Select and cycle through q1
 #1:: SelectAndCycle(1)

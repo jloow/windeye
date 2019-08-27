@@ -15,7 +15,7 @@ global IsWindowOnDesktopNumberProc := DllCall("GetProcAddress", Ptr, hVirtualDes
 global MoveWindowToDesktopNumberProc := DllCall("GetProcAddress", Ptr, hVirtualDesktopAccessor, AStr, "MoveWindowToDesktopNumber", "Ptr")
 
 ; Main
-SetKeyDelay, 75
+;SetKeyDelay, 75
 mapDesktopsFromRegistry()
 OutputDebug, [loading] desktops: %DesktopCount% current: %CurrentDesktop%
 
