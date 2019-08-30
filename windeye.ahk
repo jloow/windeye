@@ -14,7 +14,7 @@
   #Persistent
   SetWorkingDir %A_ScriptDir%
   SendMode, Input
-  SetKeyDelay, 20 ; Todo: Experiment to find a good value
+  SetKeyDelay, -1 ; Todo: Experiment to find a good value
 
   ; Because the positions of the tiled windows do not always rounded
   ; to e.g. exactly half of the monitor resolution (it happens that a
@@ -84,14 +84,13 @@ CorrectSide(d) {
 ; down = 2 (because 1 + 2 = and 2 + 2 = 4)
 ; left = -1 (because 2 - 1 = 1 and 4 - 1 = 3)
 ; right = 1 (because 1 + 1 = 2 and 3 + 1 = 4)
-MoveTo(d) {
+Move(d) {
   c := Floor(CurrentLocation())
   destination := c + d
   if (destination >= 1 and destination <= 4)
     SelectAndCycle(destination)
 }
 
-/* Lets disable this for now
 ; Moves the windows to the desired location
 MoveTo(d) {
   WinGet, id, ID, A
@@ -148,7 +147,6 @@ MoveTo(d) {
   if (CurrentLocation() != d)
     MoveTo(d)
 }
-*/
 
 ; Select the top window in a quadrant or side; cycle through the
 ; section if a window in the section is already selected
