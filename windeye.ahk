@@ -15,6 +15,7 @@
   SetWorkingDir %A_ScriptDir%
   SendMode, Input
   SetKeyDelay, -1 ; Todo: Experiment to find a good value
+  SetBatchLines -1 ; Todo: experiment with this value
 
   ; Because the positions of the tiled windows do not always rounded
   ; to e.g. exactly half of the monitor resolution (it happens that a
@@ -136,7 +137,7 @@ MoveTo(d) {
     ; want to tile another window relative to it. We do not.
     ; The loop below fixes this.
     Loop {
-      WinActivate, ahk_id %id% ; For this and similar situations it might be better to use ahk_id
+      WinActivate, ahk_id %id%
     }
     Until (WinActive("ahk_id" . id))
   }
@@ -181,7 +182,7 @@ SelectAndCycle(q) {
       if (windowIsOnDesktop == 1) {
         found := true
         WinActivate, ahk_id %this_win%
-        break
+        break ; should be return?
       }
     }
   }
@@ -416,18 +417,3 @@ TouchesBottom(id := "") {
   WinGetTitle, title, A
   MsgBox, Left: %TLeft%`nRight: %TRight%`nTop: %TTop%`nBottom: %TBottom%`nTouchesBottom: %TsBottom%`nCurrentLocation: %CL%`nTitle: %title%
 return
-
-; Some help and references
-;
-; # 	Win (Windows logo key)
-; ! 	Alt
-; ^ 	Control
-; + 	Shift
-
-; Stuff that might get reused.
-  ; TLeft := IsTiledLeft()
-  ; TRight := IsTiledRight()
-  ; TTop := IsTiledTop()
-  ; TBottom := IsTiledBottom()
-  ; TsBottom := TouchesBottom()
-  ; MsgBox, Left: %TLeft%`nRight: %TRight%`nTop: %TTop%`nBottom: %TBottom%`nTouchesBottom: %TsBottom%
