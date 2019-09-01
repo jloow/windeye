@@ -182,7 +182,7 @@ SelectAndCycle(q) {
       if (windowIsOnDesktop == 1) {
         found := true
         WinActivate, ahk_id %this_win%
-        break ; should be return?
+        return
       }
     }
   }
@@ -219,6 +219,20 @@ SelectPrev() {
     SelectAndCycle(n) 
   }
   Until (n == start or n == CurrentLocation())
+}
+
+MoveWindow(deltaX, deltaY) {
+  WinGetPos, X, Y, , , A
+  X := X+deltaX
+  Y := Y+deltaY
+  WinMove, A, , X, Y
+}
+
+ResizeWindow(deltaW, deltaH) {
+  WinGetPos, , , W, H, A
+  W := W+deltaW
+  H := H+deltaH
+  WinMove, A, , , , W, H
 }
 
 ;-------------;

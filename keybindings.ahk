@@ -10,6 +10,22 @@ $#+Left:: Send, #{Left}
 
 $#+Right:: Send, #{Right}
 
+^#Right:: MoveWindow(40, 0)
+
+^#Left:: MoveWindow(-40, 0)
+
+^#Up:: MoveWindow(0, -40)
+
+^#Down:: MoveWindow(0, 40)
+
+#!Right:: ResizeWindow(40, 0)
+
+#!Left:: ResizeWindow(-40, 0)
+
+#!Up:: ResizeWindow(0, -40)
+
+#!Down:: ResizeWindow(0, 40)
+
 ; Move up
 #Up:: Move(-2)
  
