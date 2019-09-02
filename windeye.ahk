@@ -97,6 +97,7 @@ CorrectSide(d) {
 
 ; This doesn't work as intended, but I think it works as it should
 Move(direction) {
+  WinGet, id, ID, A
   WinGetPos, cX, cY, , , A ; Get position of current window
   WinGet, win, List ; Get a list of all available windows
   
@@ -118,6 +119,13 @@ Move(direction) {
       currentQuadrant := 4
     }
   }
+
+  ; Some variables to determine which window is closest to
+  ; the current window
+  closestX := 0
+  closestY := 0
+  closestWindow := %id%
+  firstLoop := True
   
   ; Decide which windows to selected
   Loop, %win% {
@@ -127,9 +135,11 @@ Move(direction) {
     ; Correct desktop?
     global CurrentDesktop
     windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, this_win, UInt, CurrentDesktop - 1)
-    if (windowIsOnDesktop != 1) {
+    if (windowIsOnDesktop != 1)
       continue
-    }
+
+    if (id == this_win)
+      continue
 
     ; Determine quadrant of window
     if (nX < MonRight/2) {
@@ -167,15 +177,36 @@ Move(direction) {
     }
 
     ; Select the next appropriate window
-    if (direction == "right" and sameWSection and nX > cX)
-      WinActivate, ahk_id %this_win%
-    else if (direction == "left" and sameWSection and nX < cX)
-      WinActivate, ahk_id %this_win%
-    else if (direction == "up" and sameHSection and nY < cY)
-      WinActivate, ahk_id %this_win%
-    else if (direction == "down" and sameHSection and nY > cY)
-      WinActivate, ahk_id %this_win%
+    if (direction == "right" and sameWSection and nX > cX) {
+      if (nX < closestX or firstLoop) {
+        closestX := nX
+        closestWindow := this_win
+        firstLoop := False
+      }
+    }
+    else if (direction == "left" and sameWSection and nX < cX) {
+      if (nX > closestX or firstLoop) {
+        closestX := nX
+        closestWindow := this_win
+        firstLoop := False
+      }
+    }
+    else if (direction == "up" and sameHSection and nY < cY) {
+      if (nY > closestY or firstLoop) {
+        closestY := nY
+        closestWindow := this_win
+        firstLoop := False
+      }
+    }
+    else if (direction == "down" and sameHSection and nY > cY) {
+      if (nY < closestY or firstLoop) {
+        closestY := nY
+        closestWindow := this_win
+        firstLoop := False
+      }
+    }
   }
+  WinActivate, ahk_id %closestWindow%
 }
 
 ; Moves the windows to the desired location
