@@ -103,13 +103,13 @@ return
 #h:: RemoveDecoration()
 
 ; Turns off decoration
-#+h:: RestoreDecoration()
+;#+h:: RestoreDecoration()
 
 ; Decrease transparency
-#j:: DecreaseTransparency()
+;#j:: DecreaseTransparency()
 
 ; Increase transparency
-#k:: IncreaseTransparency()
+;#k:: IncreaseTransparency()
 
 ; Toggle automatic decoration control
 ; #g::
