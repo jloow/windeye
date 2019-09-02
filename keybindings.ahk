@@ -27,16 +27,16 @@ $#+Right:: Send, #{Right}
 #!Down:: ResizeWindow(0, 40)
 
 ; Move up
-#Up:: Move(-2)
+#Up:: Move("up")
  
 ; Move down
-#Down:: Move(2)
+#Down:: Move("down")
  
 ; Move left
-#Left:: Move(-1)
+#Left:: Move("left")
  
 ; Move right
-#Right:: Move(1)
+#Right:: Move("right")
 
 ; Move to q1
 #+1:: MoveTo(1)

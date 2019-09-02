@@ -85,11 +85,97 @@ CorrectSide(d) {
 ; down = 2 (because 1 + 2 = and 2 + 2 = 4)
 ; left = -1 (because 2 - 1 = 1 and 4 - 1 = 3)
 ; right = 1 (because 1 + 1 = 2 and 3 + 1 = 4)
-Move(d) {
-  c := Floor(CurrentLocation())
-  destination := c + d
-  if (destination >= 1 and destination <= 4)
-    SelectAndCycle(destination)
+
+; Todo: Remove this functionality in favour of selecting
+;       the spacially next window
+;Move(d) {
+;  c := Floor(CurrentLocation())
+;  destination := c + d
+;  if (destination >= 1 and destination <= 4)
+;    SelectAndCycle(destination)
+;}
+
+; This doesn't work as intended, but I think it works as it should
+Move(direction) {
+  WinGetPos, cX, cY, , , A ; Get position of current window
+  WinGet, win, List ; Get a list of all available windows
+  
+  ; Determine quadrant
+  SysGet, Mon, Monitor
+  if (cX < MonRight/2) {
+    if (cY < MonBottom/2) {
+      currentQuadrant := 1
+    }
+    else {
+      currentQuadrant := 3
+    }
+  }
+  else {
+    if (cY < MonBotton/2) {
+      currentQuadrant := 2
+    }
+    else {
+      currentQuadrant := 4
+    }
+  }
+  
+  ; Decide which windows to selected
+  Loop, %win% {
+    this_win := win%A_Index%
+    WinGetPos, nX, nY, , , ahk_id %this_win% ; Get position of window
+
+    ; Correct desktop?
+    global CurrentDesktop
+    windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, this_win, UInt, CurrentDesktop - 1)
+    if (windowIsOnDesktop != 1) {
+      continue
+    }
+
+    ; Determine quadrant of window
+    if (nX < MonRight/2) {
+      if (nY < MonBottom/2) {
+        nextQuadrant := 1
+      }
+      else {
+        nextQuadrant := 3
+      }
+    }
+    else {
+      if (nY < MonBotton/2) {
+        nextQuadrant := 2
+      }
+      else {
+        nextQuadrant := 4
+      }
+    }
+
+    ; Are current and next window in same section?
+    if (nextQuadrant == currentQuadrant) {
+      sameWSection := True
+      sameHSection := True
+    }
+    else {
+      if (Mod(nextQuadrant, 2) != Mod(currentQuadrant, 2))
+        sameWSection := True
+      else
+        sameWSection := False
+
+      if (Mod(nextQuadrant, 2) == Mod(nextQuadrant, 2))
+        sameHSection := True
+      else
+        sameHSection := False
+    }
+
+    ; Select the next appropriate window
+    if (direction == "right" and sameWSection and nX > cX)
+      WinActivate, ahk_id %this_win%
+    else if (direction == "left" and sameWSection and nX < cX)
+      WinActivate, ahk_id %this_win%
+    else if (direction == "up" and sameHSection and nY < cY)
+      WinActivate, ahk_id %this_win%
+    else if (direction == "down" and sameHSection and nY > cY)
+      WinActivate, ahk_id %this_win%
+  }
 }
 
 ; Moves the windows to the desired location
@@ -232,7 +318,7 @@ ResizeWindow(deltaW, deltaH) {
   WinGetPos, , , W, H, A
   W := W+deltaW
   H := H+deltaH
-  WinMove, A, , , , W, H
+  WinMove, A, , X, Y, W, H
 }
 
 ;-------------;
