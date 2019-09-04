@@ -238,17 +238,17 @@ MoveTo(d) {
         return
       ; Diff positive, move up
       else if (a > 0)
-        Send, #{Up}
+        Send, {LWin down}{Up down}{Up up}{LWin up}
       ; Diff negative, move down
       else if (a < 0)
-        Send, #{Down}
+        Send, {LWin down}{Down down}{Down up}{LWin up}
     }
     ; If we are not at the correct side, send either left or right
     else if (Mod(d, 2) == 0) {
-      Send, #{Left}
+      Send, {LWin down}{Left down}{Left up}{LWin up}
     }
     else if (Mod(d, 2) > 0) {
-      Send, #{Right}
+      Send, {LWin down}{Right down}{Right up}{LWin up}
     }
     ; Sometimes after tiling, we are asked if we automatically
     ; want to tile another window relative to it. We do not.

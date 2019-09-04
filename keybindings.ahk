@@ -2,13 +2,13 @@
 ; DEFINE HOTKEYS ;
 ;----------------;
 
-$#+Up:: Send, #{Up}
+$#+Up:: Send, {LWin down}{Up down}{Up up}{LWin up}
 
-$#+Down:: Send, #{Down}
+$#+Down:: Send, {LWin down}{Down down}{Down up}{LWin up}
 
-$#+Left:: Send, #{Left}
+$#+Left:: Send, {LWin down}{Left down}{Left up}{LWin up}
 
-$#+Right:: Send, #{Right}
+$#+Right:: Send, {LWin down}{Right down}{Right up}{LWin up}
 
 ^#Right:: MoveWindow(40, 0)
 
