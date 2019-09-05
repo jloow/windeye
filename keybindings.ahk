@@ -26,6 +26,8 @@ $#+Right:: Send, {LWin down}{Right down}{Right up}{LWin up}
 
 #!Down:: ResizeWindow(0, 40)
 
+#a:: KeyboardHelp()
+
 ; Move up
 #Up:: Move("up")
  

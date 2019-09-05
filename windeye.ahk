@@ -17,6 +17,8 @@
   SetKeyDelay, -1 ; Todo: Experiment to find a good value
   SetBatchLines -1 ; Todo: experiment with this value
 
+  KeyboardHelpActive := False
+
   ; Because the positions of the tiled windows do not always rounded
   ; to e.g. exactly half of the monitor resolution (it happens that a
   ; top-tiled windows has an x-coordinate of -4, for example) we must
@@ -34,6 +36,18 @@
   ;#Include %A_ScriptDir%\applications.ahk
 
 Return
+
+KeyboardHelp() {
+  global KeyboardHelpActive
+  if (KeyboardHelpActive) {
+    SplashImage, Off
+    KeyboardHelpActive := False
+  }
+  else if (!KeyboardHelpActive) {
+    SplashImage, keyboard.gif, B
+    KeyboardHelpActive := True
+  }
+}
 
 ;------------------------;
 ; CHECK AND MOVE WINDOWS ;
