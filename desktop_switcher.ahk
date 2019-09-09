@@ -124,6 +124,7 @@ _switchDesktopToTarget(targetDesktop)
     ; Makes the WinActivate fix less intrusive
     Sleep, 50
     focusTheForemostWindow(targetDesktop)
+    Send, {Win up} ; This is my attempt to fix stuck windows keys, which seems to happend when cycling virtual desktop
 }
 
 updateGlobalVariables() 
