@@ -4,13 +4,13 @@
 
 CapsLock::Esc
 
-!+k:: Send, {LWin down}{Up down}{Up up}{LWin up}
+$#+Up:: Send, {LWin down}{Up down}{Up up}{LWin up}
 
-!+j:: Send, {LWin down}{Down down}{Down up}{LWin up}
+$#+Down:: Send, {LWin down}{Down down}{Down up}{LWin up}
 
-!+h:: Send, {LWin down}{Left down}{Left up}{LWin up}
+$#+Left:: Send, {LWin down}{Left down}{Left up}{LWin up}
 
-!+l:: Send, {LWin down}{Right down}{Right up}{LWin up}
+$#+Right:: Send, {LWin down}{Right down}{Right up}{LWin up}
 
 ^#Right:: MoveWindow(40, 0)
 

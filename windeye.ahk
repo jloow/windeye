@@ -111,40 +111,23 @@ CorrectSide(d) {
 
 ; This doesn't work as intended, but I think it works as it should
 Move(direction) {
-  WinGet, id, ID, A
-  WinGetPos, cX, cY, , , A ; Get position of current window
+  
+  WinGet, id, ID, A ; Get id of current window
+  WinGetPos, currentX, currentY, currentWidth, currentHeight, A ; Get position of current window
   WinGet, win, List ; Get a list of all available windows
   
-  ; Determine quadrant
-  SysGet, Mon, Monitor
-  if (cX < MonRight/2) {
-    if (cY < MonBottom/2) {
-      currentQuadrant := 1
-    }
-    else {
-      currentQuadrant := 3
-    }
-  }
-  else {
-    if (cY < MonBotton/2) {
-      currentQuadrant := 2
-    }
-    else {
-      currentQuadrant := 4
-    }
-  }
-
   ; Some variables to determine which window is closest to
   ; the current window
-  closestX := 0
-  closestY := 0
-  closestWindow := %id%
+  candidateX := 0
+  candidateY := 0
+  candidateWidth := 0
+  candidateHeight := 0
+  CandidateWindow := id
   firstLoop := True
   
   ; Decide which windows to selected
   Loop, %win% {
     this_win := win%A_Index%
-    WinGetPos, nX, nY, , , ahk_id %this_win% ; Get position of window
 
     ; Correct desktop?
     global CurrentDesktop
@@ -152,75 +135,59 @@ Move(direction) {
     if (windowIsOnDesktop != 1)
       continue
 
+    ; Skip current window
     if (id == this_win)
       continue
+    
+    WinGetPos, nextX, nextY, nextWidth, nextHeight, ahk_id %this_win% ; Get position of window
 
-    ; Determine quadrant of window
-    if (nX < MonRight/2) {
-      if (nY < MonBottom/2) {
-        nextQuadrant := 1
-      }
-      else {
-        nextQuadrant := 3
-      }
-    }
-    else {
-      if (nY < MonBotton/2) {
-        nextQuadrant := 2
-      }
-      else {
-        nextQuadrant := 4
-      }
-    }
+    ; Windows seem to be slightly bigger than they appear on screen
+    ; Therefore we may have to shave some pixel of each position
+    ; to get the expected behvaviour
 
-    ; Are current and next window in same section?
-    if (nextQuadrant == currentQuadrant) {
-      sameWSection := True
-      sameHSection := True
-    }
-    else {
-      if (Mod(nextQuadrant, 2) != Mod(currentQuadrant, 2))
-        sameWSection := True
-      else
-        sameWSection := False
-
-      if (Mod(nextQuadrant, 2) == Mod(nextQuadrant, 2))
-        sameHSection := True
-      else
-        sameHSection := False
+    ; Go up
+    if (direction == "up") {
+      
+      ; Some any windows below the top of the window can be skipped
+      if (nextY > currentY)
+        continue
+      
+      ; Next we will select a window based on priority
+      ; First, we try to select the most "logical" choice
+      if (nextY + nextHeight < currentY AND nextX < currentX + currentWidth AND nextX + nextWidth > currentX) {
+        if (firstLoop OR candidateY + candidateHeight < nextY + nextHeight) {
+          firstLoop := False
+          candidateWindow := this_win
+          candidateX := nextX
+          candidateY := nextY
+          candidateHeight := nextHeight
+          candidateWidth := nextWidth
+        }
+      }
     }
 
-    ; Select the next appropriate window
-    if (direction == "right" and sameWSection and nX > cX) {
-      if (nX < closestX or firstLoop) {
-        closestX := nX
-        closestWindow := this_win
-        firstLoop := False
-      }
-    }
-    else if (direction == "left" and sameWSection and nX < cX) {
-      if (nX > closestX or firstLoop) {
-        closestX := nX
-        closestWindow := this_win
-        firstLoop := False
-      }
-    }
-    else if (direction == "up" and sameHSection and nY < cY) {
-      if (nY > closestY or firstLoop) {
-        closestY := nY
-        closestWindow := this_win
-        firstLoop := False
-      }
-    }
-    else if (direction == "down" and sameHSection and nY > cY) {
-      if (nY < closestY or firstLoop) {
-        closestY := nY
-        closestWindow := this_win
-        firstLoop := False
+    ; Go down
+    else if (direction == "down") {
+      
+      ; Any windows above the bottom of the window can be skipped
+      if (nextY < currentY + currentHeight)
+        continue
+      
+      ; Next we will select a window based on priority
+      ; First, we try to select the most "logical" choice
+      if (nextY > currentY + currentHeight AND nextX < currentX + currentWidth AND nextX + nextWidth > currentX) {
+        if (firstLoop OR candidateY + candidateHeight > nextY + nextHeight) {
+          firstLoop := False
+          candidateWindow := this_win
+          candidateX := nextX
+          candidateY := nextY
+          candidateHeight := nextHeight
+          candidateWidth := nextWidth
+        }
       }
     }
   }
-  WinActivate, ahk_id %closestWindow%
+  WinActivate, ahk_id %candidateWindow%
 }
 
 ; Moves the windows to the desired location
@@ -428,13 +395,13 @@ ToggleTransparency() {
 MakeAllTransparent() {
   WinGet, win, List
   global CurrentDesktop
-  WinGet, cWin, ID, A
+  WinGet, currentWidthin, ID, A
   Loop, %win% {
     this_win := win%A_Index%
     windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, this_win, UInt, CurrentDesktop - 1)
     if (windowIsOnDesktop) {
-      if (this_win == cWin)
-        WinSet, Transparent, 240, ahk_id %cWin%
+      if (this_win == currentWidthin)
+        WinSet, Transparent, 240, ahk_id %currentWidthin%
       else
         WinSet, Transparent, 200, ahk_id %this_win%
     }

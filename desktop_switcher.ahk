@@ -124,7 +124,9 @@ _switchDesktopToTarget(targetDesktop)
     ; Makes the WinActivate fix less intrusive
     Sleep, 50
     focusTheForemostWindow(targetDesktop)
-    Send, {Win up} ; This is my attempt to fix stuck windows keys, which seems to happend when cycling virtual desktop
+    displayDesktopNumber()
+    Send, {LWin up} ; This is my attempt to fix stuck windows keys, which seems to happend when cycling virtual desktop
+    Send, {LCtrl up} ; This is my attempt to fix stuck windows keys, which seems to happend when cycling virtual desktop
 }
 
 updateGlobalVariables() 
@@ -229,4 +231,12 @@ deleteVirtualDesktop()
     DesktopCount--
     CurrentDesktop--
     OutputDebug, [delete] desktops: %DesktopCount% current: %CurrentDesktop%
+}
+
+displayDesktopNumber() {
+  global CurrentDesktop
+  SplashImage, , B Y20 W30 H30 CW808080 CTFF0000, %CurrentDesktop%, , SplashWin
+  WinSet, TransColor, 808080, SplashWin
+  Sleep, 500
+  SplashImage, Off
 }
