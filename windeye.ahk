@@ -122,10 +122,10 @@ Move(direction) {
   candidateY := 0
   candidateWidth := 0
   candidateHeight := 0
-  CandidateWindow := id
+  candidateWindow := id
   firstLoop := True
   
-  ; Decide which windows to selected
+  ; First we try to make a narrow selection
   Loop, %win% {
     this_win := win%A_Index%
 
@@ -147,13 +147,6 @@ Move(direction) {
 
     ; Go up
     if (direction == "up") {
-      
-      ; Some any windows below the top of the window can be skipped
-      if (nextY > currentY)
-        continue
-      
-      ; Next we will select a window based on priority
-      ; First, we try to select the most "logical" choice
       if (nextY + nextHeight < currentY AND nextX < currentX + currentWidth AND nextX + nextWidth > currentX) {
         if (firstLoop OR candidateY + candidateHeight < nextY + nextHeight) {
           firstLoop := False
@@ -168,15 +161,36 @@ Move(direction) {
 
     ; Go down
     else if (direction == "down") {
-      
-      ; Any windows above the bottom of the window can be skipped
-      if (nextY < currentY + currentHeight)
-        continue
-      
-      ; Next we will select a window based on priority
-      ; First, we try to select the most "logical" choice
       if (nextY > currentY + currentHeight AND nextX < currentX + currentWidth AND nextX + nextWidth > currentX) {
         if (firstLoop OR candidateY + candidateHeight > nextY + nextHeight) {
+          firstLoop := False
+          candidateWindow := this_win
+          candidateX := nextX
+          candidateY := nextY
+          candidateHeight := nextHeight
+          candidateWidth := nextWidth
+        }
+      }
+    }
+
+    ; Go right
+    else if (direction == "right") {
+      if (nextX > currentX + currentWidth AND nextY < currentY + currentHeight AND nextY + nextHeight > currentY) {
+        if (firstLoop OR candidateX + candidateWidth > nextX + nextWidth) {
+          firstLoop := False
+          candidateWindow := this_win
+          candidateX := nextX
+          candidateY := nextY
+          candidateHeight := nextHeight
+          candidateWidth := nextWidth
+        }
+      }
+    }
+
+    ; Go left
+    else if (direction == "left") {
+      if (nextX + nextWidth < currentX AND nextY < currentY + currentHeight AND nextY + nextHeight > currentY) {
+        if (firstLoop OR candidateX + candidateWidth < nextX + nextWidth) {
           firstLoop := False
           candidateWindow := this_win
           candidateX := nextX
