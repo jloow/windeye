@@ -125,12 +125,13 @@ Move(direction) {
   candidateWindow := id
   firstLoop := True
   
+  global CurrentDesktop
+
   ; First we try to make a narrow selection
   Loop, %win% {
     this_win := win%A_Index%
 
     ; Correct desktop?
-    global CurrentDesktop
     windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, this_win, UInt, CurrentDesktop - 1)
     if (windowIsOnDesktop != 1)
       continue
@@ -151,10 +152,8 @@ Move(direction) {
         if (firstLoop OR candidateY + candidateHeight < nextY + nextHeight) {
           firstLoop := False
           candidateWindow := this_win
-          candidateX := nextX
           candidateY := nextY
           candidateHeight := nextHeight
-          candidateWidth := nextWidth
         }
       }
     }
@@ -165,9 +164,7 @@ Move(direction) {
         if (firstLoop OR candidateY + candidateHeight > nextY + nextHeight) {
           firstLoop := False
           candidateWindow := this_win
-          candidateX := nextX
           candidateY := nextY
-          candidateHeight := nextHeight
           candidateWidth := nextWidth
         }
       }
@@ -180,8 +177,6 @@ Move(direction) {
           firstLoop := False
           candidateWindow := this_win
           candidateX := nextX
-          candidateY := nextY
-          candidateHeight := nextHeight
           candidateWidth := nextWidth
         }
       }
@@ -194,9 +189,149 @@ Move(direction) {
           firstLoop := False
           candidateWindow := this_win
           candidateX := nextX
-          candidateY := nextY
-          candidateHeight := nextHeight
           candidateWidth := nextWidth
+        }
+      }
+    }
+  }
+
+  ; Then if we found no windows, we try again, but being less picky
+  if (candidateWindow == id) {
+    firstLoop := True
+    Loop, %win% {
+      this_win := win%A_Index%
+
+      ; Correct desktop?
+      windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, this_win, UInt, CurrentDesktop - 1)
+      if (windowIsOnDesktop != 1)
+        continue
+
+      ; Skip current window
+      if (id == this_win)
+        continue
+      
+      WinGetPos, nextX, nextY, nextWidth, nextHeight, ahk_id %this_win% ; Get position of window
+
+      ; Windows seem to be slightly bigger than they appear on screen
+      ; Therefore we may have to shave some pixel of each position
+      ; to get the expected behvaviour
+
+      ; Go up
+      if (direction == "up") {
+        if (nextY + nextHeight < currentY) {
+          if (firstLoop OR candidateY + candidateHeight < nextY + nextHeight) {
+            firstLoop := False
+            candidateWindow := this_win
+            candidateY := nextY
+            candidateHeight := nextHeight
+          }
+        }
+      }
+
+      ; Go down
+      else if (direction == "down") {
+        if (nextY > currentY + currentHeight) {
+          if (firstLoop OR candidateY + candidateHeight > nextY + nextHeight) {
+            firstLoop := False
+            candidateWindow := this_win
+            candidateY := nextY
+            candidateWidth := nextWidth
+          }
+        }
+      }
+
+      ; Go right
+      else if (direction == "right") {
+        if (nextX > currentX + currentWidth) {
+          if (firstLoop OR candidateX + candidateWidth > nextX + nextWidth) {
+            firstLoop := False
+            candidateWindow := this_win
+            candidateX := nextX
+            candidateWidth := nextWidth
+          }
+        }
+      }
+
+      ; Go left
+      else if (direction == "left") {
+        if (nextX + nextWidth < currentX) {
+          if (firstLoop OR candidateX + candidateWidth < nextX + nextWidth) {
+            firstLoop := False
+            candidateWindow := this_win
+            candidateX := nextX
+            candidateWidth := nextWidth
+          }
+        }
+      }
+    }
+  }
+
+  ; Lastly we are very loose with the criteria
+  if (candidateWindow == id) {
+    firstLoop := True
+    Loop, %win% {
+      this_win := win%A_Index%
+
+      ; Correct desktop?
+      windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, this_win, UInt, CurrentDesktop - 1)
+      if (windowIsOnDesktop != 1)
+        continue
+
+      ; Skip current window
+      if (id == this_win)
+        continue
+      
+      WinGetPos, nextX, nextY, nextWidth, nextHeight, ahk_id %this_win% ; Get position of window
+
+      ; Windows seem to be slightly bigger than they appear on screen
+      ; Therefore we may have to shave some pixel of each position
+      ; to get the expected behvaviour
+
+      ; Go up
+      if (direction == "up") {
+        if (nextY < currentY AND currentY + nextHeight < currentY + currentHeight) {
+          if (firstLoop OR candidateY + candidateHeight < nextY + nextHeight) {
+            firstLoop := False
+            candidateWindow := this_win
+            candidateY := nextY
+            candidateHeight := nextHeight
+          }
+        }
+      }
+
+      ; Go down
+      else if (direction == "down") {
+        if (nextY > currentY AND nextY + nextHeight > currentY + currentHeight) {
+          if (firstLoop OR candidateY + candidateHeight > nextY + nextHeight) {
+            firstLoop := False
+            candidateWindow := this_win
+            candidateY := nextY
+            candidateWidth := nextWidth
+          }
+        }
+      }
+
+      ; Go right
+      else if (direction == "right") {
+        if (nextX > currentX AND nextX + nextWidth > currentX + currentWidth) {
+          if (firstLoop OR candidateX + candidateWidth > nextX + nextWidth) {
+            firstLoop := False
+            candidateWindow := this_win
+            candidateX := nextX
+            candidateWidth := nextWidth
+          }
+        }
+      }
+
+      ; Go left
+      else if (direction == "left") {
+        if (nextX < currentX AND nextX + nextWidth < currentX + currentWidth) {
+          if (firstLoop OR candidateX + candidateWidth < nextX + nextWidth) {
+            firstLoop := False
+            candidateWindow := this_win
+            candidateX := nextX
+            candidateWidth := nextWidth
+          }
         }
       }
     }
