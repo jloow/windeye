@@ -115,6 +115,12 @@ Move(direction) {
   WinGet, id, ID, A ; Get id of current window
   WinGetPos, currentX, currentY, currentWidth, currentHeight, A ; Get position of current window
   WinGet, win, List ; Get a list of all available windows
+
+  ; We need to shave of some pixels to get the expected behaviour
+  currentX := currentX + 10
+  currentY := currentY + 10
+  currentWidth := currentWidth - 10
+  currentHeight := currentHeight - 10
   
   ; Some variables to determine which window is closest to
   ; the current window
@@ -389,9 +395,7 @@ MoveTo(d) {
     Until (WinActive("ahk_id" . id))
   }
   Until (CurrentLocation() == d)
-  ; Sometimes the tiling window still pop-up. Therefore we will try to
-  ; wait a short while, and then check the location again
-  Sleep, 1000
+  ; Sometimes the tiling window still pop-up. Therefore we will check the location again
   if (CurrentLocation() != d)
     MoveTo(d)
 }

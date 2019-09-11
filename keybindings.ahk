@@ -4,14 +4,6 @@
 
 CapsLock::Esc
 
-$#+Up:: Send, {LWin down}{Up down}{Up up}{LWin up}
-
-$#+Down:: Send, {LWin down}{Down down}{Down up}{LWin up}
-
-$#+Left:: Send, {LWin down}{Left down}{Left up}{LWin up}
-
-$#+Right:: Send, {LWin down}{Right down}{Right up}{LWin up}
-
 ^#Right:: MoveWindow(40, 0)
 
 ^#Left:: MoveWindow(-40, 0)
@@ -65,6 +57,9 @@ $#+Right:: Send, {LWin down}{Right down}{Right up}{LWin up}
 
 ; Move to q4
 #+4:: MoveTo(4)
+
+; Untile
+#+w:: MoveTo(0)
 
 ; Move to h1
 #+`:: MoveTo(1.5)
