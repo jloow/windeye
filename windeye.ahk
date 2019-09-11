@@ -116,18 +116,13 @@ Move(direction) {
   WinGetPos, currentX, currentY, currentWidth, currentHeight, A ; Get position of current window
   WinGet, win, List ; Get a list of all available windows
 
-  ; We need to shave of some pixels to get the expected behaviour
-  currentX := currentX + 10
-  currentY := currentY + 10
-  currentWidth := currentWidth - 10
-  currentHeight := currentHeight - 10
+  currentPointX := currentX + currentWidth / 2
+  currentPointY := currentY + currentHeight / 2
   
   ; Some variables to determine which window is closest to
   ; the current window
-  candidateX := 0
-  candidateY := 0
-  candidateWidth := 0
-  candidateHeight := 0
+  candidatePointX := 0
+  candidatePointY := 0
   candidateWindow := id
   firstLoop := True
   
@@ -148,60 +143,55 @@ Move(direction) {
     
     WinGetPos, nextX, nextY, nextWidth, nextHeight, ahk_id %this_win% ; Get position of window
 
-    ; Windows seem to be slightly bigger than they appear on screen
-    ; Therefore we may have to shave some pixel of each position
-    ; to get the expected behvaviour
+    nextPointX := nextX + nextWidth / 2
+    nextPointY := nextY + nextHeight / 2
 
     ; Go up
     if (direction == "up") {
-      if (nextY + nextHeight < currentY + currentHeight AND nextX < currentX + currentWidth AND nextX + nextWidth > currentX) {
-        if (firstLoop OR candidateY + candidateHeight < nextY + nextHeight) {
+      if (nextPointY < currentPointY AND nextPointX > currentX AND nextPointX < currentX + currentWidth) {
+        if (firstLoop OR candidatePointY < nextPointY) {
           firstLoop := False
           candidateWindow := this_win
-          candidateY := nextY
-          candidateHeight := nextHeight
+          candidatePointY := nextPointY
         }
       }
     }
 
     ; Go down
     else if (direction == "down") {
-      if (nextY > currentY AND nextX < currentX + currentWidth AND nextX + nextWidth > currentX) {
-        if (firstLoop OR candidateY + candidateHeight > nextY + nextHeight) {
+      if (nextPointY > currentPointY AND nextPointX > currentX AND nextPointX < currentX + currentWidth) {
+        if (firstLoop OR candidatePointY > nextPointY) {
           firstLoop := False
           candidateWindow := this_win
-          candidateY := nextY
-          candidateWidth := nextWidth
+          candidatePointY := nextPointY
         }
       }
     }
 
     ; Go right
     else if (direction == "right") {
-      if (nextX > currentX AND nextY < currentY + currentHeight AND nextY + nextHeight > currentY) {
-        if (firstLoop OR candidateX + candidateWidth > nextX + nextWidth) {
+      if (nextPointX > currentPointX AND nextPointY > currentY AND nextPointY < currentY + currentHeight) {
+        if (firstLoop OR candidatePointX > nextPointX) {
           firstLoop := False
           candidateWindow := this_win
-          candidateX := nextX
-          candidateWidth := nextWidth
+          candidatePointX := nextPointX
         }
       }
     }
 
     ; Go left
     else if (direction == "left") {
-      if (nextX + nextWidth < currentX + currentWidth AND nextY < currentY + currentHeight AND nextY + nextHeight > currentY) {
-        if (firstLoop OR candidateX + candidateWidth < nextX + nextWidth) {
+      if (nextPointX < currentPointX AND nextPointY > currentY AND nextPointY < currentY + currentHeight) {
+        if (firstLoop OR candidatePointX < nextPointX) {
           firstLoop := False
           candidateWindow := this_win
-          candidateX := nextX
-          candidateWidth := nextWidth
+          candidatePointX := nextPointX
         }
       }
     }
   }
 
-  ; Then if we found no windows, we try again, but being less picky
+  ; ; Lastly we are very loose with the criteria
   ; if (candidateWindow == id) {
   ;   firstLoop := True
   ;   Loop, %win% {
@@ -224,7 +214,7 @@ Move(direction) {
 
   ;     ; Go up
   ;     if (direction == "up") {
-  ;       if (nextY + nextHeight < currentY) {
+  ;       if (nextY < currentY AND currentY + nextHeight < currentY + currentHeight) {
   ;         if (firstLoop OR candidateY + candidateHeight < nextY + nextHeight) {
   ;           firstLoop := False
   ;           candidateWindow := this_win
@@ -236,7 +226,7 @@ Move(direction) {
 
   ;     ; Go down
   ;     else if (direction == "down") {
-  ;       if (nextY > currentY + currentHeight) {
+  ;       if (nextY > currentY AND nextY + nextHeight > currentY + currentHeight) {
   ;         if (firstLoop OR candidateY + candidateHeight > nextY + nextHeight) {
   ;           firstLoop := False
   ;           candidateWindow := this_win
@@ -248,7 +238,7 @@ Move(direction) {
 
   ;     ; Go right
   ;     else if (direction == "right") {
-  ;       if (nextX > currentX + currentWidth) {
+  ;       if (nextX > currentX AND nextX + nextWidth > currentX + currentWidth) {
   ;         if (firstLoop OR candidateX + candidateWidth > nextX + nextWidth) {
   ;           firstLoop := False
   ;           candidateWindow := this_win
@@ -260,7 +250,7 @@ Move(direction) {
 
   ;     ; Go left
   ;     else if (direction == "left") {
-  ;       if (nextX + nextWidth < currentX) {
+  ;       if (nextX < currentX AND nextX + nextWidth < currentX + currentWidth) {
   ;         if (firstLoop OR candidateX + candidateWidth < nextX + nextWidth) {
   ;           firstLoop := False
   ;           candidateWindow := this_win
@@ -271,77 +261,6 @@ Move(direction) {
   ;     }
   ;   }
   ; }
-
-  ; Lastly we are very loose with the criteria
-  if (candidateWindow == id) {
-    firstLoop := True
-    Loop, %win% {
-      this_win := win%A_Index%
-
-      ; Correct desktop?
-      windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, this_win, UInt, CurrentDesktop - 1)
-      if (windowIsOnDesktop != 1)
-        continue
-
-      ; Skip current window
-      if (id == this_win)
-        continue
-      
-      WinGetPos, nextX, nextY, nextWidth, nextHeight, ahk_id %this_win% ; Get position of window
-
-      ; Windows seem to be slightly bigger than they appear on screen
-      ; Therefore we may have to shave some pixel of each position
-      ; to get the expected behvaviour
-
-      ; Go up
-      if (direction == "up") {
-        if (nextY < currentY AND currentY + nextHeight < currentY + currentHeight) {
-          if (firstLoop OR candidateY + candidateHeight < nextY + nextHeight) {
-            firstLoop := False
-            candidateWindow := this_win
-            candidateY := nextY
-            candidateHeight := nextHeight
-          }
-        }
-      }
-
-      ; Go down
-      else if (direction == "down") {
-        if (nextY > currentY AND nextY + nextHeight > currentY + currentHeight) {
-          if (firstLoop OR candidateY + candidateHeight > nextY + nextHeight) {
-            firstLoop := False
-            candidateWindow := this_win
-            candidateY := nextY
-            candidateWidth := nextWidth
-          }
-        }
-      }
-
-      ; Go right
-      else if (direction == "right") {
-        if (nextX > currentX AND nextX + nextWidth > currentX + currentWidth) {
-          if (firstLoop OR candidateX + candidateWidth > nextX + nextWidth) {
-            firstLoop := False
-            candidateWindow := this_win
-            candidateX := nextX
-            candidateWidth := nextWidth
-          }
-        }
-      }
-
-      ; Go left
-      else if (direction == "left") {
-        if (nextX < currentX AND nextX + nextWidth < currentX + currentWidth) {
-          if (firstLoop OR candidateX + candidateWidth < nextX + nextWidth) {
-            firstLoop := False
-            candidateWindow := this_win
-            candidateX := nextX
-            candidateWidth := nextWidth
-          }
-        }
-      }
-    }
-  }
   WinActivate, ahk_id %candidateWindow%
 }
 
