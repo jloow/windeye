@@ -2,6 +2,8 @@
 ; DEFINE HOTKEYS ;
 ;----------------;
 
+; Send Swedish characters
+
 >!`;:: Send, ö
 
 >!+`;:: Send, Ö
@@ -14,7 +16,11 @@
 
 >!+[:: Send, Å
 
+; Make CapsLock useful
+
 CapsLock::Esc
+
+; Vim-like keybindings
 
 >!h:: Send, {Left}
 
@@ -48,7 +54,6 @@ CapsLock::Esc
 
 ^<!j:: ResizeWindow(0, 40)
 
-#a:: KeyboardHelp()
 
 ; Move up
 #Up:: Move("up")
@@ -61,18 +66,6 @@ CapsLock::Esc
  
 ; Move right
 #Right:: Move("right")
-
-; Move up (alternative)
-!k:: Move("up")
- 
-; Move down (alternative)
-!j:: Move("down")
- 
-; Move left (alternative)
-;!h:: Move("left")
- 
-; Move right (alternative)
-!l:: Move("right")
 
 ; Move to q1
 #+1:: MoveTo(1)
@@ -121,6 +114,8 @@ CapsLock::Esc
 
 ; Walk right to left, row by row, to select windows
 #+Tab:: SelectPrev()
+
+#a:: KeyboardHelp()
 
 ; Close the active window
 #q:: WinClose, A
