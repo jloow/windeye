@@ -235,7 +235,7 @@ Move(direction) {
 
       ; Go right
       else if (direction == "right") {
-        if (nextPointX < currentPointX) {
+        if (nextPointX > currentPointX) {
           if (firstLoop OR candidatePointX > nextPointY) {
             firstLoop := False
             candidateWindow := this_win
@@ -246,7 +246,7 @@ Move(direction) {
 
       ; Go left
       else if (direction == "left") {
-        if (nextPointX > currentPointX) {
+        if (nextPointX < currentPointX) {
           if (firstLoop OR candidatePointX < nextPointY) {
             firstLoop := False
             candidateWindow := this_win
