@@ -2,23 +2,51 @@
 ; DEFINE HOTKEYS ;
 ;----------------;
 
+>!`;:: Send, ö
+
+>!+`;:: Send, Ö
+
+>!':: Send, ä
+
+>!+':: Send, Ä
+
+>![:: Send, å
+
+>!+[:: Send, Å
+
 CapsLock::Esc
 
-^#Right:: MoveWindow(40, 0)
+>!h:: Send, {Left}
 
-^#Left:: MoveWindow(-40, 0)
+>!j:: Send, {Down}
 
-^#Up:: MoveWindow(0, -40)
+>!k:: Send, {Up}
 
-^#Down:: MoveWindow(0, 40)
+>!l:: Send, {Right}
 
-#!Right:: ResizeWindow(40, 0)
+<!h:: Move("left")
 
-#!Left:: ResizeWindow(-40, 0)
+<!j:: Move("down")
 
-#!Up:: ResizeWindow(0, -40)
+<!k:: Move("up")
 
-#!Down:: ResizeWindow(0, 40)
+<!l:: Move("right")
+
++<!l:: MoveWindow(40, 0)
+
++<!h:: MoveWindow(-40, 0)
+
++<!k:: MoveWindow(0, -40)
+
++<!j:: MoveWindow(0, 40)
+
+^<!l:: ResizeWindow(40, 0)
+
+^<!h:: ResizeWindow(-40, 0)
+
+^<!k:: ResizeWindow(0, -40)
+
+^<!j:: ResizeWindow(0, 40)
 
 #a:: KeyboardHelp()
 
@@ -41,7 +69,7 @@ CapsLock::Esc
 !j:: Move("down")
  
 ; Move left (alternative)
-!h:: Move("left")
+;!h:: Move("left")
  
 ; Move right (alternative)
 !l:: Move("right")
