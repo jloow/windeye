@@ -21,12 +21,12 @@
 ; === END OF INSTRUCTIONS ===
 ; ===========================
 
-#n::switchDesktopToRight()
-#b::switchDesktopToLeft()
-#+n::createVirtualDesktop()
-#+q::deleteVirtualDesktop()
-#^n::MoveCurrentWindowToNextDesktop()
-#^b::MoveCurrentWindowToPreviousDesktop()
+!n::switchDesktopToRight()
+!b::switchDesktopToLeft()
+!+n::createVirtualDesktop()
+!+q::deleteVirtualDesktop()
+!^n::MoveCurrentWindowToNextDesktop()
+!^b::MoveCurrentWindowToPreviousDesktop()
 
 ; CapsLock & 1::switchDesktopByNumber(1)
 ; CapsLock & 2::switchDesktopByNumber(2)

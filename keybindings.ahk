@@ -127,10 +127,10 @@ CapsLock::Esc
 !v:: SelectAndCycle(0)
 
 ; Walk left to right, row by row, to select windows
-#tab:: SelectNext()
+!tab:: SelectNext()
 
 ; Walk right to left, row by row, to select windows
-#+Tab:: SelectPrev()
+!+Tab:: SelectPrev()
 
 !a:: KeyboardHelp()
 
@@ -154,7 +154,7 @@ return
 !h:: RemoveDecoration()
 
 ; Alt Tab
-!c::AltTab
+<!c::AltTab
 
 ; Reload the script
 #+r:: Reload
