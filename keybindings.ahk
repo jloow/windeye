@@ -126,6 +126,14 @@ CapsLock::Esc
 ; Selects an untiled window
 !v:: SelectAndCycle(0)
 
+; Desktop switcher stuff
+!n:: Send, #^{Right}
+!b:: Send, #^{Left}
+!+n::createVirtualDesktop()
+!+q::deleteVirtualDesktop()
+!^n::MoveCurrentWindowToNextDesktop()
+!^b::MoveCurrentWindowToPreviousDesktop()
+
 ; Walk left to right, row by row, to select windows
 !tab:: SelectNext()
 
