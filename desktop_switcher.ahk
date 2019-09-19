@@ -123,10 +123,7 @@ _switchDesktopToTarget(targetDesktop)
 
     ; Makes the WinActivate fix less intrusive
     Sleep, 50
-    focusTheForemostWindow(targetDesktop)
     displayDesktopNumber()
-    Send, {LWin up} ; This is my attempt to fix stuck windows keys, which seems to happend when cycling virtual desktop
-    Send, {LCtrl up} ; This is my attempt to fix stuck windows keys, which seems to happend when cycling virtual desktop
 }
 
 updateGlobalVariables() 
@@ -143,55 +140,6 @@ switchDesktopByNumber(targetDesktop)
     _switchDesktopToTarget(targetDesktop)
 }
 
-switchDesktopToLastOpened()
-{
-    global CurrentDesktop, DesktopCount, LastOpenedDesktop
-    updateGlobalVariables()
-    _switchDesktopToTarget(LastOpenedDesktop)
-}
-
-switchDesktopToRight()
-{
-    global CurrentDesktop, DesktopCount
-    updateGlobalVariables()
-    _switchDesktopToTarget(CurrentDesktop == DesktopCount ? 1 : CurrentDesktop + 1)
-}
-
-switchDesktopToLeft()
-{
-    global CurrentDesktop, DesktopCount
-    updateGlobalVariables()
-    _switchDesktopToTarget(CurrentDesktop == 1 ? DesktopCount : CurrentDesktop - 1)
-}
-
-focusTheForemostWindow(targetDesktop) 
-{
-    foremostWindowId := getForemostWindowIdOnDesktop(targetDesktop)
-    WinActivate, ahk_id %foremostWindowId%
-}
-
-getForemostWindowIdOnDesktop(n)
-{
-    n := n - 1 ; Desktops start at 0, while in script it's 1
-
-    ; winIDList contains a list of windows IDs ordered from the top to the bottom for each desktop.
-    WinGet winIDList, list
-    Loop % winIDList {
-        windowID := % winIDList%A_Index%
-        windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, windowID, UInt, n)
-        ; Select the first (and foremost) window which is in the specified desktop.
-        if (windowIsOnDesktop == 1) {
-            return windowID
-        }
-    }
-}
-
-MoveCurrentWindowToDesktop(desktopNumber) {
-    WinGet, activeHwnd, ID, A
-    DllCall(MoveWindowToDesktopNumberProc, UInt, activeHwnd, UInt, desktopNumber - 1)
-    switchDesktopByNumber(desktopNumber)
-}
-
 MoveCurrentWindowToNextDesktop() {
     global CurrentDesktop, DesktopCount
     WinGet, activeHwnd, ID, A
@@ -205,36 +153,10 @@ MoveCurrentWindowToPreviousDesktop() {
     DllCall(MoveWindowToDesktopNumberProc, UInt, activeHwnd, UInt, CurrentDesktop - 2)
     switchDesktopByNumber(CurrentDesktop - 1)
 }
-;
-
-; This function creates a new virtual desktop and switches to it
-;
-createVirtualDesktop()
-{
-    global CurrentDesktop, DesktopCount
-    Send, #^d
-    DesktopCount++
-    CurrentDesktop := DesktopCount
-    OutputDebug, [create] desktops: %DesktopCount% current: %CurrentDesktop%
-}
-
-;
-; This function deletes the current virtual desktop
-;
-deleteVirtualDesktop()
-{
-    global CurrentDesktop, DesktopCount, LastOpenedDesktop
-    Send, #^{F4}
-    if (LastOpenedDesktop >= CurrentDesktop) {
-        LastOpenedDesktop--
-    }
-    DesktopCount--
-    CurrentDesktop--
-    OutputDebug, [delete] desktops: %DesktopCount% current: %CurrentDesktop%
-}
 
 displayDesktopNumber() {
   global CurrentDesktop
+  updateGlobalVariables()
   SplashImage, , B Y20 W30 H30 CW808080 CTFF0000, %CurrentDesktop%, , SplashWin
   WinSet, TransColor, 808080, SplashWin
   Sleep, 500
