@@ -235,6 +235,7 @@ deleteVirtualDesktop()
 
 displayDesktopNumber() {
   global CurrentDesktop
+  updateGlobalVariables()
   SplashImage, , B Y20 W30 H30 CW808080 CTFF0000, %CurrentDesktop%, , SplashWin
   WinSet, TransColor, 808080, SplashWin
   Sleep, 500
