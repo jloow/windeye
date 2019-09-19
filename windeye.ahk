@@ -109,7 +109,6 @@ CorrectSide(d) {
 ;    SelectAndCycle(destination)
 ;}
 
-; This doesn't work as intended, but I think it works as it should
 Move(direction) {
   
   WinGet, id, ID, A ; Get id of current window
@@ -357,9 +356,9 @@ SelectAndCycle(q) {
   ; half-screen window
   if (q == Floor(q) and not found)
     SelectAndCycle(Mod(q, 2) == 0 ? 2.5 : 1.5)
-  global MakeTransparent
-  if (found and MakeTransparent)
-    MakeAllTransparent()
+  ; global MakeTransparent
+  ; if (found and MakeTransparent)
+  ;   MakeAllTransparent()
 }
 
 SelectNext() {
@@ -433,60 +432,60 @@ RestoreDecoration(id := "") {
   }
 }
 
-IncreaseTransparency() {
-  global TrnspStep
-  WinGet, trnsp, Transparent, A
-  WinSet, Transparent, % trnsp + TrnspStep, A 
-}
-
-DecreaseTransparency() {
-  global TrnspStep
-  WinGet, trnsp, Transparent, A
-  WinSet, Transparent, % trnsp - TrnspStep, A 
-}
-
-ToggleTransparency() {
-  global MakeTransparent
-  if (MakeTransparent) {
-    MakeTransparent := false
-    MakeAllSolid()
-    SetTimer, Update, Off
-  }
-  else {
-    MakeTransparent := true
-    MakeAllTransparent()
-    SetTimer, Update, 1000
-  }
-}
-
-MakeAllTransparent() {
-  WinGet, win, List
-  global CurrentDesktop
-  WinGet, currentWidthin, ID, A
-  Loop, %win% {
-    this_win := win%A_Index%
-    windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, this_win, UInt, CurrentDesktop - 1)
-    if (windowIsOnDesktop) {
-      if (this_win == currentWidthin)
-        WinSet, Transparent, 240, ahk_id %currentWidthin%
-      else
-        WinSet, Transparent, 200, ahk_id %this_win%
-    }
-  }
-}
-
-MakeAllSolid() {
-  WinGet, win, List
-  global CurrentDesktop
-  Loop, %win% {
-    this_win := win%A_Index%
-    windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, this_win, UInt, CurrentDesktop - 1)
-    if (windowIsOnDesktop) {
-      WinSet, Transparent, 255, ahk_id %this_win%
-      WinSet, Transparent, Off, ahk_id %this_win%
-    }
-  }
-}
+; IncreaseTransparency() {
+;   global TrnspStep
+;   WinGet, trnsp, Transparent, A
+;   WinSet, Transparent, % trnsp + TrnspStep, A 
+; }
+; 
+; DecreaseTransparency() {
+;   global TrnspStep
+;   WinGet, trnsp, Transparent, A
+;   WinSet, Transparent, % trnsp - TrnspStep, A 
+; }
+; 
+; ToggleTransparency() {
+;   global MakeTransparent
+;   if (MakeTransparent) {
+;     MakeTransparent := false
+;     MakeAllSolid()
+;     SetTimer, Update, Off
+;   }
+;   else {
+;     MakeTransparent := true
+;     MakeAllTransparent()
+;     SetTimer, Update, 1000
+;   }
+; }
+; 
+; MakeAllTransparent() {
+;   WinGet, win, List
+;   global CurrentDesktop
+;   WinGet, currentWidthin, ID, A
+;   Loop, %win% {
+;     this_win := win%A_Index%
+;     windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, this_win, UInt, CurrentDesktop - 1)
+;     if (windowIsOnDesktop) {
+;       if (this_win == currentWidthin)
+;         WinSet, Transparent, 240, ahk_id %currentWidthin%
+;       else
+;         WinSet, Transparent, 200, ahk_id %this_win%
+;     }
+;   }
+; }
+; 
+; MakeAllSolid() {
+;   WinGet, win, List
+;   global CurrentDesktop
+;   Loop, %win% {
+;     this_win := win%A_Index%
+;     windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, this_win, UInt, CurrentDesktop - 1)
+;     if (windowIsOnDesktop) {
+;       WinSet, Transparent, 255, ahk_id %this_win%
+;       WinSet, Transparent, Off, ahk_id %this_win%
+;     }
+;   }
+; }
 
 ; ToggleDecoration() {
 ;   global Decoration
@@ -510,13 +509,13 @@ MakeAllSolid() {
 ;-------------;
 ; OTHER STUFF ;
 ;-------------;
-Update() {
-  global MakeTransparent
-  if (MakeTransparent)
-    MakeAllTransparent()
-  else
-    MakeAllSolid()
-}
+; Update() {
+;   global MakeTransparent
+;   if (MakeTransparent)
+;     MakeAllTransparent()
+;   else
+;     MakeAllSolid()
+; }
 
 ;----------------------;
 ; `IS TILED` FUNCTIONS ;
