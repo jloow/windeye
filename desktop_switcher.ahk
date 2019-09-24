@@ -19,7 +19,6 @@ global MoveWindowToDesktopNumberProc := DllCall("GetProcAddress", Ptr, hVirtualD
 mapDesktopsFromRegistry()
 OutputDebug, [loading] desktops: %DesktopCount% current: %CurrentDesktop%
 
-#Include %A_ScriptDir%\user_config.ahk
 return
 
 ;
@@ -142,16 +141,20 @@ switchDesktopByNumber(targetDesktop)
 
 MoveCurrentWindowToNextDesktop() {
     global CurrentDesktop, DesktopCount
+    updateGlobalVariables()
     WinGet, activeHwnd, ID, A
     DllCall(MoveWindowToDesktopNumberProc, UInt, activeHwnd, UInt, CurrentDesktop)
-    switchDesktopByNumber(CurrentDesktop + 1)
+    Send, #^{Right}
+    ; switchDesktopByNumber(CurrentDesktop + 1)
 }
 
 MoveCurrentWindowToPreviousDesktop() {
     global CurrentDesktop, DesktopCount
+    updateGlobalVariables()
     WinGet, activeHwnd, ID, A
     DllCall(MoveWindowToDesktopNumberProc, UInt, activeHwnd, UInt, CurrentDesktop - 2)
-    switchDesktopByNumber(CurrentDesktop - 1)
+    ; switchDesktopByNumber(CurrentDesktop - 1)
+    Send, #^{Left}
 }
 
 displayDesktopNumber() {

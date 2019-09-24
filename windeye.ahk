@@ -126,6 +126,7 @@ Move(direction) {
   firstLoop := True
   
   global CurrentDesktop
+  updateGlobalVariables()
 
   ; First we try to make a narrow selection
   Loop, %win% {
@@ -342,6 +343,7 @@ SelectAndCycle(q) {
       ; on. Therefore we need to check if the window is on the correct desktop
       ; or not (borrowed from desktop_switcher.ahk)
       global CurrentDesktop
+      updateGlobalVariables()
       windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, this_win, UInt, CurrentDesktop - 1)
       if (windowIsOnDesktop == 1) {
         found := true

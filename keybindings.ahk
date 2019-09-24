@@ -129,8 +129,8 @@ CapsLock::Esc
 ; Desktop switcher stuff
 !n:: Send, #^{Right}
 !b:: Send, #^{Left}
-!+n::createVirtualDesktop()
-!+q::deleteVirtualDesktop()
+!+n:: Send, #^d
+; !+q::deleteVirtualDesktop()
 !^n::MoveCurrentWindowToNextDesktop()
 !^b::MoveCurrentWindowToPreviousDesktop()
 
