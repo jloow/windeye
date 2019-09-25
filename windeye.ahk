@@ -29,7 +29,7 @@
   ; The amount of which to change transparency
   TrnspStep = 10
 
-  MakeTransparent := false
+  ; MakeTransparent := false
 
   #Include %A_ScriptDir%\desktop_switcher.ahk
   #Include %A_ScriptDir%\keybindings.ahk
@@ -126,6 +126,7 @@ Move(direction) {
   firstLoop := True
   
   global CurrentDesktop
+  updateGlobalVariables()
 
   ; First we try to make a narrow selection
   Loop, %win% {
@@ -342,6 +343,7 @@ SelectAndCycle(q) {
       ; on. Therefore we need to check if the window is on the correct desktop
       ; or not (borrowed from desktop_switcher.ahk)
       global CurrentDesktop
+      updateGlobalVariables()
       windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, this_win, UInt, CurrentDesktop - 1)
       if (windowIsOnDesktop == 1) {
         found := true
@@ -432,17 +434,21 @@ RestoreDecoration(id := "") {
   }
 }
 
-; IncreaseTransparency() {
-;   global TrnspStep
-;   WinGet, trnsp, Transparent, A
-;   WinSet, Transparent, % trnsp + TrnspStep, A 
-; }
-; 
-; DecreaseTransparency() {
-;   global TrnspStep
-;   WinGet, trnsp, Transparent, A
-;   WinSet, Transparent, % trnsp - TrnspStep, A 
-; }
+IncreaseTransparency() {
+  global TrnspStep
+  WinGet, trnsp, Transparent, A
+  WinSet, Transparent, % trnsp + TrnspStep, A 
+}
+
+DecreaseTransparency() {
+  global TrnspStep
+  WinGet, trnsp, Transparent, A
+  ; If a window has had its transparency modified, then `trnsp`
+  ; is not 255 but rather undefined
+  if (!trnsp)
+    trnsp := 255 - TrnspStep
+  WinSet, Transparent, % trnsp - TrnspStep, A 
+}
 ; 
 ; ToggleTransparency() {
 ;   global MakeTransparent
