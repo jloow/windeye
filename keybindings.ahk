@@ -51,6 +51,10 @@ CapsLock::Esc
 
 ^<!j:: ResizeWindow(0, 40)
 
+; Transparency
+!,:: DecreaseTransparency()
+!.:: IncreaseTransparency()
+
 ; Non-vim backups
 >!left:: Send, {Left}
 

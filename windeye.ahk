@@ -29,7 +29,7 @@
   ; The amount of which to change transparency
   TrnspStep = 10
 
-  MakeTransparent := false
+  ; MakeTransparent := false
 
   #Include %A_ScriptDir%\desktop_switcher.ahk
   #Include %A_ScriptDir%\keybindings.ahk
@@ -434,17 +434,21 @@ RestoreDecoration(id := "") {
   }
 }
 
-; IncreaseTransparency() {
-;   global TrnspStep
-;   WinGet, trnsp, Transparent, A
-;   WinSet, Transparent, % trnsp + TrnspStep, A 
-; }
-; 
-; DecreaseTransparency() {
-;   global TrnspStep
-;   WinGet, trnsp, Transparent, A
-;   WinSet, Transparent, % trnsp - TrnspStep, A 
-; }
+IncreaseTransparency() {
+  global TrnspStep
+  WinGet, trnsp, Transparent, A
+  WinSet, Transparent, % trnsp + TrnspStep, A 
+}
+
+DecreaseTransparency() {
+  global TrnspStep
+  WinGet, trnsp, Transparent, A
+  ; If a window has had its transparency modified, then `trnsp`
+  ; is not 255 but rather undefined
+  if (!trnsp)
+    trnsp := 255 - TrnspStep
+  WinSet, Transparent, % trnsp - TrnspStep, A 
+}
 ; 
 ; ToggleTransparency() {
 ;   global MakeTransparent
