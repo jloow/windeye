@@ -33,6 +33,7 @@
 
   #Include %A_ScriptDir%\desktop_switcher.ahk
   #Include %A_ScriptDir%\keybindings.ahk
+  #Include %A_ScriptDir%\langhelper.ahk
   ;#Include %A_ScriptDir%\applications.ahk
 
 Return
