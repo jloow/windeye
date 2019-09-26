@@ -2,19 +2,6 @@
 ; DEFINE HOTKEYS ;
 ;----------------;
 
-; Send Swedish characters
->!`;:: Send, ö
-
->!+`;:: Send, Ö
-
->!':: Send, ä
-
->!+':: Send, Ä
-
->![:: Send, å
-
->!+[:: Send, Å
-
 ; Make CapsLock useful
 CapsLock::Esc
 
