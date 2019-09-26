@@ -450,7 +450,39 @@ DecreaseTransparency() {
     trnsp := 255 - TrnspStep
   WinSet, Transparent, % trnsp - TrnspStep, A 
 }
-; 
+
+DesktopIncreaseTransparency() {
+  WinGet, win, List
+  global TrnspStep
+  global CurrentDesktop
+  updateGlobalVariables()
+  Loop, %win% {
+    this_win := win%A_Index%
+    windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, this_win, UInt, CurrentDesktop - 1)
+    if (windowIsOnDesktop == 1) {
+      WinGet, trnsp, Transparent, ahk_id %this_win%
+      WinSet, Transparent, % trnsp - TrnspStep, ahk_id %this_win%
+    }
+  }
+}
+ 
+DesktopDecreaseTransparency() {
+  WinGet, win, List
+  global TrnspStep
+  global CurrentDesktop
+  updateGlobalVariables()
+  Loop, %win% {
+    this_win := win%A_Index%
+    windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, this_win, UInt, CurrentDesktop - 1)
+    if (windowIsOnDesktop == 1) {
+      WinGet, trnsp, Transparent, ahk_id %this_win%
+      if (!trnsp)
+          trnsp := 255 - TrnspStep
+      WinSet, Transparent, % trnsp + TrnspStep, ahk_id %this_win%
+    }
+  }
+}
+
 ; ToggleTransparency() {
 ;   global MakeTransparent
 ;   if (MakeTransparent) {

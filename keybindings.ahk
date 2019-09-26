@@ -41,6 +41,8 @@ CapsLock::Esc
 ; Transparency
 !,:: DecreaseTransparency()
 !.:: IncreaseTransparency()
+!+,:: DesktopDecreaseTransparency()
+!+.:: DesktopIncreaseTransparency()
 
 ; Non-vim backups
 >!left:: Send, {Left}
