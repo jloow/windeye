@@ -21,6 +21,21 @@ Loop, 9 {
   }
 }
 
+setLayout() {
+  ; Promt the user for layout
+  ; ...
+
+  ; Convert the 2 digit sequence to a correct 3 digit sequence
+  if (Layout < 100)
+    ; We don't accept more than 4 vertical zones
+    if (Layout >= 44)
+      Layout := 44
+
+    ; Split the string
+
+
+}
+
 GenerateGrid() {
   SysGet, Mon, Monitor
 }
