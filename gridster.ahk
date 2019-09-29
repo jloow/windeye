@@ -7,26 +7,15 @@
 ; large zone.
 
 Padding := 20
-Layout := -1
+Layout := 22
 
 ; Automaticaly generate arrays for nine zones
 Loop, 9 {
-  Zone%A_Index% := {
-    X: -1,
-    Y: -1,
-    W: -1,
-    H: -1,
-    IsActive: False,
-    HasWindow: False
-  }
+  Zone%A_Index% := { X: -1, Y: -1, W: -1, H: -1, IsActive: False, HasWindow: False }
 }
 
 Loop, 3 {
-  SuperZone%A_Index% := {
-    Start: -1,
-    End: -1,
-    IsActive: False,
-  }
+  SuperZone%A_Index% := { Start: -1, End: -1, IsActive: False }
 }
 
 SetLayout() {
@@ -34,14 +23,14 @@ SetLayout() {
   OutputDebug, I'm asking the user to specify the layout
 
   ; Promt the user for layout
-  Inpur, UsrInput, BIL3T5, {Enter}{Space}
+  Input, UsrInput, BIL3T5, {Enter}{Space}
 
   ; Check if input is numeric (Abs returns an empty string if it
   ; is not
-  if (Abs == "") {
-    OutputDebug, The user didn't enter only numbers
-    return
-  }
+  ;if (Abs == "") {
+  ;  OutputDebug, The user didn't enter only numbers
+  ;  return
+  ;}
   ; We don't accept more than 4 vertical zones
   if (UsrInput > 44 AND UsrInput < 100) {
     OutputDebug, I changed the layout to 44 (was %UsrInput%)
@@ -54,9 +43,13 @@ SetLayout() {
 }
 
 GenerateGrid() {
+  global SuperZone1, SuperZone2, SuperZone3
+  global Zone1, Zone2, Zone3, Zone4, Zone5, Zone6, Zone7, Zone8, Zone9
+  global Padding
   SysGet, Mon, Monitor
   OutputDebug, I'm trying to generate some super zones
   ; Generate super zones
+  ; TODO: Do this programmatically
   if (GetNumberZonesHor() == 2){
     SuperZone1.Start := MonLeft
     SuperZone1.End := MonRight / 2
@@ -64,7 +57,6 @@ GenerateGrid() {
     SuperZone3.Start := MonRight / 2 + 1
     SuperZone3.End := MonRight
     SuperZone3.IsActive := True
-    SuperZone2.IsActive := False
   }
   else {
     SuperZone1.Start := MonLeft
@@ -73,6 +65,9 @@ GenerateGrid() {
     SuperZone2.End := MonRight * (2 / 3)
     SuperZone3.Start := MonRight * (2 / 3) + 1
     SuperZone3.End := MonRight
+    SuperZone1.IsActive := True
+    SuperZone2.IsActive := True
+    SuperZone3.IsActive := True
   } 
   OutputDebug, I'm trying to generate zones inside the super zones
   ; Generate zones inside each super zone
@@ -86,19 +81,54 @@ GenerateGrid() {
     Nr := 0
     Loop, %NrVert% {
       Nr := A_Index + LastZone
-      ; We need to work padding into this
-      Zone%Nr%.X := SuperZone%SprZone%.Start
-      Zone%Nr%.W := Zone%A_Index%.X - SuperZone%SprZone%.End
-      Zone%Nr%.Y := MonBottom * (NrVert - (NrVert - Nr + 1))
-      Zone%Nr%.Y := Zone%Nr%.Y + MonBottom / NrVert
+      Zone%Nr%.X := SuperZone%SprZone%.Start + Padding
+      Zone%Nr%.W := SuperZone%SprZone%.End - SuperZone%SprZone%.Start - Padding
+      Zone%Nr%.Y := MonBottom * ((A_Index - 1) / NrVert) + Padding
+      Zone%Nr%.H := MonBottom / NrVert - Padding
+      Zone%Nr%.IsActive := True
       OutputDebug % "Zone" . Nr . " has the following values:"
       OutputDebug % "X: " . Zone%Nr%.X
-      OutputDebug % "Y: " . Zone%Nr%.Y
       OutputDebug % "W: " . Zone%Nr%.W
+      OutputDebug % "Y: " . Zone%Nr%.Y
       OutputDebug % "H: " . Zone%Nr%.H
     }
     LastZone := Nr
     OutputDebug, LastZone is now %LastZone%
+  }
+}
+
+DrawZones() {
+  global Zone1, Zone2, Zone3, Zone4, Zone5, Zone6, Zone7, Zone8, Zone9
+  Loop, 9 {
+    X := Zone%A_Index%.X
+    Y := Zone%A_Index%.Y
+    H := Zone%A_Index%.H
+    W := Zone%A_Index%.W
+    SplashImage, %A_Index%: , B1 H%H% W%W% X%X% Y%Y%, %A_Index%
+  }
+  Sleep, 1000
+  Loop, 9
+    SplashImage, %A_Index%:Off
+}
+
+ResetZones() {
+  global Zone1, Zone2, Zone3, Zone4, Zone5, Zone6, Zone7, Zone8, Zone9
+  Loop, 9 {
+    Zone%A_Index%.X := -1
+    Zone%A_Index%.Y := -1
+    Zone%A_Index%.W := -1
+    Zone%A_Index%.H := -1
+    Zone%A_Index%.IsActive := False
+    Zone%A_Index%.HasWindow := False
+  }
+}
+
+ResetSuperZones() {
+  global SuperZone1, SuperZone2, SuperZone3
+  Loop, 3 {
+    SuperZone%A_Index%.Start := -1
+    SuperZone%A_Index%.End := -1
+    SuperZone%A_Index%.IsActive := False
   }
 }
 
@@ -116,10 +146,15 @@ GetNumberZonesHor() {
 ; zone
 GetNumberZonesVer(SuperZone) {
   global Layout
-  if (SuperZone == 2) ; middle
+  if (SuperZone == 2)
     return SubStr(Layout, 2, 1)
-  else if (SuperZone == 3) ; right
+  else if (SuperZone == 3)
     return SubStr(Layout, 0)
-  else if (SuperZone == 1) ; left
-    return SubStr(Layout, -1, 1)
+  else if (SuperZone == 1)
+    return SubStr(Layout, 1, 1)
 }
+
+!r:: Reload
+!e:: SetLayout()
+!w:: GenerateGrid()
+!q:: DrawZones()
