@@ -18,12 +18,20 @@ Loop, 3 {
   SuperZone%A_Index% := { Start: -1, End: -1, IsActive: False }
 }
 
+MoveToZone(Nr) {
+  Zone := global Zone%Nr%
+  if (Zone.IsActive)
+    WinMove, A, , Zone.X, Zone.Y, Zone.W, Zone.H
+}
+
 SetLayout() {
+  ResetZone()
+  ResetSuperZone()
   global Layout
   OutputDebug, I'm asking the user to specify the layout
 
   ; Promt the user for layout
-  Input, UsrInput, BIL3T5, {Enter}{Space}
+  Input, UsrInput, B I L3 T5, {Enter}{Space}
 
   ; Check if input is numeric (Abs returns an empty string if it
   ; is not
@@ -36,10 +44,16 @@ SetLayout() {
     OutputDebug, I changed the layout to 44 (was %UsrInput%)
     Layout := 44
   }
+  else if (UsrInput > 333) {
+    OutputDebug, I changed the layout to 333 (was %UsrInput%)
+    Layout := 333
+  }
   else {
     Layout := UsrInput
-    OutputDebug, Layout is now%Layout%
+    OutputDebug, Layout is now %Layout%
   }
+  GenerateGrid()
+  DrawZones()
 }
 
 GenerateGrid() {
