@@ -217,9 +217,9 @@ Move(direction) {
 
 ; Select the top window in a quadrant or side; cycle through the
 ; section if a window in the section is already selected
-SelectAndCycle() {
+SelectAndCycle(Zone) {
   WinGet, win, List
-  skipFirst := true
+  WinGet, CurrentWinId, ID, A
   Loop, %win% {
     this_win := win%A_Index%
     ; Some windows are hidden and get selected. Thus
@@ -227,25 +227,27 @@ SelectAndCycle() {
     WinGetTitle, t, ahk_id %this_win%
     if (t == "")
       continue
-    if (skipFirst) {
-      skipFirst := false
-      WinSet, Bottom, , ahk_id %this_win% ; If there are more than two windows we want the
+    if (WinInZone(this_win) == Zone) {
+      if (CurrentWinId == this_win) {
+        WinSet, Bottom, , ahk_id %this_win% ; If there are more than two windows we want the
                                           ; the one that was found first to get sent to
                                           ; the bottom so that we don't just switch between
                                           ; two windows 
-      continue
-    }
-    ; The list contains all windows, regardless of which desktop they're
-    ; on. Therefore we need to check if the window is on the correct desktop
-    ; or not (borrowed from desktop_switcher.ahk)
-    global CurrentDesktop
-    updateGlobalVariables()
-    windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, this_win, UInt, CurrentDesktop - 1)
-    if (windowIsOnDesktop == 1) {
-      WinActivate, ahk_id %this_win%
-      return
+        continue
+      }
+      ; The list contains all windows, regardless of which desktop they're
+      ; on. Therefore we need to check if the window is on the correct desktop
+      ; or not (borrowed from desktop_switcher.ahk)
+      global CurrentDesktop
+      updateGlobalVariables()
+      windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, this_win, UInt, CurrentDesktop - 1)
+      if (windowIsOnDesktop == 1) {
+        WinActivate, ahk_id %this_win%
+        return
+      }
     }
   }
+  WinActivate
 }
 
 MoveWindow(deltaX, deltaY) {
@@ -267,10 +269,25 @@ ResizeWindow(deltaW, deltaH) {
 ;----------;
 
 MoveToZone(Nr) {
-  global Zone1, Zone2, Zone3, Zone4, Zone5, Zone6, Zone7, Zone8, Zone9
+  global Zone%Nr%
   Zone := Zone%Nr%
   if (Zone.IsActive)
     WinMove, A, , Zone.X, Zone.Y, Zone.W, Zone.H
+}
+
+WinInZone(Id) {
+  global Zone1, Zone2, Zone3, Zone4, Zone5, Zone6, Zone7, Zone8, Zone9
+  WinGetPos, X, Y, W, H ahk_id %Id%
+  Loop, 9 {
+    if (X == Zone%A_Index%.X
+        and Y == Zone%A_Index%.Y
+        and W == Zone%A_Index%.W
+        and H == Zone%A_Index%.H) {
+      OutputDebug, This window is in zone %A_Index%
+      return A_Index
+    }
+  }
+  return 0
 }
 
 SetLayout() {
