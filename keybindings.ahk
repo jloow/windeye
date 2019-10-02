@@ -29,15 +29,30 @@ CapsLock::Esc
 ; Gridster
 !e:: SetLayout()
 
-!1:: MoveToZone(1)
-!2:: MoveToZone(2)
-!3:: MoveToZone(3)
-!4:: MoveToZone(4)
-!5:: MoveToZone(5)
-!6:: MoveToZone(6)
-!7:: MoveToZone(7)
-!8:: MoveToZone(8)
-!9:: MoveToZone(9)
+!+1:: MoveToZone(1)
+!+2:: MoveToZone(2)
+!+3:: MoveToZone(3)
+!+4:: MoveToZone(4)
+!+5:: MoveToZone(5)
+!+6:: MoveToZone(6)
+!+7:: MoveToZone(7)
+!+8:: MoveToZone(8)
+!+9:: MoveToZone(9)
+
+!v:: SelectAndCycle(0)
+!+z:: MoveToNextZone()
+!z:: FocusNextZone()
+!^z:: MoveToNextZone()
+
+!1:: SelectAndCycle(1)
+!2:: SelectAndCycle(2)
+!3:: SelectAndCycle(3)
+!4:: SelectAndCycle(4)
+!5:: SelectAndCycle(5)
+!6:: SelectAndCycle(6)
+!7:: SelectAndCycle(7)
+!8:: SelectAndCycle(8)
+!9:: SelectAndCycle(9)
 
 ; Transparency
 !,:: DecreaseTransparency()
@@ -65,9 +80,6 @@ CapsLock::Esc
 ^<!left:: ResizeWindow(-40, 0) 
 ^<!up:: ResizeWindow(0, -40) 
 ^<!down:: ResizeWindow(0, 40)
-
-; Selects an untiled window
-!v:: SelectAndCycle()
 
 ; Desktop switcher stuff
 !n:: Send, #^{Right}

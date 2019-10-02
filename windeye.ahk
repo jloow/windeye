@@ -42,6 +42,8 @@
     SuperZone%A_Index% := { Start: -1, End: -1, IsActive: False }
   }
 
+  GenerateGrid()
+
   #Include %A_ScriptDir%\desktop_switcher.ahk
   #Include %A_ScriptDir%\keybindings.ahk
   #Include %A_ScriptDir%\langhelper.ahk
@@ -230,9 +232,9 @@ SelectAndCycle(Zone) {
     if (WinInZone(this_win) == Zone) {
       if (CurrentWinId == this_win) {
         WinSet, Bottom, , ahk_id %this_win% ; If there are more than two windows we want the
-                                          ; the one that was found first to get sent to
-                                          ; the bottom so that we don't just switch between
-                                          ; two windows 
+                                            ; the one that was found first to get sent to
+                                            ; the bottom so that we don't just switch between
+                                            ; two windows 
         continue
       }
       ; The list contains all windows, regardless of which desktop they're
@@ -243,11 +245,13 @@ SelectAndCycle(Zone) {
       windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, this_win, UInt, CurrentDesktop - 1)
       if (windowIsOnDesktop == 1) {
         WinActivate, ahk_id %this_win%
-        return
+        OutputDebug, I'm returning true
+        return True
       }
     }
   }
   WinActivate
+  return False
 }
 
 MoveWindow(deltaX, deltaY) {
@@ -269,15 +273,37 @@ ResizeWindow(deltaW, deltaH) {
 ;----------;
 
 MoveToZone(Nr) {
-  global Zone%Nr%
+  global Zone1, Zone2, Zone3, Zone4, Zone5, Zone6, Zone7, Zone8, Zone9
   Zone := Zone%Nr%
-  if (Zone.IsActive)
+  if (Zone.IsActive) {
     WinMove, A, , Zone.X, Zone.Y, Zone.W, Zone.H
+    return True
+  }
+  return False
+}
+
+MoveToNextZone() {
+  WinGet, Id, ID, A
+  Zone := WinInZone(Id)
+  Zone := Zone == 9 ? 1 : Zone + 1
+  while (!MoveToZone(Zone))
+    Zone := Zone == 9 ? 1 : Zone + 1
+}
+
+FocusNextZone() {
+  WinGet, Id, ID, A
+  CurrentZone := WinInZone(Id)
+  Zone := CurrentZone == 9 ? 1 : CurrentZone + 1
+  OutputDebug, I'm trying to focus windows %Zone% (current zone is %CurrentZone%)
+  while (!SelectAndCycle(Zone)) {
+    OutputDebug, I'm trying to focus windows %Zone%
+    Zone := Zone == 9 ? 1 : Zone + 1
+  }
 }
 
 WinInZone(Id) {
   global Zone1, Zone2, Zone3, Zone4, Zone5, Zone6, Zone7, Zone8, Zone9
-  WinGetPos, X, Y, W, H ahk_id %Id%
+  WinGetPos, X, Y, W, H, ahk_id %Id%
   Loop, 9 {
     if (X == Zone%A_Index%.X
         and Y == Zone%A_Index%.Y
