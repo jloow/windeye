@@ -40,6 +40,8 @@ CapsLock::Esc
 !+9:: MoveToZone(9)
 
 !v:: SelectAndCycle(0)
+!^v:: SetSuperSelect()
+!+v:: SelectSuperSelect()
 !+z:: MoveToNextZone()
 !z:: FocusNextZone()
 !^z:: MoveToNextZone()
@@ -94,21 +96,12 @@ CapsLock::Esc
 ; Close the active window
 !q:: WinClose, A
 
-; Maximize
-; Todo: For min and max, implement restore
-!f:: WinMaximize, A
-
-; Super full-screen
-#+f::
-RemoveDecoration()
-WinMaximize, A
-return
-
 ; Minimize
 !m:: WinMinimize, A
 
 ; Turns on decoration
-!h:: RemoveDecoration()
+!f:: RemoveDecoration()
+!+f:: RestoreDecoration()
 
 ; Alt Tab
 <!c::AltTab

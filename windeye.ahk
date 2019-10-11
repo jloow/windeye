@@ -30,8 +30,9 @@
   TrnspStep = 10
 
   ; Gridster-stuff
-  Padding := 14
+  Padding := 5
   Layout := 22
+  SuperSelect := ""
 
   ; Automaticaly generate arrays for nine zones
   Loop, 9 {
@@ -83,6 +84,7 @@ Move(direction) {
   candidateWindow := id
   firstLoop := True
   
+  global SuperSelect
   global CurrentDesktop
   updateGlobalVariables()
 
@@ -97,6 +99,10 @@ Move(direction) {
 
     ; Skip current window
     if (id == this_win)
+      continue
+
+    ; Do not select the SuperSelect window
+    if (this_win == SuperSelect)
       continue
     
     WinGetPos, nextX, nextY, nextWidth, nextHeight, ahk_id %this_win% ; Get position of window
@@ -224,10 +230,11 @@ SelectAndCycle(Zone) {
   WinGet, CurrentWinId, ID, A
   Loop, %win% {
     this_win := win%A_Index%
+    global SuperSelect
     ; Some windows are hidden and get selected. Thus
     ; if and the window has no title, we shouldn't select it.
     WinGetTitle, t, ahk_id %this_win%
-    if (t == "")
+    if (t == "" or this_win == SuperSelect)
       continue
     if (WinInZone(this_win) == Zone) {
       if (CurrentWinId == this_win) {
@@ -271,6 +278,18 @@ ResizeWindow(deltaW, deltaH) {
 ;----------;
 ; GRIDSTER ;
 ;----------;
+
+SetSuperSelect() {
+  WinGet, Id, ID, A
+  global SuperSelect := Id
+  OutputDebug, SuperSelect is not %SuperSelect%
+}
+
+SelectSuperSelect() {
+  global SuperSelect
+  if (!SuperSelect != "")
+    WinActivate, ahk_id %SuperSelect%
+}
 
 MoveToZone(Nr) {
   global Zone1, Zone2, Zone3, Zone4, Zone5, Zone6, Zone7, Zone8, Zone9
@@ -467,13 +486,13 @@ GetNumberZonesVer(SuperZone) {
 RemoveDecoration(id := "") {
   if (id) {
     WinSet, Style, -0xC00000, ahk_id %id% ; Hide title bar
-    WinSet, Style, -0x200000, ahk_id %id% ; Hide vertical scroll bar
-    WinSet, Style, -0x100000, ahk_id %id% ; Hide horizontal scroll bar
+    ; WinSet, Style, -0x200000, ahk_id %id% ; Hide vertical scroll bar
+    ; WinSet, Style, -0x100000, ahk_id %id% ; Hide horizontal scroll bar
   }
   else {
     WinSet, Style, -0xC00000, A
-    WinSet, Style, -0x200000, A
-    WinSet, Style, -0x100000, A
+    ; WinSet, Style, -0x200000, A
+    ; WinSet, Style, -0x100000, A
   }
   ; Sometimes the window dimensions change when removing decoration.
   ; Thus we need to make sure the window gets back to where it started
