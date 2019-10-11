@@ -28,6 +28,7 @@ CapsLock::Esc
 
 ; Gridster
 !e:: SetLayout()
+!+e:: DrawZones() 
 
 !+1:: MoveToZone(1)
 !+2:: MoveToZone(2)

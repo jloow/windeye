@@ -282,7 +282,7 @@ ResizeWindow(deltaW, deltaH) {
 SetSuperSelect() {
   WinGet, Id, ID, A
   global SuperSelect 
-  if (SuperSelect == Id
+  if (SuperSelect == Id)
     SuperSelect := ""
   else
     SuperSelect := Id
