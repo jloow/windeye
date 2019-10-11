@@ -281,8 +281,12 @@ ResizeWindow(deltaW, deltaH) {
 
 SetSuperSelect() {
   WinGet, Id, ID, A
-  global SuperSelect := Id
-  OutputDebug, SuperSelect is not %SuperSelect%
+  global SuperSelect 
+  if (SuperSelect == Id
+    SuperSelect := ""
+  else
+    SuperSelect := Id
+  OutputDebug, SuperSelect is now %SuperSelect%
 }
 
 SelectSuperSelect() {
