@@ -30,9 +30,13 @@
   TrnspStep = 10
 
   ; Gridster-stuff
-  Padding := 5
+  Padding := 3
   Layout := 22
   SuperSelect := ""
+
+  ; Zone 0 is special. It is a type of fullscreen mode that is always
+  ; the same
+  Zone0 := { X: Padding, Y: Padding, W: A_ScreenWidth - Padding*2, H: A_ScreenHeight - Padding*2, IsActive: True }
 
   ; Automaticaly generate arrays for nine zones
   Loop, 9 {
@@ -261,6 +265,19 @@ SelectAndCycle(Zone) {
   return False
 }
 
+DesktopIsEmpty() {
+  WinGet, Wndws, List
+  Count := 0
+  Loop, %Wndws% {
+    WinGetTitle, t, ahk_id %this_win%
+    if (t == "" or this_win == SuperSelect)
+      continue
+    Count++
+  }
+  if (Count == 0)
+    return True
+}
+
 MoveWindow(deltaX, deltaY) {
   WinGetPos, X, Y, , , A
   X := X+deltaX
@@ -296,7 +313,7 @@ SelectSuperSelect() {
 }
 
 MoveToZone(Nr) {
-  global Zone1, Zone2, Zone3, Zone4, Zone5, Zone6, Zone7, Zone8, Zone9
+  global Zone0, Zone1, Zone2, Zone3, Zone4, Zone5, Zone6, Zone7, Zone8, Zone9
   Zone := Zone%Nr%
   if (Zone.IsActive) {
     WinMove, A, , Zone.X, Zone.Y, Zone.W, Zone.H
@@ -411,9 +428,9 @@ GenerateGrid() {
     Loop, %NrVert% {
       Nr := A_Index + LastZone
       Zone%Nr%.X := SuperZone%SprZone%.Start + Padding
-      Zone%Nr%.W := SuperZone%SprZone%.End - SuperZone%SprZone%.Start - Padding
+      Zone%Nr%.W := SuperZone%SprZone%.End - SuperZone%SprZone%.Start - Padding*2
       Zone%Nr%.Y := MonBottom * ((A_Index - 1) / NrVert) + Padding
-      Zone%Nr%.H := MonBottom / NrVert - Padding
+      Zone%Nr%.H := MonBottom / NrVert - Padding*2
       Zone%Nr%.IsActive := True
       OutputDebug % "Zone" . Nr . " has the following values:"
       OutputDebug % "X: " . Zone%Nr%.X

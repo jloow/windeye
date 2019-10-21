@@ -2,9 +2,6 @@
 ; DEFINE HOTKEYS ;
 ;----------------;
 
-; Make CapsLock useful
-CapsLock::Esc
-
 ; Vim-like keybindings
 >!h:: Send, {Left} 
 >!j:: Send, {Down}
@@ -30,6 +27,7 @@ CapsLock::Esc
 !e:: SetLayout()
 !+e:: DrawZones() 
 
+!+0:: MoveToZone(0)
 !+1:: MoveToZone(1)
 !+2:: MoveToZone(2)
 !+3:: MoveToZone(3)
@@ -58,10 +56,10 @@ CapsLock::Esc
 !9:: SelectAndCycle(9)
 
 ; Transparency
-!,:: DecreaseTransparency()
-!.:: IncreaseTransparency()
-!+,:: DesktopDecreaseTransparency()
-!+.:: DesktopIncreaseTransparency()
+; !,:: DecreaseTransparency()
+; !.:: IncreaseTransparency()
+; !+,:: DesktopDecreaseTransparency()
+; !+.:: DesktopIncreaseTransparency()
 
 ; Non-vim backups
 >!left:: Send, {Left} 
@@ -85,8 +83,37 @@ CapsLock::Esc
 ^<!down:: ResizeWindow(0, 40)
 
 ; Desktop switcher stuff
-!n:: Send, #^{Right}
-!b:: Send, #^{Left}
+!n::
+  if (!DesktopIsEmpty()) {
+    WinActivate, ahk_class Shell_TrayWnd
+    Sleep, 100
+    Send, #^{Right}
+    Sleep, 100
+    ; The following three lines are a hack to keep key from being stuck
+    ; Revise at some point to make prettier
+    if (!SelectAndCycle(0))
+      FocusNextZone()
+    WinActivate
+  }
+  else
+    Send, #^{Right}
+return
+
+!b::
+  if (!DesktopIsEmpty()) {
+    WinActivate, ahk_class Shell_TrayWnd
+    Sleep, 100
+    Send, #^{Left}
+    Sleep, 100
+    ; The following three lines are a hack to keep key from being stuck
+    if (!SelectAndCycle(0))
+      FocusNextZone()
+    WinActivate
+  }
+  else
+    Send, #^{Left}
+return
+
 !+n:: Send, #^d
 ; !+q::deleteVirtualDesktop()
 !^n::MoveCurrentWindowToNextDesktop()
