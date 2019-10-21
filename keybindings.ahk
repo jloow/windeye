@@ -83,6 +83,7 @@
 ^<!down:: ResizeWindow(0, 40)
 
 ; Desktop switcher stuff
+; Todo: Put this into a function
 !n::
   if (!DesktopIsEmpty()) {
     WinActivate, ahk_class Shell_TrayWnd
@@ -97,8 +98,10 @@
   }
   else
     Send, #^{Right}
+  ResetZones()
+  ResetSuperZones()
+  GenerateGrid()
 return
-
 !b::
   if (!DesktopIsEmpty()) {
     WinActivate, ahk_class Shell_TrayWnd
@@ -112,6 +115,9 @@ return
   }
   else
     Send, #^{Left}
+  ResetZones()
+  ResetSuperZones()
+  GenerateGrid()
 return
 
 !+n:: Send, #^d

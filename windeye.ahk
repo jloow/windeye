@@ -31,20 +31,18 @@
 
   ; Gridster-stuff
   Padding := 3
-  Layout := 22
   SuperSelect := ""
 
   ; Zone 0 is special. It is a type of fullscreen mode that is always
   ; the same
   Zone0 := { X: Padding, Y: Padding, W: A_ScreenWidth - Padding*2, H: A_ScreenHeight - Padding*2, IsActive: True }
 
-  ; Automaticaly generate arrays for nine zones
+  ; Automaticaly generate zones and layouts
   Loop, 9 {
     Zone%A_Index% := { X: -1, Y: -1, W: -1, H: -1, IsActive: False, HasWindow: False }
-  }
-
-  Loop, 3 {
-    SuperZone%A_Index% := { Start: -1, End: -1, IsActive: False }
+    Layout%A_Index% := 22
+    if (A_Index <= 3)
+      SuperZone%A_Index% := { Start: -1, End: -1, IsActive: False }
   }
 
   GenerateGrid()
@@ -256,7 +254,6 @@ SelectAndCycle(Zone) {
       windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, this_win, UInt, CurrentDesktop - 1)
       if (windowIsOnDesktop == 1) {
         WinActivate, ahk_id %this_win%
-        OutputDebug, I'm returning true
         return True
       }
     }
@@ -303,7 +300,6 @@ SetSuperSelect() {
     SuperSelect := ""
   else
     SuperSelect := Id
-  OutputDebug, SuperSelect is now %SuperSelect%
 }
 
 SelectSuperSelect() {
@@ -334,9 +330,7 @@ FocusNextZone() {
   WinGet, Id, ID, A
   CurrentZone := WinInZone(Id)
   Zone := CurrentZone == 9 ? 1 : CurrentZone + 1
-  OutputDebug, I'm trying to focus windows %Zone% (current zone is %CurrentZone%)
   while (!SelectAndCycle(Zone)) {
-    OutputDebug, I'm trying to focus windows %Zone%
     Zone := Zone == 9 ? 1 : Zone + 1
   }
 }
@@ -349,7 +343,6 @@ WinInZone(Id) {
         and Y == Zone%A_Index%.Y
         and W == Zone%A_Index%.W
         and H == Zone%A_Index%.H) {
-      OutputDebug, This window is in zone %A_Index%
       return A_Index
     }
   }
@@ -359,41 +352,37 @@ WinInZone(Id) {
 SetLayout() {
   ResetZones()
   ResetSuperZones()
-  global Layout
-  OutputDebug, I'm asking the user to specify the layout
-
+  global Layout1, Layout2, Layout3, Layout4, Layout5, Layout6, Layout7, Layout8, Layout9
+  global CurrentDesktop
+  updateGlobalVariables()
+  OutputDebug, CurrentDesktop is %CurrentDesktop%.
   ; Promt the user for layout
   Input, UsrInput, B I L3 T5, {Enter}{Space}
 
   ; Check if input is numeric (Abs returns an empty string if it
   ; is not
   ;if (Abs == "") {
-  ;  OutputDebug, The user didn't enter only numbers
   ;  return
   ;}
   ; We don't accept more than 4 vertical zones
   if (UsrInput > 44 AND UsrInput < 100) {
-    OutputDebug, I changed the layout to 44 (was %UsrInput%)
-    Layout := 44
+    Layout%CurrentDesktop% := 44
   }
   else if (UsrInput > 333) {
-    OutputDebug, I changed the layout to 333 (was %UsrInput%)
-    Layout := 333
+    Layout%CurrentDesktop% := 333
   }
   else {
-    Layout := UsrInput
-    OutputDebug, Layout is now %Layout%
+    Layout%CurrentDesktop% := UsrInput
   }
   GenerateGrid()
   DrawZones()
 }
 
 GenerateGrid() {
+  global Padding
   global SuperZone1, SuperZone2, SuperZone3
   global Zone1, Zone2, Zone3, Zone4, Zone5, Zone6, Zone7, Zone8, Zone9
-  global Padding
   SysGet, Mon, MonitorWorkArea
-  OutputDebug, I'm trying to generate some super zones
   ; Generate super zones
   ; TODO: Do this programmatically
   if (GetNumberZonesHor() == 2){
@@ -415,7 +404,6 @@ GenerateGrid() {
     SuperZone2.IsActive := True
     SuperZone3.IsActive := True
   } 
-  OutputDebug, I'm trying to generate zones inside the super zones
   ; Generate zones inside each super zone
   LastZone := 0
   Loop, 3 {
@@ -423,7 +411,6 @@ GenerateGrid() {
       continue
     SprZone := A_Index
     NrVert := GetNumberZonesVer(SprZone)
-    OutputDebug, I will try to create %NrVert% zones in super zone %SprZone%
     Nr := 0
     Loop, %NrVert% {
       Nr := A_Index + LastZone
@@ -432,14 +419,8 @@ GenerateGrid() {
       Zone%Nr%.Y := MonBottom * ((A_Index - 1) / NrVert) + Padding
       Zone%Nr%.H := MonBottom / NrVert - Padding*2
       Zone%Nr%.IsActive := True
-      OutputDebug % "Zone" . Nr . " has the following values:"
-      OutputDebug % "X: " . Zone%Nr%.X
-      OutputDebug % "W: " . Zone%Nr%.W
-      OutputDebug % "Y: " . Zone%Nr%.Y
-      OutputDebug % "H: " . Zone%Nr%.H
     }
     LastZone := Nr
-    OutputDebug, LastZone is now %LastZone%
   }
 }
 
@@ -479,10 +460,12 @@ ResetSuperZones() {
 }
 
 GetNumberZonesHor() {
-  global Layout
-  if (Layout == -1)
+  global Layout1, Layout2, Layout3, Layout4, Layout5, Layout6, Layout7, Layout8, Layout9
+  global CurrentDesktop
+  updateGlobalVariables()
+  if (Layout%CurrentDesktop% == -1)
     return -1
-  else if (Layout < 100) 
+  else if (Layout%CurrentDesktop% < 100) 
     return 2
   else
     return 3
@@ -491,13 +474,15 @@ GetNumberZonesHor() {
 ; Get the number of zones that are to fit vertically in a given super
 ; zone
 GetNumberZonesVer(SuperZone) {
-  global Layout
+  global Layout1, Layout2, Layout3, Layout4, Layout5, Layout6, Layout7, Layout8, Layout9
+  global CurrentDesktop
+  updateGlobalVariables()
   if (SuperZone == 2)
-    return SubStr(Layout, 2, 1)
+    return SubStr(Layout%CurrentDesktop%, 2, 1)
   else if (SuperZone == 3)
-    return SubStr(Layout, 0)
+    return SubStr(Layout%CurrentDesktop%, 0)
   else if (SuperZone == 1)
-    return SubStr(Layout, 1, 1)
+    return SubStr(Layout%CurrentDesktop%, 1, 1)
 }
 
 ;--------------;
