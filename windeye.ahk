@@ -19,18 +19,11 @@
 
   KeyboardHelpActive := False
 
-  ; Because the positions of the tiled windows do not always rounded
-  ; to e.g. exactly half of the monitor resolution (it happens that a
-  ; top-tiled windows has an x-coordinate of -4, for example) we must
-  ; define an area in which a window is considered tiled, even if it
-  ; is not. This is the `Grace` variable
-  Grace = 20
-
   ; The amount of which to change transparency
   TrnspStep = 10
 
   ; Gridster-stuff
-  Padding := 3
+  Padding := 4
   SuperSelect := ""
 
   ; Zone 0 is special. It is a type of fullscreen mode that is always
@@ -417,8 +410,8 @@ GenerateGrid() {
     Nr := 0
     Loop, %NrVert% {
       Nr := A_Index + LastZone
-      Zone%Nr%.X := SuperZone%SprZone%.Start + Padding
-      Zone%Nr%.W := SuperZone%SprZone%.End - SuperZone%SprZone%.Start - Padding*2
+      Zone%Nr%.X := SuperZone%SprZone%.Start
+      Zone%Nr%.W := SuperZone%SprZone%.End - SuperZone%SprZone%.Start
       Zone%Nr%.Y := MonBottom * ((A_Index - 1) / NrVert) + Padding
       Zone%Nr%.H := MonBottom / NrVert - Padding*2
       Zone%Nr%.IsActive := True
