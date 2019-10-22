@@ -40,11 +40,12 @@
   ; Automaticaly generate zones and layouts
   Loop, 9 {
     Zone%A_Index% := { X: -1, Y: -1, W: -1, H: -1, IsActive: False, HasWindow: False }
-    Layout%A_Index% := 22
+    Layout%A_Index% := ""
     if (A_Index <= 3)
       SuperZone%A_Index% := { Start: -1, End: -1, IsActive: False }
   }
 
+  ReadLayouts()
   GenerateGrid()
 
   #Include %A_ScriptDir%\desktop_switcher.ahk
@@ -376,6 +377,7 @@ SetLayout() {
   }
   GenerateGrid()
   DrawZones()
+  WriteLayouts()
 }
 
 GenerateGrid() {
@@ -384,8 +386,9 @@ GenerateGrid() {
   global Zone1, Zone2, Zone3, Zone4, Zone5, Zone6, Zone7, Zone8, Zone9
   SysGet, Mon, MonitorWorkArea
   ; Generate super zones
-  ; TODO: Do this programmatically
-  if (GetNumberZonesHor() == 2){
+  ; Todo: Do this programmatically
+  ; Todo: Support only 1 superzone as well
+  if (GetNumberZonesHor() == 2) {
     SuperZone1.Start := MonLeft
     SuperZone1.End := MonRight / 2
     SuperZone1.IsActive := True
@@ -483,6 +486,23 @@ GetNumberZonesVer(SuperZone) {
     return SubStr(Layout%CurrentDesktop%, 0)
   else if (SuperZone == 1)
     return SubStr(Layout%CurrentDesktop%, 1, 1)
+}
+
+;--------------;
+; HANDLE FILES ;
+;--------------;
+WriteLayouts() {
+  global Layout1, Layout2, Layout3, Layout4, Layout5, Layout6, Layout7, Layout8, Layout9
+  File := FileOpen("layouts", "w")
+  Loop, 9
+    File.Write(Layout%A_Index% . "`n")
+  File.Close()
+}
+
+ReadLayouts() {
+  global Layout1, Layout2, Layout3, Layout4, Layout5, Layout6, Layout7, Layout8, Layout9
+  Loop, Read, layouts
+    Layout%A_Index% := A_LoopField
 }
 
 ;--------------;
