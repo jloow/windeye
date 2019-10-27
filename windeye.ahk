@@ -257,16 +257,23 @@ SelectAndCycle(Zone) {
 }
 
 DesktopIsEmpty() {
+  global CurrentDesktop
+  updateGlobalVariables()
   WinGet, Wndws, List
   Count := 0
   Loop, %Wndws% {
+    this_win := Wndws%A_Index%
     WinGetTitle, t, ahk_id %this_win%
-    if (t == "" or this_win == SuperSelect)
+    if (t == "")
       continue
-    Count++
+    windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, this_win, UInt, CurrentDesktop - 1)
+    if (windowIsOnDesktop == 1)
+      Count++
   }
   if (Count == 0)
     return True
+  else
+    return False
 }
 
 MoveWindow(deltaX, deltaY) {
@@ -388,6 +395,7 @@ GenerateGrid() {
     SuperZone3.Start := MonRight / 2 + 1
     SuperZone3.End := MonRight
     SuperZone3.IsActive := True
+    SuperZone2.IsActive := False
   }
   else {
     SuperZone1.Start := MonLeft
@@ -409,6 +417,7 @@ GenerateGrid() {
     NrVert := GetNumberZonesVer(SprZone)
     Nr := 0
     Loop, %NrVert% {
+      ; Padding is not needed for the horizontal positioning for some reason
       Nr := A_Index + LastZone
       Zone%Nr%.X := SuperZone%SprZone%.Start
       Zone%Nr%.W := SuperZone%SprZone%.End - SuperZone%SprZone%.Start

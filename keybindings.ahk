@@ -85,6 +85,10 @@
 ; Desktop switcher stuff
 ; Todo: Put this into a function
 !n::
+  global CurrentDesktop
+  updateGlobalVariables()
+  if (CurrentDesktop == 9)
+    return
   if (!DesktopIsEmpty()) {
     WinActivate, ahk_class Shell_TrayWnd
     Sleep, 100
@@ -103,6 +107,10 @@
   GenerateGrid()
 return
 !b::
+  global CurrentDesktop
+  updateGlobalVariables()
+  if (CurrentDesktop == 1)
+    return
   if (!DesktopIsEmpty()) {
     WinActivate, ahk_class Shell_TrayWnd
     Sleep, 100
