@@ -85,44 +85,13 @@
 ; Desktop switcher stuff
 ; Todo: Put this into a function
 !n::
-  global CurrentDesktop
-  updateGlobalVariables()
-  if (CurrentDesktop == 9)
-    return
-  if (!DesktopIsEmpty()) {
-    WinActivate, ahk_class Shell_TrayWnd
-    Sleep, 100
-    Send, #^{Right}
-    Sleep, 100
-    ; The following three lines are a hack to keep key from being stuck
-    ; Revise at some point to make prettier
-    if (!SelectAndCycle(0))
-      FocusNextZone()
-    WinActivate
-  }
-  else
-    Send, #^{Right}
+  SwitchToDesktop(_GetNextDesktopNumber())
   ResetZones()
   ResetSuperZones()
   GenerateGrid()
 return
 !b::
-  global CurrentDesktop
-  updateGlobalVariables()
-  if (CurrentDesktop == 1)
-    return
-  if (!DesktopIsEmpty()) {
-    WinActivate, ahk_class Shell_TrayWnd
-    Sleep, 100
-    Send, #^{Left}
-    Sleep, 100
-    ; The following three lines are a hack to keep key from being stuck
-    if (!SelectAndCycle(0))
-      FocusNextZone()
-    WinActivate
-  }
-  else
-    Send, #^{Left}
+  SwitchToDesktop(_GetPreviousDesktopNumber())
   ResetZones()
   ResetSuperZones()
   GenerateGrid()
@@ -149,7 +118,7 @@ return
 <!c::AltTab
 
 ; Reload the script
-#+r:: Reload
+!+r:: Reload
 
 ; Exit script
 #+x:: ExitApp

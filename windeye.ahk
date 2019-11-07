@@ -1,13 +1,15 @@
 ﻿;------------;
-; SOME NOTES ;
-;------------;
-
-; Currently, the script flips out if the taskbar is not hidden.
-; I think this has to do with how the screen size is determined.
-
-;------------;
 ; SOME SETUP ;
 ;------------;
+
+  ;--------------------------------------------------------------------
+  ; Alternative implementation of desktop switching
+  ;--------------------------------------------------------------------
+  hVirtualDesktopAccessor := DllCall("LoadLibrary", "Str", "VirtualDesktopAccessor.dll", "Ptr")
+  global GoToDesktopNumberProc := DllCall("GetProcAddress", Ptr, hVirtualDesktopAccessor, AStr, "GoToDesktopNumber", "Ptr")
+  global GetCurrentDesktopNumberProc := DllCall("GetProcAddress", Ptr, hVirtualDesktopAccessor, AStr, "GetCurrentDesktopNumber", "Ptr")
+  global GetDesktopCountProc := DllCall("GetProcAddress", Ptr, hVirtualDesktopAccessor, AStr, "GetDesktopCount", "Ptr")
+  ;--------------------------------------------------------------------
 
   #SingleInstance Force
   #NoEnv
@@ -23,7 +25,7 @@
   TrnspStep = 10
 
   ; Gridster-stuff
-  Padding := 4
+  Padding := 0
   SuperSelect := ""
 
   ; Zone 0 is special. It is a type of fullscreen mode that is always
@@ -44,7 +46,6 @@
   #Include %A_ScriptDir%\desktop_switcher.ahk
   #Include %A_ScriptDir%\keybindings.ahk
   #Include %A_ScriptDir%\langhelper.ahk
-  ;#Include %A_ScriptDir%\applications.ahk
 
 Return
 
@@ -585,4 +586,39 @@ DesktopDecreaseTransparency() {
       WinSet, Transparent, % trnsp + TrnspStep, ahk_id %this_win%
     }
   }
+}
+
+;--------------------------------------------------------------------
+; Alternative implementation of desktop switching
+;--------------------------------------------------------------------
+_ChangeDesktop(n:=1) {
+    if (n == 0) {
+        n := 10
+    }
+    DllCall(GoToDesktopNumberProc, Int, n-1)
+}
+
+SwitchToDesktop(n:=1) {
+    doFocusAfterNextSwitch=1
+    _ChangeDesktop(n)
+}
+
+_GetNextDesktopNumber() {
+    i := _GetCurrentDesktopNumber()
+    i := (i == _GetNumberOfDesktops() ? i : i + 1)
+    return i
+}
+
+_GetPreviousDesktopNumber() {
+    i := _GetCurrentDesktopNumber()
+    i := (i == 1 ? i : i - 1)
+    return i
+}
+
+_GetCurrentDesktopNumber() {
+    return DllCall(GetCurrentDesktopNumberProc) + 1
+}
+
+_GetNumberOfDesktops() {
+    return DllCall(GetDesktopCountProc)
 }
