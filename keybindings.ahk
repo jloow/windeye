@@ -56,8 +56,8 @@
 !9:: SelectAndCycle(9)
 
 ; Transparency
-; !,:: DecreaseTransparency()
-; !.:: IncreaseTransparency()
+!,:: DecreaseTransparency()
+!.:: IncreaseTransparency()
 ; !+,:: DesktopDecreaseTransparency()
 ; !+.:: DesktopIncreaseTransparency()
 
@@ -85,16 +85,24 @@
 ; Desktop switcher stuff
 ; Todo: Put this into a function
 !n::
+  WinActivate, ahk_class Shell_TrayWnd
   SwitchToDesktop(_GetNextDesktopNumber())
   ResetZones()
   ResetSuperZones()
   GenerateGrid()
+  if (!SelectAndCycle(0))
+    FocusNextZone()
+  WinActivate
 return
 !b::
+  WinActivate, ahk_class Shell_TrayWnd
   SwitchToDesktop(_GetPreviousDesktopNumber())
   ResetZones()
   ResetSuperZones()
   GenerateGrid()
+  if (!SelectAndCycle(0))
+    FocusNextZone()
+  WinActivate
 return
 
 !+n:: Send, #^d

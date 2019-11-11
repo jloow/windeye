@@ -543,6 +543,8 @@ RestoreDecoration(id := "") {
 IncreaseTransparency() {
   global TrnspStep
   WinGet, trnsp, Transparent, A
+  if (!trnsp)
+    trnsp := 255
   WinSet, Transparent, % trnsp + TrnspStep, A 
 }
 
