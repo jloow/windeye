@@ -624,3 +624,31 @@ _GetCurrentDesktopNumber() {
 _GetNumberOfDesktops() {
     return DllCall(GetDesktopCountProc)
 }
+
+; My additions
+GoToNextDesktop() {
+  CurrentDesktop := _GetCurrentDesktopNumber()
+  NumberOfDesktops := _GetNumberOfDesktops()
+  if (CurrentDesktop == NumberOfDesktops)
+    return
+  if (!DesktopIsEmpty())
+    WinActivate, ahk_class Shell_TrayWnd
+  SwitchToDesktop(_GetNextDesktopNumber())
+  if (!DesktopIsEmpty()) {
+    SelectAndCycle(0)
+    WinActivate
+  }
+}
+
+GoToPrevDesktop() {
+  CurrentDesktop := _GetCurrentDesktopNumber()
+  if (CurrentDesktop == 1)
+    return
+  if (!DesktopIsEmpty())
+    WinActivate, ahk_class Shell_TrayWnd
+  SwitchToDesktop(_GetPreviousDesktopNumber())
+  if (!DesktopIsEmpty()) {
+    SelectAndCycle(0)
+    WinActivate
+  }
+}

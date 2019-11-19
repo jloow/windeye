@@ -84,26 +84,30 @@
 
 ; Desktop switcher stuff
 ; Todo: Put this into a function
-!n::
-  WinActivate, ahk_class Shell_TrayWnd
-  SwitchToDesktop(_GetNextDesktopNumber())
-  ResetZones()
-  ResetSuperZones()
-  GenerateGrid()
-  if (!SelectAndCycle(0))
-    FocusNextZone()
-  WinActivate
-return
-!b::
-  WinActivate, ahk_class Shell_TrayWnd
-  SwitchToDesktop(_GetPreviousDesktopNumber())
-  ResetZones()
-  ResetSuperZones()
-  GenerateGrid()
-  if (!SelectAndCycle(0))
-    FocusNextZone()
-  WinActivate
-return
+!n:: GoToNextDesktop()
+  ; global CurrentDesktop
+  ; updateGlobalVariables()
+  ; if (CurrentDesktop == 9)
+  ;   return
+  ; WinActivate, ahk_class Shell_TrayWnd
+  ; SwitchToDesktop(_GetNextDesktopNumber())
+  ;if (!SelectAndCycle(0))
+  ;  FocusNextZone()
+  ;WinActivate
+  ;ResetSuperZones()
+  ;GenerateGrid()
+!b:: GoToPrevDesktop()
+  ; updateGlobalVariables()
+  ; if (CurrentDesktop == 1)
+  ;   return
+  ; WinActivate, ahk_class Shell_TrayWnd
+  ; SwitchToDesktop(_GetPreviousDesktopNumber())
+  ; if (!SelectAndCycle(0))
+  ;   FocusNextZone()
+  ; WinActivate
+  ; ResetZones()
+  ; ResetSuperZones()
+  ; GenerateGrid()
 
 !+n:: Send, #^d
 ; !+q::deleteVirtualDesktop()
