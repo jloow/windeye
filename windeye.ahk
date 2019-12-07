@@ -1,9 +1,12 @@
-﻿;------------;
-; SOME SETUP ;
-;------------;
+﻿;--------------;
+; Auto execute ;
+;--------------;
 
   ;--------------------------------------------------------------------
-  ; Alternative implementation of desktop switching
+  ; VirtualDesktopAccessor, credits:
+  ; - https://github.com/pmb6tz/windows-desktop-switcher
+  ; - https://github.com/sdias/win-10-virtual-desktop-enhancer
+  ; - https://github.com/Ciantic/VirtualDesktopAccessor
   ;--------------------------------------------------------------------
   hVirtualDesktopAccessor := DllCall("LoadLibrary", "Str", "VirtualDesktopAccessor.dll", "Ptr")
   global GoToDesktopNumberProc := DllCall("GetProcAddress", Ptr, hVirtualDesktopAccessor, AStr, "GoToDesktopNumber", "Ptr")
@@ -11,61 +14,67 @@
   global GetDesktopCountProc := DllCall("GetProcAddress", Ptr, hVirtualDesktopAccessor, AStr, "GetDesktopCount", "Ptr")
   ;--------------------------------------------------------------------
 
+  ;--------------------------------------------------------------------
+  ; WinArrange, credits:
+  ; https://autohotkey.com/board/topic/80580-how-to-programmatically-tile-cascade-windows/
+  ;--------------------------------------------------------------------
+  global TILE        := 1                  ; for Param 1
+  global CASCADE     := 2                  ; for Param 1
+  global VERTICAL    := 0                  ; for Param 3
+  global HORIZONTAL  := 1                  ; for Param 3
+  global ZORDER      := 4                  ; for Param 3
+  global CLIENTAREA  := "200|25|1000|700"  ; for Param 4
+  ; ALLWINDOWS (Param 2), ARRAYORDER (Param 3), FULLSCREEN (Param 4) 
+  ; are undeclared variables simulating NULL content.
+  ;--------------------------------------------------------------------
+
+  ; Split the screen in two
+  global LEFT  := "0|0|" . A_ScreenWidth / 2 . "|" . A_ScreenHeight
+  global RIGHT := A_ScreenWidth / 2 . "|0|" . A_ScreenWidth . "|" . A_ScreenHeight
+
+  ; Arrays for tiled windows. Support 9 virtual desktops
+  global  arrayLeft1 := Array()
+  global  arrayLeft2 := Array()
+  global  arrayLeft3 := Array()
+  global  arrayLeft4 := Array()
+  global  arrayLeft5 := Array()
+  global  arrayLeft6 := Array()
+  global  arrayLeft7 := Array()
+  global  arrayLeft8 := Array()
+  global  arrayLeft9 := Array()
+  global arrayRight1 := Array() 
+  global arrayRight2 := Array()
+  global arrayRight3 := Array() 
+  global arrayRight4 := Array() 
+  global arrayRight5 := Array() 
+  global arrayRight6 := Array() 
+  global arrayRight7 := Array() 
+  global arrayRight8 := Array() 
+  global arrayRight9 := Array() 
+
   #SingleInstance Force
   #NoEnv
   #Persistent
   SetWorkingDir %A_ScriptDir%
   SendMode, Input
-  SetKeyDelay, -1 ; Todo: Experiment to find a good value
-  SetBatchLines -1 ; Todo: experiment with this value
-
-  KeyboardHelpActive := False
+  SetKeyDelay, -1
+  SetBatchLines -1
 
   ; The amount of which to change transparency
   TrnspStep = 10
 
-  ; Gridster-stuff
-  Padding := 0
-  SuperSelect := ""
-
-  ; Zone 0 is special. It is a type of fullscreen mode that is always
-  ; the same
-  Zone0 := { X: Padding, Y: Padding, W: A_ScreenWidth - Padding*2, H: A_ScreenHeight - Padding*2, IsActive: True }
-
-  ; Automaticaly generate zones and layouts
-  Loop, 9 {
-    Zone%A_Index% := { X: -1, Y: -1, W: -1, H: -1, IsActive: False, HasWindow: False }
-    Layout%A_Index% := ""
-    if (A_Index <= 3)
-      SuperZone%A_Index% := { Start: -1, End: -1, IsActive: False }
-  }
-
-  ReadLayouts()
-  GenerateGrid()
-
-  #Include %A_ScriptDir%\desktop_switcher.ahk
+  ; Includes
+  #Include %A_ScriptDir%\desktop_switcher.ahk ; Remove when dependency removed
   #Include %A_ScriptDir%\keybindings.ahk
-  #Include %A_ScriptDir%\langhelper.ahk
+  #Include %A_ScriptDir%\WinArrange.ahk
 
 Return
-
-KeyboardHelp() {
-  global KeyboardHelpActive
-  if (KeyboardHelpActive) {
-    SplashImage, Off
-    KeyboardHelpActive := False
-  }
-  else if (!KeyboardHelpActive) {
-    SplashImage, keyboard.gif, B
-    KeyboardHelpActive := True
-  }
-}
 
 ;-------------------------;
 ; SELECT AND MOVE WINDWOS ;
 ;-------------------------;
 
-Move(direction) {
+MoveFocus(direction) {
   
   WinGet, id, ID, A ; Get id of current window
   WinGetPos, currentX, currentY, currentWidth, currentHeight, A ; Get position of current window
@@ -81,28 +90,20 @@ Move(direction) {
   candidateWindow := id
   firstLoop := True
   
-  global SuperSelect
-  global CurrentDesktop
-  updateGlobalVariables()
-
   ; First we try to make a narrow selection
   Loop, %win% {
-    this_win := win%A_Index%
+    thisWin := win%A_Index%
 
     ; Correct desktop?
-    windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, this_win, UInt, CurrentDesktop - 1)
+    windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, thisWin, UInt, _GetCurrentDesktopNumber() - 1)
     if (windowIsOnDesktop != 1)
       continue
 
     ; Skip current window
-    if (id == this_win)
+    if (id == thisWin)
       continue
 
-    ; Do not select the SuperSelect window
-    if (this_win == SuperSelect)
-      continue
-    
-    WinGetPos, nextX, nextY, nextWidth, nextHeight, ahk_id %this_win% ; Get position of window
+    WinGetPos, nextX, nextY, nextWidth, nextHeight, ahk_id %thisWin% ; Get position of window
 
     nextPointX := nextX + nextWidth / 2
     nextPointY := nextY + nextHeight / 2
@@ -112,7 +113,7 @@ Move(direction) {
       if (nextPointY < currentPointY AND nextPointX > currentX AND nextPointX < currentX + currentWidth) {
         if (firstLoop OR candidatePointY < nextPointY) {
           firstLoop := False
-          candidateWindow := this_win
+          candidateWindow := thisWin
           candidatePointY := nextPointY
         }
       }
@@ -123,7 +124,7 @@ Move(direction) {
       if (nextPointY > currentPointY AND nextPointX > currentX AND nextPointX < currentX + currentWidth) {
         if (firstLoop OR candidatePointY > nextPointY) {
           firstLoop := False
-          candidateWindow := this_win
+          candidateWindow := thisWin
           candidatePointY := nextPointY
         }
       }
@@ -134,7 +135,7 @@ Move(direction) {
       if (nextPointX > currentPointX AND nextPointY > currentY AND nextPointY < currentY + currentHeight) {
         if (firstLoop OR candidatePointX > nextPointX) {
           firstLoop := False
-          candidateWindow := this_win
+          candidateWindow := thisWin
           candidatePointX := nextPointX
         }
       }
@@ -145,7 +146,7 @@ Move(direction) {
       if (nextPointX < currentPointX AND nextPointY > currentY AND nextPointY < currentY + currentHeight) {
         if (firstLoop OR candidatePointX < nextPointX) {
           firstLoop := False
-          candidateWindow := this_win
+          candidateWindow := thisWin
           candidatePointX := nextPointX
         }
       }
@@ -156,18 +157,18 @@ Move(direction) {
   if (candidateWindow == id) {
     firstLoop := True
     Loop, %win% {
-      this_win := win%A_Index%
+      thisWin := win%A_Index%
 
       ; Correct desktop?
-      windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, this_win, UInt, CurrentDesktop - 1)
+      windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, thisWin, UInt, CurrentDesktop - 1)
       if (windowIsOnDesktop != 1)
         continue
 
       ; Skip current window
-      if (id == this_win)
+      if (id == thisWin)
         continue
       
-      WinGetPos, nextX, nextY, nextWidth, nextHeight, ahk_id %this_win% ; Get position of window
+      WinGetPos, nextX, nextY, nextWidth, nextHeight, ahk_id %thisWin% ; Get position of window
 
       nextPointX := nextX + nextWidth / 2
       nextPointY := nextY + nextHeight / 2
@@ -177,7 +178,7 @@ Move(direction) {
         if (nextPointY < currentPointY) {
           if (firstLoop OR candidatePointY < nextPointY) {
             firstLoop := False
-            candidateWindow := this_win
+            candidateWindow := thisWin
             candidatePointY := nextPointY
           }
         }
@@ -188,7 +189,7 @@ Move(direction) {
         if (nextPointY > currentPointY) {
           if (firstLoop OR candidatePointY > nextPointY) {
             firstLoop := False
-            candidateWindow := this_win
+            candidateWindow := thisWin
             candidatePointY := nextPointY
           }
         }
@@ -199,7 +200,7 @@ Move(direction) {
         if (nextPointX > currentPointX) {
           if (firstLoop OR candidatePointX > nextPointY) {
             firstLoop := False
-            candidateWindow := this_win
+            candidateWindow := thisWin
             candidatePointY := nextPointY
           }
         }
@@ -210,7 +211,7 @@ Move(direction) {
         if (nextPointX < currentPointX) {
           if (firstLoop OR candidatePointX < nextPointY) {
             firstLoop := False
-            candidateWindow := this_win
+            candidateWindow := thisWin
             candidatePointY := nextPointY
           }
         }
@@ -222,295 +223,192 @@ Move(direction) {
 
 ; Select the top window in a quadrant or side; cycle through the
 ; section if a window in the section is already selected
+; Todo: Is this needed in this implementation?
 SelectAndCycle(Zone) {
   WinGet, win, List
   WinGet, CurrentWinId, ID, A
+  NewSelected := False
   Loop, %win% {
     this_win := win%A_Index%
-    global SuperSelect
     ; Some windows are hidden and get selected. Thus
     ; if and the window has no title, we shouldn't select it.
     WinGetTitle, t, ahk_id %this_win%
-    if (t == "" or this_win == SuperSelect)
+    if (t == "")
       continue
-    if (WinInZone(this_win) == Zone) {
-      if (CurrentWinId == this_win) {
-        WinSet, Bottom, , ahk_id %this_win% ; If there are more than two windows we want the
-                                            ; the one that was found first to get sent to
-                                            ; the bottom so that we don't just switch between
-                                            ; two windows 
-        continue
-      }
-      ; The list contains all windows, regardless of which desktop they're
-      ; on. Therefore we need to check if the window is on the correct desktop
-      ; or not (borrowed from desktop_switcher.ahk)
-      global CurrentDesktop
-      updateGlobalVariables()
-      windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, this_win, UInt, CurrentDesktop - 1)
-      if (windowIsOnDesktop == 1) {
-        WinActivate, ahk_id %this_win%
-        return True
-      }
+    if (CurrentWinId == this_win) {
+      ; If there are more than two windows we want the
+      ; the one that was found first to get sent to          
+      ; the bottom so that we don't just switch between                                          
+      ; two windows                                                                              
+      ; WinSet, Bottom, , ahk_id %this_win% 
+      continue
+    }
+    ; The list contains all windows, regardless of which desktop they're
+    ; on. Therefore we need to check if the window is on the correct desktop
+    ; or not (borrowed from desktop_switcher.ahk)
+    global CurrentDesktop
+    updateGlobalVariables()
+    windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, this_win, UInt, CurrentDesktop - 1)
+    if (windowIsOnDesktop == 1) {
+      WinActivate, ahk_id %this_win%
+      NewSelected := True
+      Break
     }
   }
-  WinActivate
-  return False
+  if (!NewSelected)
+    WinActivate
 }
 
 DesktopIsEmpty() {
-  global CurrentDesktop
-  updateGlobalVariables()
-  WinGet, Wndws, List
-  Count := 0
-  Loop, %Wndws% {
-    this_win := Wndws%A_Index%
-    WinGetTitle, t, ahk_id %this_win%
+  WinGet, wndws, List
+  Loop, %wndws% {
+    thisWin := wndws%A_Index%
+    WinGetTitle, t, ahk_id %thisWin%
     if (t == "")
       continue
-    windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, this_win, UInt, CurrentDesktop - 1)
+    windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, thisWin, UInt, _GetCurrentDesktopNumber() - 1)
     if (windowIsOnDesktop == 1)
-      Count++
+      return False
   }
-  if (Count == 0)
-    return True
-  else
-    return False
+  return True
 }
 
 MoveWindow(deltaX, deltaY) {
-  WinGetPos, X, Y, , , A
-  X := X+deltaX
-  Y := Y+deltaY
-  WinMove, A, , X, Y
+  tiledStatus := GetTiledStatus()
+  WinGetPos, x, y, , , A
+  x := x+deltaX
+  y := y+deltaY
+  WinMove, A, , x, y
+  RemoveWindowFromArray()
+  AutoTile()
 }
 
 ResizeWindow(deltaW, deltaH) {
-  WinGetPos, , , W, H, A
-  W := W+deltaW
-  H := H+deltaH
-  WinMove, A, , X, Y, W, H
+  TiledStatus := GetTiledStatus()
+  WinGetPos, , , w, h, A
+  w := w+deltaW
+  h := h+deltaH
+  WinMove, A, , x, y, w, h
+  RemoveWindowFromArray()
+  AutoTile()
 }
 
-;----------;
-; GRIDSTER ;
-;----------;
-
-SetSuperSelect() {
-  WinGet, Id, ID, A
-  global SuperSelect 
-  if (SuperSelect == Id)
-    SuperSelect := ""
-  else
-    SuperSelect := Id
+ToggleMax() {
+  WinGet, win, ID, A
+  WinGet, status, MinMax, ahk_id %win%
+  if (status == -1)
+    WinRestore, ahk_id %win%
+  else if (status == 0)
+    WinMaximize, ahk_id %win%
 }
 
-SelectSuperSelect() {
-  global SuperSelect
-  if (!SuperSelect != "")
-    WinActivate, ahk_id %SuperSelect%
+ToggleMin() {
+  WinGet, win, ID, A
+  WinGet, status, MinMax, ahk_id %win%
+  if (status == 1)
+    WinRestore, ahk_id %win%
+  else if (status == 0)
+    WinMinimize, ahk_id %win%
 }
 
-MoveToZone(Nr) {
-  global Zone0, Zone1, Zone2, Zone3, Zone4, Zone5, Zone6, Zone7, Zone8, Zone9
-  Zone := Zone%Nr%
-  if (Zone.IsActive) {
-    WinMove, A, , Zone.X, Zone.Y, Zone.W, Zone.H
-    return True
+;---------------------;
+; TILER (THE CREATOR) ;
+;---------------------;
+TileCurrentWindow(side) {
+  WinGet, win, ID, A
+  currentDesktopNumber := _GetCurrentDesktopNumber()
+  while (RemoveWindowFromArray()) {
   }
-  return False
+  ; For some reason, WinArrange does not work as it should
+  ; unless the window ids are repeated
+  Array%side%%currentDesktopNumber%.Push(win, win)
+  TileWindows()
 }
 
-MoveToNextZone() {
-  WinGet, Id, ID, A
-  Zone := WinInZone(Id)
-  Zone := Zone == 9 ? 1 : Zone + 1
-  while (!MoveToZone(Zone))
-    Zone := Zone == 9 ? 1 : Zone + 1
+TileWindows() {
+  currentDesktopNumber := _GetCurrentDesktopNumber()
+  theLeftArray := MakeTheArray(arrayLeft%currentDesktopNumber%)
+  if (theLeftArray != "")
+    WinArrange(TILE, theLeftArray, HORIZONTAL, LEFT)
+  theRightArray := MakeTheArray(arrayRight%currentDesktopNumber%)
+  if (theRightArray != "")
+    WinArrange(TILE, theRightArray, HORIZONTAL, RIGHT)
 }
 
-FocusNextZone() {
-  WinGet, Id, ID, A
-  CurrentZone := WinInZone(Id)
-  Zone := CurrentZone == 9 ? 1 : CurrentZone + 1
-  while (!SelectAndCycle(Zone)) {
-    Zone := Zone == 9 ? 1 : Zone + 1
+UntileCurrentWindow() {
+  while (RemoveWindowFromArray()) {
   }
+  WinMove, A, , 200, 200, 1000, 1000 ; Some cascading thing here?
+  AutoTile()
 }
 
-WinInZone(Id) {
-  global Zone1, Zone2, Zone3, Zone4, Zone5, Zone6, Zone7, Zone8, Zone9
-  WinGetPos, X, Y, W, H, ahk_id %Id%
-  Loop, 9 {
-    if (X == Zone%A_Index%.X
-        and Y == Zone%A_Index%.Y
-        and W == Zone%A_Index%.W
-        and H == Zone%A_Index%.H) {
-      return A_Index
+RemoveWindowFromArray(win := ""){
+  if (Win == "")
+    WinGet, Win, ID, A
+  currentDesktopNumber := _GetCurrentDesktopNumber()
+  found := False
+  Loop % arrayLeft%currentDesktopNumber%.Length() {
+    if (arrayLeft%currentDesktopNumber%[A_Index] == Win) {
+      found := True
+      arrayLeft%currentDesktopNumber%.RemoveAt(A_Index)
     }
   }
-  return 0
-}
-
-SetLayout() {
-  ResetZones()
-  ResetSuperZones()
-  global Layout1, Layout2, Layout3, Layout4, Layout5, Layout6, Layout7, Layout8, Layout9
-  global CurrentDesktop
-  updateGlobalVariables()
-  OutputDebug, CurrentDesktop is %CurrentDesktop%.
-  ; Promt the user for layout
-  Input, UsrInput, B I L3 T5, {Enter}{Space}
-
-  ; Check if input is numeric (Abs returns an empty string if it
-  ; is not
-  ;if (Abs == "") {
-  ;  return
-  ;}
-  ; We don't accept more than 4 vertical zones
-  if (UsrInput > 44 AND UsrInput < 100) {
-    Layout%CurrentDesktop% := 44
-  }
-  else if (UsrInput > 333) {
-    Layout%CurrentDesktop% := 333
-  }
-  else {
-    Layout%CurrentDesktop% := UsrInput
-  }
-  GenerateGrid()
-  DrawZones()
-  WriteLayouts()
-}
-
-GenerateGrid() {
-  global Padding
-  global SuperZone1, SuperZone2, SuperZone3
-  global Zone1, Zone2, Zone3, Zone4, Zone5, Zone6, Zone7, Zone8, Zone9
-  SysGet, Mon, MonitorWorkArea
-  ; Generate super zones
-  ; Todo: Do this programmatically
-  ; Todo: Support only 1 superzone as well
-  if (GetNumberZonesHor() == 2) {
-    SuperZone1.Start := MonLeft
-    SuperZone1.End := MonRight / 2
-    SuperZone1.IsActive := True
-    SuperZone3.Start := MonRight / 2 + 1
-    SuperZone3.End := MonRight
-    SuperZone3.IsActive := True
-    SuperZone2.IsActive := False
-  }
-  else {
-    SuperZone1.Start := MonLeft
-    SuperZone1.End := MonRight / 3
-    SuperZone2.Start := MonRight / 3 + 1
-    SuperZone2.End := MonRight * (2 / 3)
-    SuperZone3.Start := MonRight * (2 / 3) + 1
-    SuperZone3.End := MonRight
-    SuperZone1.IsActive := True
-    SuperZone2.IsActive := True
-    SuperZone3.IsActive := True
-  } 
-  ; Generate zones inside each super zone
-  LastZone := 0
-  Loop, 3 {
-    if (!SuperZone2.IsActive AND A_Index == 2)
-      continue
-    SprZone := A_Index
-    NrVert := GetNumberZonesVer(SprZone)
-    Nr := 0
-    Loop, %NrVert% {
-      ; Padding is not needed for the horizontal positioning for some reason
-      Nr := A_Index + LastZone
-      Zone%Nr%.X := SuperZone%SprZone%.Start
-      Zone%Nr%.W := SuperZone%SprZone%.End - SuperZone%SprZone%.Start
-      Zone%Nr%.Y := MonBottom * ((A_Index - 1) / NrVert) + Padding
-      Zone%Nr%.H := MonBottom / NrVert - Padding*2
-      Zone%Nr%.IsActive := True
+  Loop % arrayRight%currentDesktopNumber%.Length() {
+    if (arrayRight%currentDesktopNumber%[A_Index] == Win) {
+      found := True
+      arrayRight%currentDesktopNumber%.RemoveAt(A_Index)
     }
-    LastZone := Nr
   }
+  return found
 }
 
-DrawZones() {
-  global Zone1, Zone2, Zone3, Zone4, Zone5, Zone6, Zone7, Zone8, Zone9
-  Loop, 9 {
-    X := Zone%A_Index%.X
-    Y := Zone%A_Index%.Y
-    H := Zone%A_Index%.H
-    W := Zone%A_Index%.W
-    SplashImage, %A_Index%: , B1 H%H% W%W% X%X% Y%Y%, %A_Index%
+MakeTheArray(a){
+  theArray := ""
+  Loop % a.Length(){
+    if (A_Index == a.Length())
+      theArray := theArray . a[A_Index]
+    else
+      theArray := theArray . a[A_Index] . "|"
   }
-  Sleep, 1000
-  Loop, 9
-    SplashImage, %A_Index%:Off
+  return theArray
 }
 
-ResetZones() {
-  global Zone1, Zone2, Zone3, Zone4, Zone5, Zone6, Zone7, Zone8, Zone9
-  Loop, 9 {
-    Zone%A_Index%.X := -1
-    Zone%A_Index%.Y := -1
-    Zone%A_Index%.W := -1
-    Zone%A_Index%.H := -1
-    Zone%A_Index%.IsActive := False
-    Zone%A_Index%.HasWindow := False
-  }
+CascadeAll() {
+  WinArrange(CASCADE, ALLWINDOWS, VERTICAL, FULLSCREEN)
 }
 
-ResetSuperZones() {
-  global SuperZone1, SuperZone2, SuperZone3
-  Loop, 3 {
-    SuperZone%A_Index%.Start := -1
-    SuperZone%A_Index%.End := -1
-    SuperZone%A_Index%.IsActive := False
-  }
+AutoTile() {
+  currentDesktopNumber := _GetCurrentDesktopNumber()
+  theLeftArray := MakeTheArray(arrayLeft%currentDesktopNumber%)
+  theRightArray := MakeTheArray(arrayRight%CurrentDesktopNumber%)
+  if (theLeftArray != "")
+    WinArrange(TILE, theLeftArray, HORIZONTAL, LEFT)
+  if (theRightArray != "")
+    WinArrange(TILE, theRightArray, HORIZONTAL, RIGHT)
 }
 
-GetNumberZonesHor() {
-  global Layout1, Layout2, Layout3, Layout4, Layout5, Layout6, Layout7, Layout8, Layout9
-  global CurrentDesktop
-  updateGlobalVariables()
-  if (Layout%CurrentDesktop% == -1)
-    return -1
-  else if (Layout%CurrentDesktop% < 100) 
-    return 2
+GetTiledStatus(win := "") {
+  if (win == "")
+    WinGet, Win, ID, A
+  
+  leftLeft := 0
+  leftRight := A_ScreenWidth / 2
+  rightLeft := A_ScreenWidth / 2
+  rightRight := A_ScreenWidth
+
+  WinGetPos, x,  , w,  , A
+  if (x == leftLeft and x+w == leftRight)
+    return "Left"
+  else if (x == rightLeft and x+w == rightRight)
+    return "Right"
   else
-    return 3
-}
-
-; Get the number of zones that are to fit vertically in a given super
-; zone
-GetNumberZonesVer(SuperZone) {
-  global Layout1, Layout2, Layout3, Layout4, Layout5, Layout6, Layout7, Layout8, Layout9
-  global CurrentDesktop
-  updateGlobalVariables()
-  if (SuperZone == 2)
-    return SubStr(Layout%CurrentDesktop%, 2, 1)
-  else if (SuperZone == 3)
-    return SubStr(Layout%CurrentDesktop%, 0)
-  else if (SuperZone == 1)
-    return SubStr(Layout%CurrentDesktop%, 1, 1)
-}
-
-;--------------;
-; HANDLE FILES ;
-;--------------;
-WriteLayouts() {
-  global Layout1, Layout2, Layout3, Layout4, Layout5, Layout6, Layout7, Layout8, Layout9
-  File := FileOpen("layouts", "w")
-  Loop, 9
-    File.Write(Layout%A_Index% . "`n")
-  File.Close()
-}
-
-ReadLayouts() {
-  global Layout1, Layout2, Layout3, Layout4, Layout5, Layout6, Layout7, Layout8, Layout9
-  Loop, Read, layouts
-    Layout%A_Index% := A_LoopField
+    return ""
 }
 
 ;--------------;
 ; VISUAL STUFF ;
 ;--------------;
+; Todo: Go through to see if this is needed
 
 RemoveDecoration(id := "") {
   if (id) {
@@ -540,6 +438,8 @@ RestoreDecoration(id := "") {
   }
 }
 
+; Merge into one function, where the step and direction is given by
+; the argument
 IncreaseTransparency() {
   global TrnspStep
   WinGet, trnsp, Transparent, A
@@ -593,6 +493,7 @@ DesktopDecreaseTransparency() {
 ;--------------------------------------------------------------------
 ; Alternative implementation of desktop switching
 ;--------------------------------------------------------------------
+; Todo: Put in a separate file?
 _ChangeDesktop(n:=1) {
     if (n == 0) {
         n := 10
@@ -638,6 +539,7 @@ GoToNextDesktop() {
     SelectAndCycle(0)
     WinActivate
   }
+  AutoTile()
 }
 
 GoToPrevDesktop() {
@@ -651,4 +553,5 @@ GoToPrevDesktop() {
     SelectAndCycle(0)
     WinActivate
   }
+  AutoTile()
 }

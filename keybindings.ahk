@@ -3,57 +3,29 @@
 ;----------------;
 
 ; Vim-like keybindings
->!h:: Send, {Left} 
->!j:: Send, {Down}
->!k:: Send, {Up}
->!l:: Send, {Right}
+!h:: MoveFocus("left")
+!j:: MoveFocus("down")
+!k:: MoveFocus("up")
+!l:: MoveFocus("right")
 
-<!h:: Move("left")
-<!j:: Move("down")
-<!k:: Move("up")
-<!l:: Move("right")
++!l:: MoveWindow(80, 0)
++!h:: MoveWindow(-80, 0)
++!k:: MoveWindow(0, -80)
++!j:: MoveWindow(0, 40)
 
-+<!l:: MoveWindow(40, 0)
-+<!h:: MoveWindow(-40, 0)
-+<!k:: MoveWindow(0, -40)
-+<!j:: MoveWindow(0, 40)
+^+!l:: ResizeWindow(80, 0)
+^+!h:: ResizeWindow(-80, 0)
+^+!k:: ResizeWindow(0, -80)
+^+!j:: ResizeWindow(0, 80)
 
-^<!l:: ResizeWindow(40, 0)
-^<!h:: ResizeWindow(-40, 0)
-^<!k:: ResizeWindow(0, -40)
-^<!j:: ResizeWindow(0, 40)
-
-; Gridster
-!e:: SetLayout()
-!+e:: DrawZones() 
-
-!+0:: MoveToZone(0)
-!+1:: MoveToZone(1)
-!+2:: MoveToZone(2)
-!+3:: MoveToZone(3)
-!+4:: MoveToZone(4)
-!+5:: MoveToZone(5)
-!+6:: MoveToZone(6)
-!+7:: MoveToZone(7)
-!+8:: MoveToZone(8)
-!+9:: MoveToZone(9)
+^!h:: TileCurrentWindow("Left")
+^!l:: TileCurrentWindow("Right")
+^!k:: ToggleMax()
+^!j:: ToggleMin()
+^!x:: UntileCurrentWindow()
+^!r:: CascadeAll()
 
 !v:: SelectAndCycle(0)
-!^v:: SetSuperSelect()
-!+v:: SelectSuperSelect()
-!+z:: MoveToNextZone()
-!z:: FocusNextZone()
-!^z:: MoveToNextZone()
-
-!1:: SelectAndCycle(1)
-!2:: SelectAndCycle(2)
-!3:: SelectAndCycle(3)
-!4:: SelectAndCycle(4)
-!5:: SelectAndCycle(5)
-!6:: SelectAndCycle(6)
-!7:: SelectAndCycle(7)
-!8:: SelectAndCycle(8)
-!9:: SelectAndCycle(9)
 
 ; Transparency
 !,:: DecreaseTransparency()
@@ -67,10 +39,10 @@
 >!up:: Send, {Up} 
 >!right:: Send, {Right}
 
-<!left:: Move("left") 
-<!down:: Move("down") 
-<!up:: Move("up") 
-<!right:: Move("right")
+<!left::  MoveFocus("left") 
+<!down::  MoveFocus("down") 
+<!up::    MoveFocus("up") 
+<!right:: MoveFocus("right")
 
 +<!right:: MoveWindow(40, 0) 
 +<!left:: MoveWindow(-40, 0) 
@@ -111,13 +83,14 @@
 
 !+n:: Send, #^d
 ; !+q::deleteVirtualDesktop()
-!^n::MoveCurrentWindowToNextDesktop()
-!^b::MoveCurrentWindowToPreviousDesktop()
-
-!a:: KeyboardHelp()
+!^n:: MoveCurrentWindowToNextDesktop()
+!^b:: MoveCurrentWindowToPreviousDesktop()
 
 ; Close the active window
-!q:: WinClose, A
+!q::
+  WinClose, A
+  AutoTile()
+Return
 
 ; Minimize
 !m:: WinMinimize, A
@@ -134,5 +107,3 @@
 
 ; Exit script
 #+x:: ExitApp
-
-
