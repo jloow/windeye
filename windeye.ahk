@@ -12,6 +12,9 @@
   global GoToDesktopNumberProc := DllCall("GetProcAddress", Ptr, hVirtualDesktopAccessor, AStr, "GoToDesktopNumber", "Ptr")
   global GetCurrentDesktopNumberProc := DllCall("GetProcAddress", Ptr, hVirtualDesktopAccessor, AStr, "GetCurrentDesktopNumber", "Ptr")
   global GetDesktopCountProc := DllCall("GetProcAddress", Ptr, hVirtualDesktopAccessor, AStr, "GetDesktopCount", "Ptr")
+  global MoveWindowToDesktopNumberProc := DllCall("GetProcAddress", Ptr, hVirtualDesktopAccessor, AStr, "MoveWindowToDesktopNumber", "Ptr")
+  global IsWindowOnDesktopNumberProc := DllCall("GetProcAddress", Ptr, hVirtualDesktopAccessor, AStr, "IsWindowOnDesktopNumber", "Ptr")
+
   ;--------------------------------------------------------------------
 
   ;--------------------------------------------------------------------
@@ -64,8 +67,7 @@
   TrnspStep = 10
 
   ; Includes
-  #Include %A_ScriptDir%\desktop_switcher.ahk ; Remove when dependency removed
-  #Include %A_ScriptDir%\keybindings.ahk
+  #Include %A_ScriptDir%\Keybindings.ahk
   #Include %A_ScriptDir%\WinArrange.ahk
 
 Return
@@ -75,7 +77,7 @@ Return
 ;-------------------------;
 
 MoveFocus(direction) {
-  
+
   WinGet, id, ID, A ; Get id of current window
   WinGetPos, currentX, currentY, currentWidth, currentHeight, A ; Get position of current window
   WinGet, win, List ; Get a list of all available windows
@@ -92,12 +94,13 @@ MoveFocus(direction) {
   
   ; First we try to make a narrow selection
   Loop, %win% {
+
     thisWin := win%A_Index%
 
     ; Correct desktop?
-    windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, thisWin, UInt, _GetCurrentDesktopNumber() - 1)
+    crnt := _GetCurrentDesktopNumber()
+    windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, thisWin, UInt, _GetCurrentDesktopNumber())
     if (windowIsOnDesktop != 1)
-      continue
 
     ; Skip current window
     if (id == thisWin)
@@ -160,7 +163,7 @@ MoveFocus(direction) {
       thisWin := win%A_Index%
 
       ; Correct desktop?
-      windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, thisWin, UInt, CurrentDesktop - 1)
+      windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, thisWin, UInt, _GetCurrentDesktopNumber() - 1)
       if (windowIsOnDesktop != 1)
         continue
 
@@ -246,9 +249,7 @@ SelectAndCycle(Zone) {
     ; The list contains all windows, regardless of which desktop they're
     ; on. Therefore we need to check if the window is on the correct desktop
     ; or not (borrowed from desktop_switcher.ahk)
-    global CurrentDesktop
-    updateGlobalVariables()
-    windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, this_win, UInt, CurrentDesktop - 1)
+    windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, this_win, UInt, _GetCurrentDesktopNumber() - 1)
     if (windowIsOnDesktop == 1) {
       WinActivate, ahk_id %this_win%
       NewSelected := True
@@ -461,11 +462,9 @@ DecreaseTransparency() {
 DesktopIncreaseTransparency() {
   WinGet, win, List
   global TrnspStep
-  global CurrentDesktop
-  updateGlobalVariables()
   Loop, %win% {
     this_win := win%A_Index%
-    windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, this_win, UInt, CurrentDesktop - 1)
+    windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, this_win, UInt, _GetCurrentDesktopNumber() - 1)
     if (windowIsOnDesktop == 1) {
       WinGet, trnsp, Transparent, ahk_id %this_win%
       WinSet, Transparent, % trnsp - TrnspStep, ahk_id %this_win%
@@ -476,11 +475,9 @@ DesktopIncreaseTransparency() {
 DesktopDecreaseTransparency() {
   WinGet, win, List
   global TrnspStep
-  global CurrentDesktop
-  updateGlobalVariables()
   Loop, %win% {
     this_win := win%A_Index%
-    windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, this_win, UInt, CurrentDesktop - 1)
+    windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, this_win, UInt, _GetCurrentDesktopNumber() - 1)
     if (windowIsOnDesktop == 1) {
       WinGet, trnsp, Transparent, ahk_id %this_win%
       if (!trnsp)
@@ -554,4 +551,15 @@ GoToPrevDesktop() {
     WinActivate
   }
   AutoTile()
+}
+
+MoveCurrentWindowToNextDesktop(){
+  WinGet, winId, ID, A
+  DllCall(MoveWindowToDesktopNumberProc, UInt, winId, UInt, _GetCurrentDesktopNumber())
+}
+
+
+MoveCurrentWindowToPreviousDesktop(){
+  WinGet, winId, ID, A
+  DllCall(MoveWindowToDesktopNumberProc, UInt, winId, UInt, _GetCurrentDesktopNumber()-1)
 }
