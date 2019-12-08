@@ -98,7 +98,7 @@ MoveFocus(direction) {
     thisWin := win%A_Index%
 
     ; Correct desktop?
-    windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, thisWin, UInt, _GetCurrentDesktopNumber())
+    windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, thisWin, UInt, _GetCurrentDesktopNumber() - 1)
     if (windowIsOnDesktop != 1)
       continue
 
