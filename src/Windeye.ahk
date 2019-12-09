@@ -2,13 +2,21 @@
 ; Auto execute ;
 ;--------------;
 
+  #SingleInstance Force
+  #NoEnv
+  #Persistent
+  SetWorkingDir %A_ScriptDir%
+  SendMode, Input
+  SetKeyDelay, -1
+  SetBatchLines -1
+
   ;--------------------------------------------------------------------
   ; VirtualDesktopAccessor, credits:
   ; - https://github.com/pmb6tz/windows-desktop-switcher
   ; - https://github.com/sdias/win-10-virtual-desktop-enhancer
   ; - https://github.com/Ciantic/VirtualDesktopAccessor
   ;--------------------------------------------------------------------
-  hVirtualDesktopAccessor := DllCall("LoadLibrary", "Str", "VirtualDesktopAccessor.dll", "Ptr")
+  hVirtualDesktopAccessor := DllCall("LoadLibrary", "Str", A_ScriptDir . "\..\libraries\VirtualDesktopAccessor.dll", "Ptr")
   global GoToDesktopNumberProc := DllCall("GetProcAddress", Ptr, hVirtualDesktopAccessor, AStr, "GoToDesktopNumber", "Ptr")
   global GetCurrentDesktopNumberProc := DllCall("GetProcAddress", Ptr, hVirtualDesktopAccessor, AStr, "GetCurrentDesktopNumber", "Ptr")
   global GetDesktopCountProc := DllCall("GetProcAddress", Ptr, hVirtualDesktopAccessor, AStr, "GetDesktopCount", "Ptr")
@@ -55,20 +63,12 @@
   global arrayRight8 := Array() 
   global arrayRight9 := Array() 
 
-  #SingleInstance Force
-  #NoEnv
-  #Persistent
-  SetWorkingDir %A_ScriptDir%
-  SendMode, Input
-  SetKeyDelay, -1
-  SetBatchLines -1
-
   ; The amount of which to change transparency
   TrnspStep = 10
 
   ; Includes
   #Include %A_ScriptDir%\Keybindings.ahk
-  #Include %A_ScriptDir%\WinArrange.ahk
+  #Include %A_ScriptDir%\..\libraries\WinArrange.ahk
 
 Return
 

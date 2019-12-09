@@ -82,7 +82,7 @@ Return
 !+f:: RestoreDecoration()
 
 ; Alt Tab
-!c::AltTab
+<!c::AltTab
 
 ; Reload the script
 !+r:: Reload
