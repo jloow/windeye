@@ -16,7 +16,7 @@
   ; - https://github.com/sdias/win-10-virtual-desktop-enhancer
   ; - https://github.com/Ciantic/VirtualDesktopAccessor
   ;--------------------------------------------------------------------
-  hVirtualDesktopAccessor := DllCall("LoadLibrary", "Str", A_ScriptDir . "\..\libraries\VirtualDesktopAccessor.dll", "Ptr")
+  hVirtualDesktopAccessor := DllCall("LoadLibrary", "Str", A_ScriptDir . "\..\lib\VirtualDesktopAccessor.dll", "Ptr")
   global GoToDesktopNumberProc := DllCall("GetProcAddress", Ptr, hVirtualDesktopAccessor, AStr, "GoToDesktopNumber", "Ptr")
   global GetCurrentDesktopNumberProc := DllCall("GetProcAddress", Ptr, hVirtualDesktopAccessor, AStr, "GetCurrentDesktopNumber", "Ptr")
   global GetDesktopCountProc := DllCall("GetProcAddress", Ptr, hVirtualDesktopAccessor, AStr, "GetDesktopCount", "Ptr")
@@ -68,7 +68,7 @@
 
   ; Includes
   #Include %A_ScriptDir%\Keybindings.ahk
-  #Include %A_ScriptDir%\..\libraries\WinArrange.ahk
+  #Include %A_ScriptDir%\..\lib\WinArrange.ahk
 
 Return
 
