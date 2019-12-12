@@ -50,13 +50,17 @@
 ^!down:: ToggleMin()
 
 !x:: UntileCurrentWindow()
-!r:: CascadeAll()
+!r:: CascadeCurrentDesktop()
+
+; Modify tiling area width
+!+,:: ModifyWidth(-80)
+!+.:: ModifyWidth(80)
 
 ; !v:: SelectAndCycle(0) Disabled untiled improved
 
 ; Transparency
-!,:: DecreaseTransparency()
-!.:: IncreaseTransparency()
+!,:: ChangeTransparency(-10)
+!.:: ChangeTransparency(10)
 ; !+,:: DesktopDecreaseTransparency()
 ; !+.:: DesktopIncreaseTransparency()
 
@@ -85,7 +89,10 @@ Return
 <!c::AltTab
 
 ; Reload the script
-!+r:: Reload
+!+r:: 
+  Reload
+  CascadeAll()
+return
 
 ; Exit script
 #+x:: ExitApp

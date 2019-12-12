@@ -39,20 +39,36 @@
   ; are undeclared variables simulating NULL content.
   ;--------------------------------------------------------------------
 
-  ; Split the screen in two
-  global LEFT  := "0|0|" . A_ScreenWidth / 2 . "|" . A_ScreenHeight
-  global RIGHT := A_ScreenWidth / 2 . "|0|" . A_ScreenWidth . "|" . A_ScreenHeight
+  ; Initially split the screen in two
+  global Left1  := "0|0|" . A_ScreenWidth / 2 . "|" . A_ScreenHeight
+  global Left2  := "0|0|" . A_ScreenWidth / 2 . "|" . A_ScreenHeight
+  global Left3  := "0|0|" . A_ScreenWidth / 2 . "|" . A_ScreenHeight
+  global Left4  := "0|0|" . A_ScreenWidth / 2 . "|" . A_ScreenHeight
+  global Left5  := "0|0|" . A_ScreenWidth / 2 . "|" . A_ScreenHeight
+  global Left6  := "0|0|" . A_ScreenWidth / 2 . "|" . A_ScreenHeight
+  global Left7  := "0|0|" . A_ScreenWidth / 2 . "|" . A_ScreenHeight
+  global Left8  := "0|0|" . A_ScreenWidth / 2 . "|" . A_ScreenHeight
+  global Left9  := "0|0|" . A_ScreenWidth / 2 . "|" . A_ScreenHeight
+  global Right1 := A_ScreenWidth / 2 . "|0|" . A_ScreenWidth . "|" . A_ScreenHeight
+  global Right2 := A_ScreenWidth / 2 . "|0|" . A_ScreenWidth . "|" . A_ScreenHeight
+  global Right3 := A_ScreenWidth / 2 . "|0|" . A_ScreenWidth . "|" . A_ScreenHeight
+  global Right4 := A_ScreenWidth / 2 . "|0|" . A_ScreenWidth . "|" . A_ScreenHeight
+  global Right5 := A_ScreenWidth / 2 . "|0|" . A_ScreenWidth . "|" . A_ScreenHeight
+  global Right6 := A_ScreenWidth / 2 . "|0|" . A_ScreenWidth . "|" . A_ScreenHeight
+  global Right7 := A_ScreenWidth / 2 . "|0|" . A_ScreenWidth . "|" . A_ScreenHeight
+  global Right8 := A_ScreenWidth / 2 . "|0|" . A_ScreenWidth . "|" . A_ScreenHeight
+  global Right9 := A_ScreenWidth / 2 . "|0|" . A_ScreenWidth . "|" . A_ScreenHeight
 
   ; Arrays for tiled windows. Support 9 virtual desktops
-  global  arrayLeft1 := Array()
-  global  arrayLeft2 := Array()
-  global  arrayLeft3 := Array()
-  global  arrayLeft4 := Array()
-  global  arrayLeft5 := Array()
-  global  arrayLeft6 := Array()
-  global  arrayLeft7 := Array()
-  global  arrayLeft8 := Array()
-  global  arrayLeft9 := Array()
+  global arrayLeft1  := Array()
+  global arrayLeft2  := Array()
+  global arrayLeft3  := Array()
+  global arrayLeft4  := Array()
+  global arrayLeft5  := Array()
+  global arrayLeft6  := Array()
+  global arrayLeft7  := Array()
+  global arrayLeft8  := Array()
+  global arrayLeft9  := Array()
   global arrayRight1 := Array() 
   global arrayRight2 := Array()
   global arrayRight3 := Array() 
@@ -63,8 +79,7 @@
   global arrayRight8 := Array() 
   global arrayRight9 := Array() 
 
-  ; The amount of which to change transparency
-  TrnspStep = 10
+  CascadeAll()
 
   ; Includes
   #Include %A_ScriptDir%\Keybindings.ahk
@@ -98,7 +113,7 @@ MoveFocus(direction) {
     thisWin := win%A_Index%
 
     ; Correct desktop?
-    windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, thisWin, UInt, _GetCurrentDesktopNumber() - 1)
+    windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, thisWin, UInt, GetCurrentDesktopNumber() - 1)
     if (windowIsOnDesktop != 1)
       continue
 
@@ -163,7 +178,7 @@ MoveFocus(direction) {
       thisWin := win%A_Index%
 
       ; Correct desktop?
-      windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, thisWin, UInt, _GetCurrentDesktopNumber() - 1)
+      windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, thisWin, UInt, GetCurrentDesktopNumber() - 1)
       if (windowIsOnDesktop != 1)
         continue
 
@@ -249,7 +264,7 @@ SelectAndCycle(Zone) {
     ; The list contains all windows, regardless of which desktop they're
     ; on. Therefore we need to check if the window is on the correct desktop
     ; or not (borrowed from desktop_switcher.ahk)
-    windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, this_win, UInt, _GetCurrentDesktopNumber() - 1)
+    windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, this_win, UInt, GetCurrentDesktopNumber() - 1)
     if (windowIsOnDesktop == 1) {
       WinActivate, ahk_id %this_win%
       NewSelected := True
@@ -267,7 +282,7 @@ DesktopIsEmpty() {
     WinGetTitle, t, ahk_id %thisWin%
     if (t == "")
       continue
-    windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, thisWin, UInt, _GetCurrentDesktopNumber() - 1)
+    windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, thisWin, UInt, GetCurrentDesktopNumber() - 1)
     if (windowIsOnDesktop == 1)
       return False
   }
@@ -317,7 +332,7 @@ ToggleMin() {
 ;---------------------;
 TileCurrentWindow(side) {
   WinGet, win, ID, A
-  currentDesktopNumber := _GetCurrentDesktopNumber()
+  currentDesktopNumber := GetCurrentDesktopNumber()
   while (RemoveWindowFromArray()) {
   }
   ; For some reason, WinArrange does not work as it should
@@ -327,13 +342,13 @@ TileCurrentWindow(side) {
 }
 
 TileWindows() {
-  currentDesktopNumber := _GetCurrentDesktopNumber()
+  currentDesktopNumber := GetCurrentDesktopNumber()
   theLeftArray := MakeTheArray(arrayLeft%currentDesktopNumber%)
   if (theLeftArray != "")
-    WinArrange(TILE, theLeftArray, HORIZONTAL, LEFT)
+    WinArrange(TILE, theLeftArray, HORIZONTAL, Left%currentDesktopNumber%)
   theRightArray := MakeTheArray(arrayRight%currentDesktopNumber%)
   if (theRightArray != "")
-    WinArrange(TILE, theRightArray, HORIZONTAL, RIGHT)
+    WinArrange(TILE, theRightArray, HORIZONTAL, Right%currentDesktopNumber%)
 }
 
 UntileCurrentWindow() {
@@ -346,7 +361,7 @@ UntileCurrentWindow() {
 RemoveWindowFromArray(win := ""){
   if (Win == "")
     WinGet, Win, ID, A
-  currentDesktopNumber := _GetCurrentDesktopNumber()
+  currentDesktopNumber := GetCurrentDesktopNumber()
   found := False
   Loop % arrayLeft%currentDesktopNumber%.Length() {
     if (arrayLeft%currentDesktopNumber%[A_Index] == Win) {
@@ -378,14 +393,27 @@ CascadeAll() {
   WinArrange(CASCADE, ALLWINDOWS, VERTICAL, FULLSCREEN)
 }
 
+CascadeCurrentDesktop() {
+  WinGet, Win, List
+  CurrentDesktop := GetCurrentDesktopNumber()
+  TheWindows := Array()
+  Loop, %Win% {
+    ThisWin := Win%A_Index%
+    if (WindowIsOnDesktop(ThisWin) == 1)
+      TheWindows.Push(ThisWin, ThisWin)
+  }
+  TheArray := MakeTheArray(TheWindows)
+  WinArrange(CASCADE, TheArray, VERTICAL, FULLSCREEN)
+}
+
 AutoTile() {
-  currentDesktopNumber := _GetCurrentDesktopNumber()
+  currentDesktopNumber := GetCurrentDesktopNumber()
   theLeftArray := MakeTheArray(arrayLeft%currentDesktopNumber%)
   theRightArray := MakeTheArray(arrayRight%CurrentDesktopNumber%)
   if (theLeftArray != "")
-    WinArrange(TILE, theLeftArray, HORIZONTAL, LEFT)
+    WinArrange(TILE, theLeftArray, HORIZONTAL, Left%currentDesktopNumber%)
   if (theRightArray != "")
-    WinArrange(TILE, theRightArray, HORIZONTAL, RIGHT)
+    WinArrange(TILE, theRightArray, HORIZONTAL, Right%currentDesktopNumber%)
 }
 
 GetTiledStatus(win := "") {
@@ -404,6 +432,18 @@ GetTiledStatus(win := "") {
     return "Right"
   else
     return ""
+}
+
+ModifyWidth(Delta) {
+  CurrentDesktop := GetCurrentDesktopNumber()
+  Left := Left%CurrentDesktop%
+  Divide := ""
+  Loop, Parse, Left, |
+    if (A_Index == 3)
+      Divide := A_LoopField + Delta
+  Left%currentDesktop% := "0|0|" . Divide . "|" . A_ScreenHeight
+  Right%currentDesktop% := Divide . "|0|" . A_ScreenWidth . "|" . A_ScreenHeight
+  TileWindows()
 }
 
 ;--------------;
@@ -441,51 +481,40 @@ RestoreDecoration(id := "") {
 
 ; Merge into one function, where the step and direction is given by
 ; the argument
-IncreaseTransparency() {
-  global TrnspStep
-  WinGet, trnsp, Transparent, A
-  if (!trnsp)
-    trnsp := 255
-  WinSet, Transparent, % trnsp + TrnspStep, A 
+ChangeTransparency(Step := 10) {
+  WinGet, Trnsp, Transparent, A
+  if (!Trnsp)
+    Trnsp := 255
+  WinSet, Transparent, % Trnsp + Step, A 
 }
 
-DecreaseTransparency() {
-  global TrnspStep
-  WinGet, trnsp, Transparent, A
-  ; If a window has had its transparency modified, then `trnsp`
-  ; is not 255 but rather undefined
-  if (!trnsp)
-    trnsp := 255 - TrnspStep
-  WinSet, Transparent, % trnsp - TrnspStep, A 
-}
-
-DesktopIncreaseTransparency() {
-  WinGet, win, List
-  global TrnspStep
-  Loop, %win% {
-    this_win := win%A_Index%
-    windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, this_win, UInt, _GetCurrentDesktopNumber() - 1)
-    if (windowIsOnDesktop == 1) {
-      WinGet, trnsp, Transparent, ahk_id %this_win%
-      WinSet, Transparent, % trnsp - TrnspStep, ahk_id %this_win%
-    }
-  }
-}
+; DesktopIncreaseTransparency() {
+;   WinGet, win, List
+;   global TrnspStep
+;   Loop, %win% {
+;     this_win := win%A_Index%
+;     windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, this_win, UInt, GetCurrentDesktopNumber() - 1)
+;     if (windowIsOnDesktop == 1) {
+;       WinGet, trnsp, Transparent, ahk_id %this_win%
+;       WinSet, Transparent, % trnsp - TrnspStep, ahk_id %this_win%
+;     }
+;   }
+; }
  
-DesktopDecreaseTransparency() {
-  WinGet, win, List
-  global TrnspStep
-  Loop, %win% {
-    this_win := win%A_Index%
-    windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, this_win, UInt, _GetCurrentDesktopNumber() - 1)
-    if (windowIsOnDesktop == 1) {
-      WinGet, trnsp, Transparent, ahk_id %this_win%
-      if (!trnsp)
-          trnsp := 255 - TrnspStep
-      WinSet, Transparent, % trnsp + TrnspStep, ahk_id %this_win%
-    }
-  }
-}
+; DesktopDecreaseTransparency() {
+;   WinGet, win, List
+;   global TrnspStep
+;   Loop, %win% {
+;     this_win := win%A_Index%
+;     windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, this_win, UInt, GetCurrentDesktopNumber() - 1)
+;     if (windowIsOnDesktop == 1) {
+;       WinGet, trnsp, Transparent, ahk_id %this_win%
+;       if (!trnsp)
+;           trnsp := 255 - TrnspStep
+;       WinSet, Transparent, % trnsp + TrnspStep, ahk_id %this_win%
+;     }
+;   }
+; }
 
 ;--------------------------------------------------------------------
 ; Alternative implementation of desktop switching
@@ -504,18 +533,18 @@ SwitchToDesktop(n:=1) {
 }
 
 _GetNextDesktopNumber() {
-    i := _GetCurrentDesktopNumber()
+    i := GetCurrentDesktopNumber()
     i := (i == _GetNumberOfDesktops() ? i : i + 1)
     return i
 }
 
 _GetPreviousDesktopNumber() {
-    i := _GetCurrentDesktopNumber()
+    i := GetCurrentDesktopNumber()
     i := (i == 1 ? i : i - 1)
     return i
 }
 
-_GetCurrentDesktopNumber() {
+GetCurrentDesktopNumber() {
     return DllCall(GetCurrentDesktopNumberProc) + 1
 }
 
@@ -525,7 +554,7 @@ _GetNumberOfDesktops() {
 
 ; My additions
 GoToNextDesktop() {
-  CurrentDesktop := _GetCurrentDesktopNumber()
+  CurrentDesktop := GetCurrentDesktopNumber()
   NumberOfDesktops := _GetNumberOfDesktops()
   if (CurrentDesktop == NumberOfDesktops)
     return
@@ -540,7 +569,7 @@ GoToNextDesktop() {
 }
 
 GoToPrevDesktop() {
-  CurrentDesktop := _GetCurrentDesktopNumber()
+  CurrentDesktop := GetCurrentDesktopNumber()
   if (CurrentDesktop == 1)
     return
   if (!DesktopIsEmpty())
@@ -555,11 +584,15 @@ GoToPrevDesktop() {
 
 MoveCurrentWindowToNextDesktop(){
   WinGet, winId, ID, A
-  DllCall(MoveWindowToDesktopNumberProc, UInt, winId, UInt, _GetCurrentDesktopNumber())
+  DllCall(MoveWindowToDesktopNumberProc, UInt, winId, UInt, GetCurrentDesktopNumber())
 }
 
 
 MoveCurrentWindowToPreviousDesktop(){
   WinGet, winId, ID, A
-  DllCall(MoveWindowToDesktopNumberProc, UInt, winId, UInt, _GetCurrentDesktopNumber()-1)
+  DllCall(MoveWindowToDesktopNumberProc, UInt, winId, UInt, GetCurrentDesktopNumber()-2)
+}
+
+WindowIsOnDesktop(Window){
+  return DllCall(IsWindowOnDesktopNumberProc, UInt, Window, UInt, GetCurrentDesktopNumber() - 1)
 }
