@@ -16,7 +16,13 @@
   ; - https://github.com/sdias/win-10-virtual-desktop-enhancer
   ; - https://github.com/Ciantic/VirtualDesktopAccessor
   ;--------------------------------------------------------------------
-  hVirtualDesktopAccessor := DllCall("LoadLibrary", "Str", A_ScriptDir . "\..\lib\VirtualDesktopAccessor.dll", "Ptr")
+  if (A_IsCompiled == 1) {
+    if !FileExist("VirtualDesktopAccessor.dll")
+      FileInstall, ..\lib\VirtualDesktopAccessor.dll, %A_WorkingDir%\VirtualDesktopAccessor.dll
+    hVirtualDesktopAccessor := DllCall("LoadLibrary", "Str", "VirtualDesktopAccessor.dll", "Ptr")
+  }
+  else
+    hVirtualDesktopAccessor := DllCall("LoadLibrary", "Str", A_ScriptDir . "\..\lib\VirtualDesktopAccessor.dll", "Ptr")
   global GoToDesktopNumberProc := DllCall("GetProcAddress", Ptr, hVirtualDesktopAccessor, AStr, "GoToDesktopNumber", "Ptr")
   global GetCurrentDesktopNumberProc := DllCall("GetProcAddress", Ptr, hVirtualDesktopAccessor, AStr, "GetCurrentDesktopNumber", "Ptr")
   global GetDesktopCountProc := DllCall("GetProcAddress", Ptr, hVirtualDesktopAccessor, AStr, "GetDesktopCount", "Ptr")
