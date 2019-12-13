@@ -333,9 +333,9 @@ ToggleMin() {
     WinMinimize, ahk_id %win%
 }
 
-;---------------------;
-; TILER (THE CREATOR) ;
-;---------------------;
+;-------;
+; TILER ;
+;-------;
 TileCurrentWindow(side) {
   WinGet, win, ID, A
   currentDesktopNumber := GetCurrentDesktopNumber()
@@ -451,76 +451,6 @@ ModifyWidth(Delta) {
   Right%currentDesktop% := Divide . "|0|" . A_ScreenWidth . "|" . A_ScreenHeight
   TileWindows()
 }
-
-;--------------;
-; VISUAL STUFF ;
-;--------------;
-; Todo: Go through to see if this is needed
-
-RemoveDecoration(id := "") {
-  if (id) {
-    WinSet, Style, -0xC00000, ahk_id %id% ; Hide title bar
-    ; WinSet, Style, -0x200000, ahk_id %id% ; Hide vertical scroll bar
-    ; WinSet, Style, -0x100000, ahk_id %id% ; Hide horizontal scroll bar
-  }
-  else {
-    WinSet, Style, -0xC00000, A
-    ; WinSet, Style, -0x200000, A
-    ; WinSet, Style, -0x100000, A
-  }
-  ; Sometimes the window dimensions change when removing decoration.
-  ; Thus we need to make sure the window gets back to where it started
-}
-
-RestoreDecoration(id := "") {
-  if (id) {
-    WinSet, Style, +0xC00000, ahk_id %id% ; Hide title bar
-    ; WinSet, Style, +0x200000, ahk_id %id% ; Hide vertical scroll bar
-    ; WinSet, Style, +0x100000, ahk_id %id% ; Hide horizontal scroll bar
-  }
-  else {
-    WinSet, Style, +0xC00000, A
-    ; WinSet, Style, +0x200000, A
-    ; WinSet, Style, +0x100000, A
-  }
-}
-
-; Merge into one function, where the step and direction is given by
-; the argument
-ChangeTransparency(Step := 10) {
-  WinGet, Trnsp, Transparent, A
-  if (!Trnsp)
-    Trnsp := 255
-  WinSet, Transparent, % Trnsp + Step, A 
-}
-
-; DesktopIncreaseTransparency() {
-;   WinGet, win, List
-;   global TrnspStep
-;   Loop, %win% {
-;     this_win := win%A_Index%
-;     windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, this_win, UInt, GetCurrentDesktopNumber() - 1)
-;     if (windowIsOnDesktop == 1) {
-;       WinGet, trnsp, Transparent, ahk_id %this_win%
-;       WinSet, Transparent, % trnsp - TrnspStep, ahk_id %this_win%
-;     }
-;   }
-; }
- 
-; DesktopDecreaseTransparency() {
-;   WinGet, win, List
-;   global TrnspStep
-;   Loop, %win% {
-;     this_win := win%A_Index%
-;     windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, this_win, UInt, GetCurrentDesktopNumber() - 1)
-;     if (windowIsOnDesktop == 1) {
-;       WinGet, trnsp, Transparent, ahk_id %this_win%
-;       if (!trnsp)
-;           trnsp := 255 - TrnspStep
-;       WinSet, Transparent, % trnsp + TrnspStep, ahk_id %this_win%
-;     }
-;   }
-; }
 
 ;--------------------------------------------------------------------
 ; Alternative implementation of desktop switching

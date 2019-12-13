@@ -19,10 +19,10 @@
 +!k::      MoveWindow(0, -80)
 +!j::      MoveWindow(0, 40)
 
-+<!right:: MoveWindow(80, 0) 
-+<!left::  MoveWindow(-80, 0) 
-+<!up::    MoveWindow(0, -80) 
-+<!down::  MoveWindow(0, 80)
++!right::  MoveWindow(80, 0) 
++!left::   MoveWindow(-80, 0) 
++!up::     MoveWindow(0, -80) 
++!down::   MoveWindow(0, 80)
 
 ; Resize window
 ^+!l::     ResizeWindow(80, 0)
@@ -30,10 +30,10 @@
 ^+!k::     ResizeWindow(0, -80)
 ^+!j::     ResizeWindow(0, 80)
 
-^<!right:: ResizeWindow(80, 0) 
-^<!left::  ResizeWindow(-80, 0) 
-^<!up::    ResizeWindow(0, -80) 
-^<!down::  ResizeWindow(0, 80)
+^!right::  ResizeWindow(80, 0) 
+^!left::   ResizeWindow(-80, 0) 
+^!up::     ResizeWindow(0, -80) 
+^!down::   ResizeWindow(0, 80)
 
 ; Tile windows
 ^!h::     TileCurrentWindow("Left")
@@ -58,12 +58,6 @@
 
 ; !v:: SelectAndCycle(0) Disabled untiled improved
 
-; Transparency
-!,:: ChangeTransparency(-10)
-!.:: ChangeTransparency(10)
-; !+,:: DesktopDecreaseTransparency()
-; !+.:: DesktopIncreaseTransparency()
-
 ; Desktop switching
 !n:: GoToNextDesktop()
 !b:: GoToPrevDesktop()
@@ -80,10 +74,6 @@
   RemoveWindowFromArray()
   AutoTile()
 Return
-
-; Turns on decoration
-!f:: RemoveDecoration()
-!+f:: RestoreDecoration()
 
 ; Alt Tab
 <!c::AltTab
