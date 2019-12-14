@@ -3,76 +3,76 @@
 ;----------------;
 
 ; Move focus
-!h::      MoveFocus("left")
-!j::      MoveFocus("down")
-!k::      MoveFocus("up")
-!l::      MoveFocus("right")
+!h::      moveFocus("left")
+!j::      moveFocus("down")
+!k::      moveFocus("up")
+!l::      moveFocus("right")
 
-!left::  MoveFocus("left") 
-!down::  MoveFocus("down") 
-!up::    MoveFocus("up") 
-!right:: MoveFocus("right")
+!left::   moveFocus("left") 
+!down::   moveFocus("down") 
+!up::     moveFocus("up") 
+!right::  moveFocus("right")
 
 ; Move window
-+!l::      MoveWindow(80, 0)
-+!h::      MoveWindow(-80, 0)
-+!k::      MoveWindow(0, -80)
-+!j::      MoveWindow(0, 40)
++!l::      moveWindow(80, 0)
++!h::      moveWindow(-80, 0)
++!k::      moveWindow(0, -80)
++!j::      moveWindow(0, 40)
 
-+!right::  MoveWindow(80, 0) 
-+!left::   MoveWindow(-80, 0) 
-+!up::     MoveWindow(0, -80) 
-+!down::   MoveWindow(0, 80)
++!right::  moveWindow(80, 0) 
++!left::   moveWindow(-80, 0) 
++!up::     moveWindow(0, -80) 
++!down::   moveWindow(0, 80)
 
 ; Resize window
-^+!l::     ResizeWindow(80, 0)
-^+!h::     ResizeWindow(-80, 0)
-^+!k::     ResizeWindow(0, -80)
-^+!j::     ResizeWindow(0, 80)
+^+!l::     resizeWindow(80, 0)
+^+!h::     resizeWindow(-80, 0)
+^+!k::     resizeWindow(0, -80)
+^+!j::     resizeWindow(0, 80)
 
-^!right::  ResizeWindow(80, 0) 
-^!left::   ResizeWindow(-80, 0) 
-^!up::     ResizeWindow(0, -80) 
-^!down::   ResizeWindow(0, 80)
+^!right::  resizeWindow(80, 0) 
+^!left::   resizeWindow(-80, 0) 
+^!up::     resizeWindow(0, -80) 
+^!down::   resizeWindow(0, 80)
 
 ; Tile windows
-^!h::     TileCurrentWindow("Left")
-^!l::     TileCurrentWindow("Right")
+^!h::     tileCurrentWindow("Left")
+^!l::     tileCurrentWindow("Right")
 
-^!left::  TileCurrentWindow("Left")
-^!right:: TileCurrentWindow("Right")
+^!left::  tileCurrentWindow("Left")
+^!right:: tileCurrentWindow("Right")
 
 ; Maximise/minimise
-^!k::    ToggleMax()
-^!j::    ToggleMin()
+^!k::    toggleMax()
+^!j::    toggleMin()
 
-^!up::   ToggleMax()
-^!down:: ToggleMin()
+^!up::   toggleMax()
+^!down:: toggleMin()
 
-!x:: UntileCurrentWindow()
-!r:: CascadeCurrentDesktop()
+!x:: untileCurrentWindow()
+!r:: cascadeCurrentDesktop()
 
 ; Modify tiling area width
-!+,:: ModifyWidth(-80)
-!+.:: ModifyWidth(80)
+!+,:: modifyWidth(-80)
+!+.:: modifyWidth(80)
 
-; !v:: SelectAndCycle(0) Disabled untiled improved
+; !v:: selectAndCycle(0) Disabled untiled improved
 
 ; Desktop switching
-!n:: GoToNextDesktop()
-!b:: GoToPrevDesktop()
+!n:: goToNextDesktop()
+!b:: goToPrevDesktop()
 
 ; Todo: Implement using the DLL
 !+n:: Send, #^d
-; !+q::deleteVirtualDesktop()
-!^n:: MoveCurrentWindowToNextDesktop()
-!^b:: MoveCurrentWindowToPreviousDesktop()
+; !+q::deletevirtualDesktop()
+!^n:: moveCurrentWindowToNextDesktop()
+!^b:: moveCurrentWindowToPreviousDesktop()
 
 ; Close the active window
 !q::
   WinClose, A
-  RemoveWindowFromArray()
-  AutoTile()
+  removeWindowFromArray()
+  autoTile()
 Return
 
 ; Alt Tab
@@ -81,7 +81,7 @@ Return
 ; Reload the script
 !+r:: 
   Reload
-  CascadeAll()
+  cascadeAll()
 return
 
 ; Exit script
