@@ -30,10 +30,10 @@
 ^+!k::     resizeWindow(0, -80)
 ^+!j::     resizeWindow(0, 80)
 
-^!right::  resizeWindow(80, 0) 
-^!left::   resizeWindow(-80, 0) 
-^!up::     resizeWindow(0, -80) 
-^!down::   resizeWindow(0, 80)
+^+!right::  resizeWindow(80, 0) 
+^+!left::   resizeWindow(-80, 0) 
+^+!up::     resizeWindow(0, -80) 
+^+!down::   resizeWindow(0, 80)
 
 ; Tile windows
 ^!h::     tileCurrentWindow("Left")
