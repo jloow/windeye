@@ -1,6 +1,6 @@
-﻿;======================================================================
-; AUTO-EXECUTE 
-;======================================================================
+﻿; =====================================================================
+;  AUTO-EXECUTE 
+; =====================================================================
 
   #SingleInstance Force
   #NoEnv
@@ -11,12 +11,12 @@
   SetKeyDelay, -1
   SetBatchLines -1
 
-  ;---------------------------------------------------------------------
-  ; Based on virtual-desktop-accessor and related projects; credits:
-  ; - https://github.com/pmb6tz/windows-desktop-switcher
-  ; - https://github.com/sdias/win-10-virtual-desktop-enhancer
-  ; - https://github.com/Ciantic/VirtualDesktopAccessor
-  ;---------------------------------------------------------------------
+  ; --------------------------------------------------------------------
+  ;  Based on virtual-desktop-accessor and related projects; credits:
+  ;  - https://github.com/pmb6tz/windows-desktop-switcher
+  ;  - https://github.com/sdias/win-10-virtual-desktop-enhancer
+  ;  - https://github.com/Ciantic/VirtualDesktopAccessor
+  ; --------------------------------------------------------------------
   
   ; DLL-files are not included in the compiled version unless specified
   ; by FileInstall. It is then easiest if the dll is put in the some
@@ -35,10 +35,10 @@
   global MoveWindowToDesktopNumberProc := DllCall("GetProcAddress", Ptr, hVirtualDesktopAccessor, AStr, "MoveWindowToDesktopNumber", "Ptr")
   global IsWindowOnDesktopNumberProc := DllCall("GetProcAddress", Ptr, hVirtualDesktopAccessor, AStr, "IsWindowOnDesktopNumber", "Ptr")
 
-  ;--------------------------------------------------------------------
-  ; WinArrange, credits:
-  ; https://autohotkey.com/board/topic/80580-how-to-programmatically-tile-cascade-windows/
-  ;--------------------------------------------------------------------
+  ; -------------------------------------------------------------------
+  ;  WinArrange, credits:
+  ;  https://autohotkey.com/board/topic/80580-how-to-programmatically-tile-cascade-windows/
+  ; -------------------------------------------------------------------
   global TILE        := 1                  ; for Param 1
   global CASCADE     := 2                  ; for Param 1
   global VERTICAL    := 0                  ; for Param 3
@@ -97,13 +97,13 @@
   #Include %A_ScriptDir%\..\lib\WinArrange.ahk
 
 Return
-;======================================================================
-; AUTO-EXECUTE END
-;======================================================================
+; =====================================================================
+;  AUTO-EXECUTE END
+; =====================================================================
 
-;======================================================================
-; SELECT AND MOVE WINDWOS
-;======================================================================
+; =====================================================================
+;  SELECT AND MOVE WINDWOS
+; =====================================================================
 moveFocus(direction) {
 
   WinGet, id, ID, A ; Get id of current window
@@ -257,29 +257,35 @@ moveFocus(direction) {
 ; Todo: Is this needed in this implementation?
 selectAndCycle(Zone) {
   WinGet, win, List
-  WinGet, CurrentWinId, ID, A
-  NewSelected := False
+  WinGet, currentWinId, ID, A
+  newSelected := False
+
+  ; Create a list of the windows on this desktop
   Loop, %win% {
-    this_win := win%A_Index%
+
+  }
+
+  Loop, %win% {
+    thisWin := win%A_Index%
     ; Some windows are hidden and get selected. Thus
     ; if and the window has no title, we shouldn't select it.
-    WinGetTitle, t, ahk_id %this_win%
+    WinGetTitle, t, ahk_id %thisWin%
     if (t == "")
       continue
-    if (CurrentWinId == this_win) {
+    if (currentWinId == thisWin) {
       ; If there are more than two windows we want the
       ; the one that was found first to get sent to          
       ; the bottom so that we don't just switch between                                          
       ; two windows                                                                              
-      ; WinSet, Bottom, , ahk_id %this_win% 
+      ; WinSet, Bottom, , ahk_id %thisWin% 
       continue
     }
     ; The list contains all windows, regardless of which desktop they're
     ; on. Therefore we need to check if the window is on the correct desktop
     ; or not (borrowed from desktop_switcher.ahk)
-    windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, this_win, UInt, getCurrentDesktopNumber() - 1)
+    windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, thisWin, UInt, getCurrentDesktopNumber() - 1)
     if (windowIsOnDesktop == 1) {
-      WinActivate, ahk_id %this_win%
+      WinActivate, ahk_id %thisWin%
       NewSelected := True
       Break
     }
@@ -305,8 +311,8 @@ desktopIsEmpty() {
 moveWindow(deltaX, deltaY) {
   tiledStatus := getTiledStatus()
   WinGetPos, x, y, , , A
-  x := x+deltaX
-  y := y+deltaY
+  x := x + deltaX
+  y := y + deltaY
   WinMove, A, , x, y
   removeWindowFromArray()
   autoTile()
@@ -315,8 +321,8 @@ moveWindow(deltaX, deltaY) {
 resizeWindow(deltaW, deltaH) {
   TiledStatus := getTiledStatus()
   WinGetPos, , , w, h, A
-  w := w+deltaW
-  h := h+deltaH
+  w := w + deltaW
+  h := h + deltaH
   WinMove, A, , x, y, w, h
   removeWindowFromArray()
   autoTile()
@@ -340,9 +346,9 @@ toggleMin() {
     WinMinimize, ahk_id %win%
 }
 
-;======================================================================
-; TILER
-;======================================================================
+; =====================================================================
+;  TILER
+; =====================================================================
 tileCurrentWindow(side) {
   WinGet, win, ID, A
   currentDesktopNumber := getCurrentDesktopNumber()
@@ -434,9 +440,9 @@ getTiledStatus(win := "") {
   if (win == "")
     WinGet, win, ID, A
   
-  leftLeft := 0
-  leftRight := A_ScreenWidth / 2
-  rightLeft := A_ScreenWidth / 2
+  leftLeft   := 0
+  leftRight  := A_ScreenWidth / 2
+  rightLeft  := A_ScreenWidth / 2
   rightRight := A_ScreenWidth
 
   WinGetPos, x,  , w,  , A
@@ -455,14 +461,14 @@ modifyWidth(delta) {
   Loop, Parse, left, |
     if (A_Index == 3)
       divide := A_LoopField + delta
-  left%currentDesktop% := "0|0|" . divide . "|" . A_ScreenHeight
-  right%currentDesktop% := divide . "|0|" . A_ScreenWidth . "|" . A_ScreenHeight
+  left%currentDesktop%  := "0|0|" . divide . "|" . A_ScreenHeight
+  right%currentDesktop% := divide . "|0|"  . A_ScreenWidth . "|" . A_ScreenHeight
   tileWindows()
 }
 
-;======================================================================
-; DESKTOP SWITCHING ETC.
-;======================================================================
+; =====================================================================
+;  DESKTOP SWITCHING ETC.
+; =====================================================================
 changeDesktop(n := 1) {
   if (n == 0)
     n := 10
@@ -530,6 +536,6 @@ moveCurrentWindowToPreviousDesktop(){
   DllCall(MoveWindowToDesktopNumberProc, UInt, winId, UInt, getCurrentDesktopNumber()-2)
 }
 
-windowIsOnDesktop(Window){
+windowIsOnDesktop(window){
   return DllCall(IsWindowOnDesktopNumberProc, UInt, Window, UInt, getCurrentDesktopNumber() - 1)
 }
