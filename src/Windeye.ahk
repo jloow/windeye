@@ -40,7 +40,6 @@
   global VERTICAL    := 0                  ; for Param 3
   global HORIZONTAL  := 1                  ; for Param 3
   global ZORDER      := 4                  ; for Param 3
-  global CLIENTAREA  := "200|25|1000|700"  ; for Param 4
   ; ALLWINDOWS (Param 2), ARRAYORDER (Param 3), FULLSCREEN (Param 4) 
   ; are undeclared variables simulating NULL content.
   ;--------------------------------------------------------------------
@@ -85,7 +84,7 @@
   global arrayRight8 := Array() 
   global arrayRight9 := Array() 
 
-  CascadeAll()
+  cascadeAll()
 
   ; Includes
   #Include %A_ScriptDir%\Keybindings.ahk
@@ -97,7 +96,7 @@ Return
 ; SELECT AND MOVE WINDWOS ;
 ;-------------------------;
 
-MoveFocus(direction) {
+moveFocus(direction) {
 
   WinGet, id, ID, A ; Get id of current window
   WinGetPos, currentX, currentY, currentWidth, currentHeight, A ; Get position of current window
@@ -248,7 +247,7 @@ MoveFocus(direction) {
 ; Select the top window in a quadrant or side; cycle through the
 ; section if a window in the section is already selected
 ; Todo: Is this needed in this implementation?
-SelectAndCycle(Zone) {
+selectAndCycle(Zone) {
   WinGet, win, List
   WinGet, CurrentWinId, ID, A
   NewSelected := False
@@ -281,7 +280,7 @@ SelectAndCycle(Zone) {
     WinActivate
 }
 
-DesktopIsEmpty() {
+desktopIsEmpty() {
   WinGet, wndws, List
   Loop, %wndws% {
     thisWin := wndws%A_Index%
@@ -295,27 +294,27 @@ DesktopIsEmpty() {
   return True
 }
 
-MoveWindow(deltaX, deltaY) {
-  tiledStatus := GetTiledStatus()
+moveWindow(deltaX, deltaY) {
+  tiledStatus := getTiledStatus()
   WinGetPos, x, y, , , A
   x := x+deltaX
   y := y+deltaY
   WinMove, A, , x, y
-  RemoveWindowFromArray()
-  AutoTile()
+  removeWindowFromArray()
+  autoTile()
 }
 
-ResizeWindow(deltaW, deltaH) {
-  TiledStatus := GetTiledStatus()
+resizeWindow(deltaW, deltaH) {
+  TiledStatus := getTiledStatus()
   WinGetPos, , , w, h, A
   w := w+deltaW
   h := h+deltaH
   WinMove, A, , x, y, w, h
-  RemoveWindowFromArray()
-  AutoTile()
+  removeWindowFromArray()
+  autoTile()
 }
 
-ToggleMax() {
+toggleMax() {
   WinGet, win, ID, A
   WinGet, status, MinMax, ahk_id %win%
   if (status == -1)
@@ -324,7 +323,7 @@ ToggleMax() {
     WinMaximize, ahk_id %win%
 }
 
-ToggleMin() {
+toggleMin() {
   WinGet, win, ID, A
   WinGet, status, MinMax, ahk_id %win%
   if (status == 1)
@@ -336,47 +335,47 @@ ToggleMin() {
 ;-------;
 ; TILER ;
 ;-------;
-TileCurrentWindow(side) {
+tileCurrentWindow(side) {
   WinGet, win, ID, A
-  currentDesktopNumber := GetCurrentDesktopNumber()
-  while (RemoveWindowFromArray()) {
+  currentDesktopNumber := getCurrentDesktopNumber()
+  while (removeWindowFromArray()) {
   }
   ; For some reason, WinArrange does not work as it should
   ; unless the window ids are repeated
-  Array%side%%currentDesktopNumber%.Push(win, win)
-  TileWindows()
+  Array%side%%currentDesktopNumber%.push(win, win)
+  tileWindows()
 }
 
-TileWindows() {
-  currentDesktopNumber := GetCurrentDesktopNumber()
-  theLeftArray := MakeTheArray(arrayLeft%currentDesktopNumber%)
+tileWindows() {
+  currentDesktopNumber := getCurrentDesktopNumber()
+  theLeftArray := makeTheArray(arrayLeft%currentDesktopNumber%)
   if (theLeftArray != "")
     WinArrange(TILE, theLeftArray, HORIZONTAL, Left%currentDesktopNumber%)
-  theRightArray := MakeTheArray(arrayRight%currentDesktopNumber%)
+  theRightArray := makeTheArray(arrayRight%currentDesktopNumber%)
   if (theRightArray != "")
     WinArrange(TILE, theRightArray, HORIZONTAL, Right%currentDesktopNumber%)
 }
 
-UntileCurrentWindow() {
-  while (RemoveWindowFromArray()) {
+untileCurrentWindow() {
+  while (removeWindowFromArray()) {
   }
   WinMove, A, , 200, 200, 1000, 1000 ; Some cascading thing here?
-  AutoTile()
+  autoTile()
 }
 
-RemoveWindowFromArray(win := ""){
-  if (Win == "")
-    WinGet, Win, ID, A
-  currentDesktopNumber := GetCurrentDesktopNumber()
+removeWindowFromArray(win := ""){
+  if (win == "")
+    WinGet, win, ID, A
+  currentDesktopNumber := getCurrentDesktopNumber()
   found := False
   Loop % arrayLeft%currentDesktopNumber%.Length() {
-    if (arrayLeft%currentDesktopNumber%[A_Index] == Win) {
+    if (arrayLeft%currentDesktopNumber%[A_Index] == win) {
       found := True
       arrayLeft%currentDesktopNumber%.RemoveAt(A_Index)
     }
   }
   Loop % arrayRight%currentDesktopNumber%.Length() {
-    if (arrayRight%currentDesktopNumber%[A_Index] == Win) {
+    if (arrayRight%currentDesktopNumber%[A_Index] == win) {
       found := True
       arrayRight%currentDesktopNumber%.RemoveAt(A_Index)
     }
@@ -384,7 +383,7 @@ RemoveWindowFromArray(win := ""){
   return found
 }
 
-MakeTheArray(a){
+makeTheArray(a){
   theArray := ""
   Loop % a.Length(){
     if (A_Index == a.Length())
@@ -395,36 +394,36 @@ MakeTheArray(a){
   return theArray
 }
 
-CascadeAll() {
+cascadeAll() {
   WinArrange(CASCADE, ALLWINDOWS, VERTICAL, FULLSCREEN)
 }
 
-CascadeCurrentDesktop() {
+cascadeCurrentDesktop() {
   WinGet, Win, List
-  CurrentDesktop := GetCurrentDesktopNumber()
+  CurrentDesktop := getCurrentDesktopNumber()
   TheWindows := Array()
   Loop, %Win% {
     ThisWin := Win%A_Index%
-    if (WindowIsOnDesktop(ThisWin) == 1)
-      TheWindows.Push(ThisWin, ThisWin)
+    if (windowIsOnDesktop(ThisWin) == 1)
+      TheWindows.push(ThisWin, ThisWin)
   }
-  TheArray := MakeTheArray(TheWindows)
+  TheArray := makeTheArray(TheWindows)
   WinArrange(CASCADE, TheArray, VERTICAL, FULLSCREEN)
 }
 
-AutoTile() {
-  currentDesktopNumber := GetCurrentDesktopNumber()
-  theLeftArray := MakeTheArray(arrayLeft%currentDesktopNumber%)
-  theRightArray := MakeTheArray(arrayRight%CurrentDesktopNumber%)
+autoTile() {
+  currentDesktopNumber := getCurrentDesktopNumber()
+  theLeftArray := makeTheArray(arrayLeft%currentDesktopNumber%)
+  theRightArray := makeTheArray(arrayRight%CurrentDesktopNumber%)
   if (theLeftArray != "")
-    WinArrange(TILE, theLeftArray, HORIZONTAL, Left%currentDesktopNumber%)
+    WinArrange(TILE, theLeftArray, HORIZONTAL, left%currentDesktopNumber%)
   if (theRightArray != "")
-    WinArrange(TILE, theRightArray, HORIZONTAL, Right%currentDesktopNumber%)
+    WinArrange(TILE, theRightArray, HORIZONTAL, right%currentDesktopNumber%)
 }
 
-GetTiledStatus(win := "") {
+getTiledStatus(win := "") {
   if (win == "")
-    WinGet, Win, ID, A
+    WinGet, win, ID, A
   
   leftLeft := 0
   leftRight := A_ScreenWidth / 2
@@ -440,95 +439,95 @@ GetTiledStatus(win := "") {
     return ""
 }
 
-ModifyWidth(Delta) {
-  CurrentDesktop := GetCurrentDesktopNumber()
-  Left := Left%CurrentDesktop%
-  Divide := ""
-  Loop, Parse, Left, |
+modifyWidth(delta) {
+  currentDesktop := getCurrentDesktopNumber()
+  left := left%CurrentDesktop%
+  divide := ""
+  Loop, Parse, left, |
     if (A_Index == 3)
-      Divide := A_LoopField + Delta
-  Left%currentDesktop% := "0|0|" . Divide . "|" . A_ScreenHeight
-  Right%currentDesktop% := Divide . "|0|" . A_ScreenWidth . "|" . A_ScreenHeight
-  TileWindows()
+      divide := A_LoopField + delta
+  left%currentDesktop% := "0|0|" . divide . "|" . A_ScreenHeight
+  right%currentDesktop% := divide . "|0|" . A_ScreenWidth . "|" . A_ScreenHeight
+  tileWindows()
 }
 
 ;--------------------------------------------------------------------
 ; Alternative implementation of desktop switching
 ;--------------------------------------------------------------------
 ; Todo: Put in a separate file?
-_ChangeDesktop(n:=1) {
+changeDesktop(n:=1) {
     if (n == 0) {
         n := 10
     }
     DllCall(GoToDesktopNumberProc, Int, n-1)
 }
 
-SwitchToDesktop(n:=1) {
+switchToDesktop(n:=1) {
     doFocusAfterNextSwitch=1
-    _ChangeDesktop(n)
+    changeDesktop(n)
 }
 
-_GetNextDesktopNumber() {
-    i := GetCurrentDesktopNumber()
-    i := (i == _GetNumberOfDesktops() ? i : i + 1)
+getNextDesktopNumber() {
+    i := getCurrentDesktopNumber()
+    i := (i == getNumberOfDesktops() ? i : i + 1)
     return i
 }
 
-_GetPreviousDesktopNumber() {
-    i := GetCurrentDesktopNumber()
+getPreviousDesktopNumber() {
+    i := getCurrentDesktopNumber()
     i := (i == 1 ? i : i - 1)
     return i
 }
 
-GetCurrentDesktopNumber() {
+getCurrentDesktopNumber() {
     return DllCall(GetCurrentDesktopNumberProc) + 1
 }
 
-_GetNumberOfDesktops() {
+getNumberOfDesktops() {
     return DllCall(GetDesktopCountProc)
 }
 
 ; My additions
-GoToNextDesktop() {
-  CurrentDesktop := GetCurrentDesktopNumber()
-  NumberOfDesktops := _GetNumberOfDesktops()
-  if (CurrentDesktop == NumberOfDesktops)
+goToNextDesktop() {
+  currentDesktop := getCurrentDesktopNumber()
+  numberOfDesktops := getNumberOfDesktops()
+  if (currentDesktop == numberOfDesktops)
     return
-  if (!DesktopIsEmpty())
+  if (!desktopIsEmpty())
     WinActivate, ahk_class Shell_TrayWnd
-  SwitchToDesktop(_GetNextDesktopNumber())
-  if (!DesktopIsEmpty()) {
-    SelectAndCycle(0)
+  switchToDesktop(getNextDesktopNumber())
+  if (!desktopIsEmpty()) {
+    selectAndCycle(0)
     WinActivate
   }
-  AutoTile()
+  autoTile()
 }
 
-GoToPrevDesktop() {
-  CurrentDesktop := GetCurrentDesktopNumber()
+goToPrevDesktop() {
+  CurrentDesktop := getCurrentDesktopNumber()
   if (CurrentDesktop == 1)
     return
-  if (!DesktopIsEmpty())
+  if (!desktopIsEmpty())
     WinActivate, ahk_class Shell_TrayWnd
-  SwitchToDesktop(_GetPreviousDesktopNumber())
-  if (!DesktopIsEmpty()) {
-    SelectAndCycle(0)
+  switchToDesktop(GetPreviousDesktopNumber())
+  if (!desktopIsEmpty()) {
+    selectAndCycle(0)
     WinActivate
   }
-  AutoTile()
+  autoTile()
 }
 
-MoveCurrentWindowToNextDesktop(){
+moveCurrentWindowToNextDesktop(){
   WinGet, winId, ID, A
   DllCall(MoveWindowToDesktopNumberProc, UInt, winId, UInt, GetCurrentDesktopNumber())
 }
 
 
-MoveCurrentWindowToPreviousDesktop(){
+moveCurrentWindowToPreviousDesktop(){
   WinGet, winId, ID, A
   DllCall(MoveWindowToDesktopNumberProc, UInt, winId, UInt, GetCurrentDesktopNumber()-2)
 }
 
-WindowIsOnDesktop(Window){
+windowIsOnDesktop(Window){
   return DllCall(IsWindowOnDesktopNumberProc, UInt, Window, UInt, GetCurrentDesktopNumber() - 1)
 }
