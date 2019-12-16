@@ -1,21 +1,26 @@
-﻿;--------------;
-; Auto execute ;
-;--------------;
+﻿;======================================================================
+; AUTO-EXECUTE 
+;======================================================================
 
   #SingleInstance Force
   #NoEnv
   #Persistent
+
   SetWorkingDir %A_ScriptDir%
   SendMode, Input
   SetKeyDelay, -1
   SetBatchLines -1
 
-  ;--------------------------------------------------------------------
-  ; VirtualDesktopAccessor, credits:
+  ;---------------------------------------------------------------------
+  ; Based on virtual-desktop-accessor and related projects; credits:
   ; - https://github.com/pmb6tz/windows-desktop-switcher
   ; - https://github.com/sdias/win-10-virtual-desktop-enhancer
   ; - https://github.com/Ciantic/VirtualDesktopAccessor
-  ;--------------------------------------------------------------------
+  ;---------------------------------------------------------------------
+  
+  ; DLL-files are not included in the compiled version unless specified
+  ; by FileInstall. It is then easiest if the dll is put in the some
+  ; folder as the executable
   if (A_IsCompiled == 1) {
     if !FileExist("VirtualDesktopAccessor.dll")
       FileInstall, ..\lib\VirtualDesktopAccessor.dll, %A_WorkingDir%\VirtualDesktopAccessor.dll
@@ -23,13 +28,12 @@
   }
   else
     hVirtualDesktopAccessor := DllCall("LoadLibrary", "Str", A_ScriptDir . "\..\lib\VirtualDesktopAccessor.dll", "Ptr")
+
   global GoToDesktopNumberProc := DllCall("GetProcAddress", Ptr, hVirtualDesktopAccessor, AStr, "GoToDesktopNumber", "Ptr")
   global GetCurrentDesktopNumberProc := DllCall("GetProcAddress", Ptr, hVirtualDesktopAccessor, AStr, "GetCurrentDesktopNumber", "Ptr")
   global GetDesktopCountProc := DllCall("GetProcAddress", Ptr, hVirtualDesktopAccessor, AStr, "GetDesktopCount", "Ptr")
   global MoveWindowToDesktopNumberProc := DllCall("GetProcAddress", Ptr, hVirtualDesktopAccessor, AStr, "MoveWindowToDesktopNumber", "Ptr")
   global IsWindowOnDesktopNumberProc := DllCall("GetProcAddress", Ptr, hVirtualDesktopAccessor, AStr, "IsWindowOnDesktopNumber", "Ptr")
-
-  ;--------------------------------------------------------------------
 
   ;--------------------------------------------------------------------
   ; WinArrange, credits:
@@ -42,9 +46,8 @@
   global ZORDER      := 4                  ; for Param 3
   ; ALLWINDOWS (Param 2), ARRAYORDER (Param 3), FULLSCREEN (Param 4) 
   ; are undeclared variables simulating NULL content.
-  ;--------------------------------------------------------------------
 
-  ; Initially split the screen in two
+  ; Initially split the screen in two; support 9 desktops
   global Left1  := "0|0|" . A_ScreenWidth / 2 . "|" . A_ScreenHeight
   global Left2  := "0|0|" . A_ScreenWidth / 2 . "|" . A_ScreenHeight
   global Left3  := "0|0|" . A_ScreenWidth / 2 . "|" . A_ScreenHeight
@@ -64,7 +67,7 @@
   global Right8 := A_ScreenWidth / 2 . "|0|" . A_ScreenWidth . "|" . A_ScreenHeight
   global Right9 := A_ScreenWidth / 2 . "|0|" . A_ScreenWidth . "|" . A_ScreenHeight
 
-  ; Arrays for tiled windows. Support 9 virtual desktops
+  ; Arrays for tiled windows; support 9 virtual desktops
   global arrayLeft1  := Array()
   global arrayLeft2  := Array()
   global arrayLeft3  := Array()
@@ -84,6 +87,9 @@
   global arrayRight8 := Array() 
   global arrayRight9 := Array() 
 
+  ; Initially cascade all windows (even though this will cascade
+  ; windows on the individual desktops, their placement is in
+  ; relation even to windows *not* on the specific desktop)
   cascadeAll()
 
   ; Includes
@@ -91,11 +97,13 @@
   #Include %A_ScriptDir%\..\lib\WinArrange.ahk
 
 Return
+;======================================================================
+; AUTO-EXECUTE END
+;======================================================================
 
-;-------------------------;
-; SELECT AND MOVE WINDWOS ;
-;-------------------------;
-
+;======================================================================
+; SELECT AND MOVE WINDWOS
+;======================================================================
 moveFocus(direction) {
 
   WinGet, id, ID, A ; Get id of current window
@@ -118,7 +126,7 @@ moveFocus(direction) {
     thisWin := win%A_Index%
 
     ; Correct desktop?
-    windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, thisWin, UInt, GetCurrentDesktopNumber() - 1)
+    windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, thisWin, UInt, getCurrentDesktopNumber() - 1)
     if (windowIsOnDesktop != 1)
       continue
 
@@ -135,7 +143,7 @@ moveFocus(direction) {
     if (direction == "up") {
       if (nextPointY < currentPointY AND nextPointX > currentX AND nextPointX < currentX + currentWidth) {
         if (firstLoop OR candidatePointY < nextPointY) {
-          firstLoop := False
+          firstLoop       := False
           candidateWindow := thisWin
           candidatePointY := nextPointY
         }
@@ -146,7 +154,7 @@ moveFocus(direction) {
     else if (direction == "down") {
       if (nextPointY > currentPointY AND nextPointX > currentX AND nextPointX < currentX + currentWidth) {
         if (firstLoop OR candidatePointY > nextPointY) {
-          firstLoop := False
+          firstLoop       := False
           candidateWindow := thisWin
           candidatePointY := nextPointY
         }
@@ -157,7 +165,7 @@ moveFocus(direction) {
     else if (direction == "right") {
       if (nextPointX > currentPointX AND nextPointY > currentY AND nextPointY < currentY + currentHeight) {
         if (firstLoop OR candidatePointX > nextPointX) {
-          firstLoop := False
+          firstLoop       := False
           candidateWindow := thisWin
           candidatePointX := nextPointX
         }
@@ -168,7 +176,7 @@ moveFocus(direction) {
     else if (direction == "left") {
       if (nextPointX < currentPointX AND nextPointY > currentY AND nextPointY < currentY + currentHeight) {
         if (firstLoop OR candidatePointX < nextPointX) {
-          firstLoop := False
+          firstLoop       := False
           candidateWindow := thisWin
           candidatePointX := nextPointX
         }
@@ -183,7 +191,7 @@ moveFocus(direction) {
       thisWin := win%A_Index%
 
       ; Correct desktop?
-      windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, thisWin, UInt, GetCurrentDesktopNumber() - 1)
+      windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, thisWin, UInt, getCurrentDesktopNumber() - 1)
       if (windowIsOnDesktop != 1)
         continue
 
@@ -200,7 +208,7 @@ moveFocus(direction) {
       if (direction == "up") {
         if (nextPointY < currentPointY) {
           if (firstLoop OR candidatePointY < nextPointY) {
-            firstLoop := False
+            firstLoop       := False
             candidateWindow := thisWin
             candidatePointY := nextPointY
           }
@@ -211,7 +219,7 @@ moveFocus(direction) {
       else if (direction == "down") {
         if (nextPointY > currentPointY) {
           if (firstLoop OR candidatePointY > nextPointY) {
-            firstLoop := False
+            firstLoop       := False
             candidateWindow := thisWin
             candidatePointY := nextPointY
           }
@@ -222,7 +230,7 @@ moveFocus(direction) {
       else if (direction == "right") {
         if (nextPointX > currentPointX) {
           if (firstLoop OR candidatePointX > nextPointY) {
-            firstLoop := False
+            firstLoop       := False
             candidateWindow := thisWin
             candidatePointY := nextPointY
           }
@@ -233,7 +241,7 @@ moveFocus(direction) {
       else if (direction == "left") {
         if (nextPointX < currentPointX) {
           if (firstLoop OR candidatePointX < nextPointY) {
-            firstLoop := False
+            firstLoop       := False
             candidateWindow := thisWin
             candidatePointY := nextPointY
           }
@@ -269,7 +277,7 @@ selectAndCycle(Zone) {
     ; The list contains all windows, regardless of which desktop they're
     ; on. Therefore we need to check if the window is on the correct desktop
     ; or not (borrowed from desktop_switcher.ahk)
-    windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, this_win, UInt, GetCurrentDesktopNumber() - 1)
+    windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, this_win, UInt, getCurrentDesktopNumber() - 1)
     if (windowIsOnDesktop == 1) {
       WinActivate, ahk_id %this_win%
       NewSelected := True
@@ -287,7 +295,7 @@ desktopIsEmpty() {
     WinGetTitle, t, ahk_id %thisWin%
     if (t == "")
       continue
-    windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, thisWin, UInt, GetCurrentDesktopNumber() - 1)
+    windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, thisWin, UInt, getCurrentDesktopNumber() - 1)
     if (windowIsOnDesktop == 1)
       return False
   }
@@ -332,17 +340,17 @@ toggleMin() {
     WinMinimize, ahk_id %win%
 }
 
-;-------;
-; TILER ;
-;-------;
+;======================================================================
+; TILER
+;======================================================================
 tileCurrentWindow(side) {
   WinGet, win, ID, A
   currentDesktopNumber := getCurrentDesktopNumber()
-  while (removeWindowFromArray()) {
+  while (removeWindowFromArray()) { ; Is there a prettier way to do this?
   }
   ; For some reason, WinArrange does not work as it should
   ; unless the window ids are repeated
-  Array%side%%currentDesktopNumber%.push(win, win)
+  array%side%%currentDesktopNumber%.Push(win, win)
   tileWindows()
 }
 
@@ -350,10 +358,10 @@ tileWindows() {
   currentDesktopNumber := getCurrentDesktopNumber()
   theLeftArray := makeTheArray(arrayLeft%currentDesktopNumber%)
   if (theLeftArray != "")
-    WinArrange(TILE, theLeftArray, HORIZONTAL, Left%currentDesktopNumber%)
+    WinArrange(TILE, theLeftArray, HORIZONTAL, left%currentDesktopNumber%)
   theRightArray := makeTheArray(arrayRight%currentDesktopNumber%)
   if (theRightArray != "")
-    WinArrange(TILE, theRightArray, HORIZONTAL, Right%currentDesktopNumber%)
+    WinArrange(TILE, theRightArray, HORIZONTAL, right%currentDesktopNumber%)
 }
 
 untileCurrentWindow() {
@@ -399,13 +407,13 @@ cascadeAll() {
 }
 
 cascadeCurrentDesktop() {
-  WinGet, Win, List
-  CurrentDesktop := getCurrentDesktopNumber()
-  TheWindows := Array()
-  Loop, %Win% {
-    ThisWin := Win%A_Index%
+  WinGet, win, List
+  currentDesktop := getCurrentDesktopNumber()
+  theWindows := Array()
+  Loop, %win% {
+    thisWin := win%A_Index%
     if (windowIsOnDesktop(ThisWin) == 1)
-      TheWindows.push(ThisWin, ThisWin)
+      TheWindows.Push(thisWin, thisWin)
   }
   TheArray := makeTheArray(TheWindows)
   WinArrange(CASCADE, TheArray, VERTICAL, FULLSCREEN)
@@ -421,6 +429,7 @@ autoTile() {
     WinArrange(TILE, theRightArray, HORIZONTAL, right%currentDesktopNumber%)
 }
 
+; Todo; fix so that it works even when the space if further divided
 getTiledStatus(win := "") {
   if (win == "")
     WinGet, win, ID, A
@@ -451,40 +460,33 @@ modifyWidth(delta) {
   tileWindows()
 }
 
-;--------------------------------------------------------------------
-; Alternative implementation of desktop switching
-;--------------------------------------------------------------------
-; Todo: Put in a separate file?
-changeDesktop(n:=1) {
-    if (n == 0) {
-        n := 10
-    }
-    DllCall(GoToDesktopNumberProc, Int, n-1)
-}
-
-switchToDesktop(n:=1) {
-    doFocusAfterNextSwitch=1
-    changeDesktop(n)
+;======================================================================
+; DESKTOP SWITCHING ETC.
+;======================================================================
+changeDesktop(n := 1) {
+  if (n == 0)
+    n := 10
+  DllCall(GoToDesktopNumberProc, Int, n - 1)
 }
 
 getNextDesktopNumber() {
-    i := getCurrentDesktopNumber()
-    i := (i == getNumberOfDesktops() ? i : i + 1)
-    return i
+  i := getCurrentDesktopNumber()
+  i := (i == getNumberOfDesktops() ? i : i + 1)
+  return i
 }
 
 getPreviousDesktopNumber() {
-    i := getCurrentDesktopNumber()
-    i := (i == 1 ? i : i - 1)
-    return i
+  i := getCurrentDesktopNumber()
+  i := (i == 1 ? i : i - 1)
+  return i
 }
 
 getCurrentDesktopNumber() {
-    return DllCall(GetCurrentDesktopNumberProc) + 1
+  return DllCall(GetCurrentDesktopNumberProc) + 1
 }
 
 getNumberOfDesktops() {
-    return DllCall(GetDesktopCountProc)
+  return DllCall(GetDesktopCountProc)
 }
 
 ; My additions
@@ -495,9 +497,9 @@ goToNextDesktop() {
     return
   if (!desktopIsEmpty())
     WinActivate, ahk_class Shell_TrayWnd
-  switchToDesktop(getNextDesktopNumber())
+  changeDesktop(getNextDesktopNumber())
   if (!desktopIsEmpty()) {
-    selectAndCycle(0)
+    selectAndCycle(0) ; Todo: make sure to change this
     WinActivate
   }
   autoTile()
@@ -509,7 +511,7 @@ goToPrevDesktop() {
     return
   if (!desktopIsEmpty())
     WinActivate, ahk_class Shell_TrayWnd
-  switchToDesktop(GetPreviousDesktopNumber())
+  changeDesktop(GetPreviousDesktopNumber())
   if (!desktopIsEmpty()) {
     selectAndCycle(0)
     WinActivate
@@ -519,15 +521,15 @@ goToPrevDesktop() {
 
 moveCurrentWindowToNextDesktop(){
   WinGet, winId, ID, A
-  DllCall(MoveWindowToDesktopNumberProc, UInt, winId, UInt, GetCurrentDesktopNumber())
+  DllCall(MoveWindowToDesktopNumberProc, UInt, winId, UInt, getCurrentDesktopNumber())
 }
 
 
 moveCurrentWindowToPreviousDesktop(){
   WinGet, winId, ID, A
-  DllCall(MoveWindowToDesktopNumberProc, UInt, winId, UInt, GetCurrentDesktopNumber()-2)
+  DllCall(MoveWindowToDesktopNumberProc, UInt, winId, UInt, getCurrentDesktopNumber()-2)
 }
 
 windowIsOnDesktop(Window){
-  return DllCall(IsWindowOnDesktopNumberProc, UInt, Window, UInt, GetCurrentDesktopNumber() - 1)
+  return DllCall(IsWindowOnDesktopNumberProc, UInt, Window, UInt, getCurrentDesktopNumber() - 1)
 }
