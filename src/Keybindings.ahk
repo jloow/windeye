@@ -76,7 +76,8 @@
 !q::        closeWindow()
 
 ; Alt Tab
-<!c::       AltTab
+<!v::       AltTab
+<!c::       ShiftAltTab
 
 ; Reload the script
 !+r::       reloadScript()
