@@ -87,6 +87,9 @@
   global arrayRight8 := Array() 
   global arrayRight9 := Array() 
 
+  ; Array for selecting windows on the current desktop
+  global theWindowsOnDesktop := {}
+
   ; Initially cascade all windows (even though this will cascade
   ; windows on the individual desktops, their placement is in
   ; relation even to windows *not* on the specific desktop)
@@ -252,46 +255,56 @@ moveFocus(direction) {
   WinActivate, ahk_id %candidateWindow%
 }
 
-; Select the top window in a quadrant or side; cycle through the
-; section if a window in the section is already selected
-; Todo: Is this needed in this implementation?
-selectAndCycle(Zone) {
-  WinGet, win, List
-  WinGet, currentWinId, ID, A
-  newSelected := False
+selectAndCycle() {
+  WinGet, listOfAllWindows, List
+  windowsOnDesktop := Array()
 
-  ; Create a list of the windows on this desktop
-  Loop, %win% {
-
+  ; Create a list of all windows on the current desktop
+  Loop, %listOfAllWindows% {
+    thisWin := listOfAllWindows%A_Index%
+    if (windowIsOnDesktop(thisWin) == 1)
+      windowsOnDesktop.Push(thisWin)
   }
 
-  Loop, %win% {
-    thisWin := win%A_Index%
-    ; Some windows are hidden and get selected. Thus
-    ; if and the window has no title, we shouldn't select it.
-    WinGetTitle, t, ahk_id %thisWin%
-    if (t == "")
-      continue
-    if (currentWinId == thisWin) {
-      ; If there are more than two windows we want the
-      ; the one that was found first to get sent to          
-      ; the bottom so that we don't just switch between                                          
-      ; two windows                                                                              
-      ; WinSet, Bottom, , ahk_id %thisWin% 
-      continue
+  ; Compare this list to our old list
+  found := False
+  if (theWindowsOnDesktop.Length() == windowsOnDesktop.Length()) {
+    Loop, % theWindowsOnDesktop.Length() {
+      found := False
+      theWindow := theWindowsOnDesktop[A_Index]
+      Loop, % windowsOnDesktop.Length() {
+        window := windowsOnDesktop[A_Index]
+        if (window == theWindow) {
+          found := True
+          break
+        }
+      }
+      ; If the lists are not the same, then replace
+      ; the old list
+      if !found {
+        theWindowsOnDesktop := windowsOnDesktop
+        break
+      }
     }
-    ; The list contains all windows, regardless of which desktop they're
-    ; on. Therefore we need to check if the window is on the correct desktop
-    ; or not (borrowed from desktop_switcher.ahk)
-    windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, thisWin, UInt, getCurrentDesktopNumber() - 1)
-    if (windowIsOnDesktop == 1) {
+  }
+  else
+    theWindowsOnDesktop := windowsOnDesktop
+
+  ; Move the first window to the bottom of the list
+  ; and activate the window that is next in line
+  topWindow := theWindowsOnDesktop.RemoveAt(1)
+  theWindowsOnDesktop.Push(topWindow)
+  nextWindow := theWindowsOnDesktop[1]
+  WinActivate, ahk_id %nextWindow%
+}
+
+selectPrevious() {
+  WinGet, listOfAllWindows, List
+  Loop, %listOfAllWindows% {
+    thisWin := listOfAllWindows%A_Index%
+    if (windowIsOnDesktop(thisWin) == 1)
       WinActivate, ahk_id %thisWin%
-      NewSelected := True
-      Break
-    }
   }
-  if (!NewSelected)
-    WinActivate
 }
 
 desktopIsEmpty() {
@@ -505,7 +518,7 @@ goToNextDesktop() {
     WinActivate, ahk_class Shell_TrayWnd
   changeDesktop(getNextDesktopNumber())
   if (!desktopIsEmpty()) {
-    selectAndCycle(0) ; Todo: make sure to change this
+    selectAndCycle() ; Todo: make sure to change this
     WinActivate
   }
   autoTile()
@@ -519,7 +532,7 @@ goToPrevDesktop() {
     WinActivate, ahk_class Shell_TrayWnd
   changeDesktop(GetPreviousDesktopNumber())
   if (!desktopIsEmpty()) {
-    selectAndCycle(0)
+    selectAndCycle()
     WinActivate
   }
   autoTile()

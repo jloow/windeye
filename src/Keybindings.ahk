@@ -56,7 +56,8 @@
 !+,:: modifyWidth(-80)
 !+.:: modifyWidth(80)
 
-; !v:: selectAndCycle(0) Disabled untiled improved
+!z::  selectAndCycle()
+!+z:: selectPrevious()
 
 ; Desktop switching
 !n:: goToNextDesktop()
