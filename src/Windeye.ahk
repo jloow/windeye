@@ -552,3 +552,17 @@ moveCurrentWindowToPreviousDesktop(){
 windowIsOnDesktop(window){
   return DllCall(IsWindowOnDesktopNumberProc, UInt, Window, UInt, getCurrentDesktopNumber() - 1)
 }
+
+; =====================================================================
+;  GENERAL THINGS
+; =====================================================================
+closeWindow() {
+  removeWindowFromArray()
+  autoTile()
+  WinClose, A
+}
+
+reloadScript() {
+  Reload
+  cascadeAll()
+}
