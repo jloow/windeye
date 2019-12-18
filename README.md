@@ -1,8 +1,8 @@
 # Windeye
 
-Windeye is a light dynamic window manager for Windows 10. It aims to
-improve the windows management capabilities of Windows --- primarily by
-introducing automatic tiling and keyboard navigation --- without
+Windeye is a "light" dynamic window manager for Windows 10. It aims to
+improve the windows management capabilities of Windows -- primarily by
+introducing automatic tiling and keyboard navigation -- without
 altering Windows's own functionality.
 
 ## Features
@@ -17,9 +17,11 @@ altering Windows's own functionality.
 
 ## Installation
 
-Either download the executable file and run it. Or download AutoHotkey
-and run `src\Windeye.ahk` or compile into an executable by running
-`tools\Build.ahk`.
+Either download the executable file and run it. Or download
+[AutoHotkey](http://autohotkey.com), install it, and run
+`src\Windeye.ahk` -- or compile into an executable by running
+`tools\Build.ahk` (for now, right-clicking and pressing `Compile Script`
+also works).
 
 Note that running the executable places `VirtualDesktopAccessor.dll` in
 the executable folder.
@@ -35,13 +37,8 @@ the modifier keys to do the following:
 
 - <kbd>Alt</kbd><kbd>Shift</kbd>: Move window
 
-- <kbd>Alt</kbd><kbd>Ctrl</kbd> + Up/Down: Maximise/minimise window
-
-- <kbd>Alt</kbd><kbd>Ctrl</kbd> + Right/Left: Tile window to the
-  right/left
-
-- <kbd>Alt</kbd><kbd>Shift</kbd><kbd>Ctrl</kbd>: Tile window to the
-  right/left
+- <kbd>Alt</kbd><kbd>Ctrl</kbd>: (Up/Down) Maximise/minimise window; 
+  (Right/Left) Tile window to the right/left
 
 Beyond this, use the following key combinations:
 
@@ -50,9 +47,6 @@ Beyond this, use the following key combinations:
 
 - <kbd>Alt</kbd><kbd>r</kbd>: Cascade all windows on the desktop
 
-- <kbd>Alt</kbd><kbd>.</kbd>/<kbd>,</kbd>: Increase/decrease window
-  transparency
-
 - <kbd>Alt</kbd><kbd>n</kbd>/<kbd>b</kbd>: Next/previous desktop
 
 - <kbd>Ctrl</kbd><kbd>Alt</kbd><kbd>n</kbd>/<kbd>b</kbd>: Move window to next/previous desktop
@@ -60,13 +54,17 @@ Beyond this, use the following key combinations:
 - <kbd>Shift</kbd><kbd>Alt</kbd><kbd>n</kbd>: Create new virtual desktop
   (identical to <kbd>Win</kbd><kbd>Ctrl</kbd><kbd>d</kbd>)
 
+- <kbd>Alt</kbd><kbd>,</kbd>/<kbd>.</kbd>: Increase/decrease width of
+  tiling area
+
+- <kbd>Alt</kbd><kbd>z</kbd>: Cycle through the windows
+
+- <kbd>Shift</kbd><kbd>Alt</kbd><kbd>z</kbd>: Select previous window
+
 - <kbd>Alt</kbd><kbd>q</kbd>: Close window
 
-- (<kbd>Shift</kbd>)<kbd>Alt</kbd><kbd>f</kbd>: Remove (restore) decoration from
-  window
-
-- <kbd>Alt</kbd><kbd>c</kbd>: Alternative keybinding for
-  <kbd>Alt</kbd><kbd>Tab</kbd>
+- <kbd>Alt</kbd><kbd>c</kbd>/<kbd>v</kbd>: Alternative keybinding for
+  <kbd>Alt</kbd>(<kbd>Shift</kbd>)<kbd>Tab</kbd>
 
 - <kbd>Shift</kbd><kbd>Alt</kbd><kbd>r</kbd>: Reload the script
 
@@ -85,6 +83,9 @@ pre-compiled version.
   multi-screen environment will not work without issues.
 
 - Probably only supports Windows 10
+
+- Does not detect new windows, which means these have to be tiled
+  manually etc.
 
 ## Notes, questions and answers
 
