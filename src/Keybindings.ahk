@@ -1,8 +1,4 @@
-﻿;----------------;
-; DEFINE HOTKEYS ;
-;----------------;
-
-; Move focus
+﻿; Move focus
 !h::        moveFocus("left")
 !j::        moveFocus("down")
 !k::        moveFocus("up")
