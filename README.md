@@ -7,19 +7,22 @@ altering Windows's own functionality.
 
 ## Features
 
-- Moves focus between windows using using only the keyboard
+- Move focus between windows using using only the keyboard
 
-- Resizes and moves windows using only the keyboard
+- Resize and move windows using only the keyboard
 
-- Automatically tiles windows
+- Automatically tile windows
 
-- Moves windows between virtual desktops
+- Move windows between virtual desktops
 
 ## Installation
 
 Either download the executable file and run it. Or download AutoHotkey
-and run `Windeye.ahk` or compile into an executable by running
-`Build.ahk`.
+and run `src\Windeye.ahk` or compile into an executable by running
+`tools\Build.ahk`.
+
+Note that running the executable places `VirtualDesktopAccessor.dll` in
+the executable folder.
 
 ## Usage
 
@@ -73,8 +76,15 @@ Beyond this, use the following key combinations:
 
 The keybindings (and some behaviour, such as how far to move a window
 after each command) can be modified by editing `Keybindings.ahk`. That
-is, you current cannot change the keybindings if using the pre-compiled
-version.
+is, currently you cannot change the keybindings when using the
+pre-compiled version.
+
+## Limitations/know bugs/todo/untested
+
+- So far I have only tested this on a single screen setup. Probably a
+  multi-screen environment will not work without issues.
+
+- Probably only supports Windows 10
 
 ## Notes, questions and answers
 
