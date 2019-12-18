@@ -256,6 +256,7 @@ moveFocus(direction) {
 }
 
 selectAndCycle() {
+  
   WinGet, listOfAllWindows, List
   windowsOnDesktop := Array()
 
@@ -446,25 +447,6 @@ autoTile() {
     WinArrange(TILE, theLeftArray, HORIZONTAL, left%currentDesktopNumber%)
   if (theRightArray != "")
     WinArrange(TILE, theRightArray, HORIZONTAL, right%currentDesktopNumber%)
-}
-
-; Todo; fix so that it works even when the space if further divided
-getTiledStatus(win := "") {
-  if (win == "")
-    WinGet, win, ID, A
-  
-  leftLeft   := 0
-  leftRight  := A_ScreenWidth / 2
-  rightLeft  := A_ScreenWidth / 2
-  rightRight := A_ScreenWidth
-
-  WinGetPos, x,  , w,  , A
-  if (x == leftLeft and x+w == leftRight)
-    return "Left"
-  else if (x == rightLeft and x+w == rightRight)
-    return "Right"
-  else
-    return ""
 }
 
 modifyWidth(delta) {
