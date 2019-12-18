@@ -100,9 +100,7 @@
   #Include %A_ScriptDir%\..\lib\WinArrange.ahk
 
 Return
-; =====================================================================
-;  AUTO-EXECUTE END
-; =====================================================================
+; = AUTO-EXECUTE END ==================================================
 
 ; =====================================================================
 ;  SELECT AND MOVE WINDWOS
@@ -323,23 +321,21 @@ desktopIsEmpty() {
 }
 
 moveWindow(deltaX, deltaY) {
-  tiledStatus := getTiledStatus()
+  removeWindowFromArray()
+  autoTile()
   WinGetPos, x, y, , , A
   x := x + deltaX
   y := y + deltaY
   WinMove, A, , x, y
-  removeWindowFromArray()
-  autoTile()
 }
 
 resizeWindow(deltaW, deltaH) {
-  TiledStatus := getTiledStatus()
+  removeWindowFromArray()
+  autoTile()
   WinGetPos, , , w, h, A
   w := w + deltaW
   h := h + deltaH
   WinMove, A, , x, y, w, h
-  removeWindowFromArray()
-  autoTile()
 }
 
 toggleMax() {
@@ -500,14 +496,13 @@ goToNextDesktop() {
     WinActivate, ahk_class Shell_TrayWnd
   changeDesktop(getNextDesktopNumber())
   if (!desktopIsEmpty()) {
-    selectAndCycle() ; Todo: make sure to change this
-    WinActivate
+    selectAndCycle()
   }
   autoTile()
 }
 
 goToPrevDesktop() {
-  CurrentDesktop := getCurrentDesktopNumber()
+  currentDesktop := getCurrentDesktopNumber()
   if (CurrentDesktop == 1)
     return
   if (!desktopIsEmpty())
@@ -515,7 +510,6 @@ goToPrevDesktop() {
   changeDesktop(GetPreviousDesktopNumber())
   if (!desktopIsEmpty()) {
     selectAndCycle()
-    WinActivate
   }
   autoTile()
 }
