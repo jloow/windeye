@@ -557,7 +557,8 @@ windowIsOnDesktop(window){
 ;  GENERAL THINGS
 ; =====================================================================
 closeWindow() {
-  removeWindowFromArray()
+  while (removeWindowFromArray()) {
+  }
   autoTile()
   WinClose, A
 }
