@@ -11,6 +11,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Custom icon
 
-## [1.0.0] - 2019-12-xx
+## [1.0.0] - 2019-12-28
 
 - Initial release.
