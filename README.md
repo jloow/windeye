@@ -1,8 +1,8 @@
 # Windeye
 
 Windeye is a "light" dynamic window manager for Windows 10. It aims to
-improve the windows management capabilities of Windows -- primarily by
-introducing automatic tiling and keyboard navigation -- without
+improve the windows management capabilities of Windows — primarily by
+introducing automatic tiling and keyboard navigation — without
 altering Windows's own functionality.
 
 ## Features
@@ -21,7 +21,7 @@ altering Windows's own functionality.
 
 Either download the executable file and run it. Or download
 [AutoHotkey](http://autohotkey.com), install it, and run
-`src\Windeye.ahk` -- or compile into an executable by running
+`src\Windeye.ahk` — or compile into an executable by running
 `tools\Build.ahk` (for now, right-clicking and pressing `Compile Script`
 also works).
 
