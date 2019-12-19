@@ -15,6 +15,8 @@ altering Windows's own functionality.
 
 - Move windows between virtual desktops
 
+- Vi-like keybindings for navigation
+
 ## Installation
 
 Either download the executable file and run it. Or download
@@ -73,9 +75,9 @@ Beyond this, use the following key combinations:
 ## Configuration
 
 The keybindings (and some behaviour, such as how far to move a window
-after each command) can be modified by editing `Keybindings.ahk`. That
-is, currently you cannot change the keybindings when using the
-pre-compiled version.
+with each command) can be modified by editing `src\Keybindings.ahk`. In
+other words, the keybindings cannot be changed in the pre-compiled
+version.
 
 ## Limitations/know bugs/todo/untested
 
@@ -97,19 +99,19 @@ management, but its functionality leaves some things to be desired (eg
 why can I tile windows with keyboard shortcut but not quickly select
 them?).
 
-While there already are programs such as `bug.n` --- which is impressive
---- I found it a bit excessive; I would have preferred to have keyboard
-navigation and the ability to quickly reposition windows without all the
-options that `bug.n` comes with. (It is furthermore based in `dwm` which
-is quite esoteric.) It also replaces Windows's own functionality with
-its own. This, I think, leads to a slower program.
+While there already are programs such as
+[bug.n](https://github.com/fuhsjr00/bug.n) — which you should
+definitely try out — I found myself only using some of its
+functionality: the keyboard navigation and ability to quickly
+reposition windows. The other functionality I rarely used, such as the
+detailed control of parent and child areas.
 
-`Windeye` tries to do much less and tries to use, to the extent that it
+Windeye tries to do much less and tries to use, to the extent that it
 is possible, Windows's own functionality.
 
 ### The code looks horrible
 
-Yes, probably! I'm not a programmer and wrote this in my free time ---
+Yes, probably! I'm not a programmer and wrote this in my free time —
 I'm just learning as I go. Suggestions for improvement are welcome.
 
 ### The name?
@@ -125,8 +127,18 @@ cannot be locked at all. If you are fine using the arrow keys (instead
 of the vi-like keybindings), then the keys can be rebound using the
 Windows-key.
 
-## Credits
+## Credits/inspiration
 
+- <https://github.com/fuhsjr00/bug.n>
+
+- <https://github.com/Ciantic/VirtualDesktopAccessor> 
+
+- <https://github.com/pmb6tz/windows-desktop-switcher>
+
+- <https://github.com/sdias/win-10-virtual-desktop-enhancer>
+
+-
+<https://autohotkey.com/board/topic/80580-how-to-programmatically-tile-cascade-windows/>
 
 ## License
 
