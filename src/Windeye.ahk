@@ -321,8 +321,7 @@ desktopIsEmpty() {
 }
 
 moveWindow(deltaX, deltaY) {
-  removeWindowFromArray()
-  autoTile()
+  untileCurrentWindow()
   WinGetPos, x, y, , , A
   x := x + deltaX
   y := y + deltaY
@@ -330,8 +329,7 @@ moveWindow(deltaX, deltaY) {
 }
 
 resizeWindow(deltaW, deltaH) {
-  removeWindowFromArray()
-  autoTile()
+  untileCurrentWindow()
   WinGetPos, , , w, h, A
   w := w + deltaW
   h := h + deltaH
