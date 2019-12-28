@@ -137,8 +137,7 @@ Windows-key.
 
 - <https://github.com/sdias/win-10-virtual-desktop-enhancer>
 
--
-<https://autohotkey.com/board/topic/80580-how-to-programmatically-tile-cascade-windows/>
+- <https://autohotkey.com/board/topic/80580-how-to-programmatically-tile-cascade-windows/>
 
 ## License
 
