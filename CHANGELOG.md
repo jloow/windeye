@@ -13,6 +13,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Make build file create output folder if it does not exist
 
+## [1.0.1] - xxxx-xx-xx
+
+### Fixed
+
+- Improve how windows are automatically tiled when resized and moved
+
+- Retile windows when moving them to new virtual desktops
+
+- Automatically go to desktop to which window was sent
+
+- "Reset" window position when moving windows between virtual desktops
+
 ## [1.0.0] - 2019-12-28
 
 - Initial release.
