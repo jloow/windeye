@@ -11,9 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Custom icon
 
-- Make build file create output folder if it does not exist
+## [1.0.1] - 2019-12-30
 
-## [1.0.1] - xxxx-xx-xx
+### Added
+
+- Make build file create output folder if it does not exist
 
 ### Fixed
 
