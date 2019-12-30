@@ -321,7 +321,8 @@ desktopIsEmpty() {
 }
 
 moveWindow(deltaX, deltaY) {
-  untileCurrentWindow()
+  removeWindowFromArray()
+  AutoTile()
   WinGetPos, x, y, , , A
   x := x + deltaX
   y := y + deltaY
@@ -329,7 +330,8 @@ moveWindow(deltaX, deltaY) {
 }
 
 resizeWindow(deltaW, deltaH) {
-  untileCurrentWindow()
+  removeWindowFromArray() 
+  AutoTile()
   WinGetPos, , , w, h, A
   w := w + deltaW
   h := h + deltaH
@@ -360,8 +362,7 @@ toggleMin() {
 tileCurrentWindow(side) {
   WinGet, win, ID, A
   currentDesktopNumber := getCurrentDesktopNumber()
-  while (removeWindowFromArray()) { ; Is there a prettier way to do this?
-  }
+  removeWindowFromArray()
   ; For some reason, WinArrange does not work as it should
   ; unless the window ids are repeated
   array%side%%currentDesktopNumber%.Push(win, win)
@@ -379,8 +380,7 @@ tileWindows() {
 }
 
 untileCurrentWindow() {
-  while (removeWindowFromArray()) {
-  }
+  removeWindowFromArray()
   WinMove, A, , 200, 200, 1000, 1000 ; Some cascading thing here?
   autoTile()
 }
@@ -390,19 +390,20 @@ removeWindowFromArray(win := ""){
     WinGet, win, ID, A
   currentDesktopNumber := getCurrentDesktopNumber()
   found := False
+  ; Todo: Here we could loop until found is false
   Loop % arrayLeft%currentDesktopNumber%.Length() {
     if (arrayLeft%currentDesktopNumber%[A_Index] == win) {
       found := True
-      arrayLeft%currentDesktopNumber%.RemoveAt(A_Index)
+      arrayLeft%currentDesktopNumber%.RemoveAt(A_Index, A_Index + 1)
+      break
     }
   }
   Loop % arrayRight%currentDesktopNumber%.Length() {
     if (arrayRight%currentDesktopNumber%[A_Index] == win) {
       found := True
-      arrayRight%currentDesktopNumber%.RemoveAt(A_Index)
+      arrayRight%currentDesktopNumber%.RemoveAt(A_Index, A_Index + 1)
     }
   }
-  return found
 }
 
 makeTheArray(a){
@@ -514,13 +515,21 @@ goToPrevDesktop() {
 
 moveCurrentWindowToNextDesktop(){
   WinGet, winId, ID, A
+  removeWindowFromArray(winId)
+  autoTile()
   DllCall(MoveWindowToDesktopNumberProc, UInt, winId, UInt, getCurrentDesktopNumber())
+  goToNextDesktop()
+  WinMove, ahk_id %winId%, , 100, 100
 }
 
 
 moveCurrentWindowToPreviousDesktop(){
   WinGet, winId, ID, A
+  removeWindowFromArray(winId)
+  autoTile()
   DllCall(MoveWindowToDesktopNumberProc, UInt, winId, UInt, getCurrentDesktopNumber()-2)
+  goToPrevDesktop()
+  WinMove, ahk_id %winId%, , 100, 100
 }
 
 windowIsOnDesktop(window){
@@ -531,8 +540,7 @@ windowIsOnDesktop(window){
 ;  GENERAL THINGS
 ; =====================================================================
 closeWindow() {
-  while (removeWindowFromArray()) {
-  }
+  removeWindowFromArray()
   autoTile()
   WinClose, A
 }
