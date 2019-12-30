@@ -13,5 +13,9 @@ Loop, Read, ..\CHANGELOG.md
   }
 }
 
+; Create the out-folder if it does not already exist
+if (FileExist("..\out") != "D")
+  FileCreateDir, ..\out
+
 ; Build latest version
 Run, Ahk2Exe.exe /in ..\src\Windeye.ahk /out ..\out\Windeye-%ver%.exe
