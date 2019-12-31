@@ -427,8 +427,10 @@ cascadeCurrentDesktop() {
   theWindows := Array()
   Loop, %win% {
     thisWin := win%A_Index%
-    if (windowIsOnDesktop(ThisWin) == 1)
-      TheWindows.Push(thisWin, thisWin)
+    if (windowIsOnDesktop(ThisWin) == 1) {
+      theWindows.Push(thisWin, thisWin)
+      removeWindowFromArray(thisWin)
+    }
   }
   TheArray := makeTheArray(TheWindows)
   WinArrange(CASCADE, TheArray, VERTICAL, FULLSCREEN)
