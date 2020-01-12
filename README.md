@@ -42,6 +42,8 @@ the modifier keys to do the following:
 - <kbd>Alt</kbd><kbd>Ctrl</kbd>: (Up/Down) Maximise/minimise window; 
   (Right/Left) Tile window to the right/left
 
+- <kbd>Alt</kbd><kbd>Ctrl</kbd><kbd>Shift</kbd>: Resize window
+
 Beyond this, use the following key combinations:
 
 - <kbd>Alt</kbd><kbd>x</kbd>: Untile window (if a window is moved with

@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Custom icon
 
+- Limit the number of options available in the right-click menu of the tray icon
+
 ## [1.0.2] - xxxx-xx-xx
 
 ### Fixed
