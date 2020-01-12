@@ -542,8 +542,15 @@ windowIsOnDesktop(window){
 ;  GENERAL THINGS
 ; =====================================================================
 closeWindow() {
+  ; A newly opened window will occupy the same space as it did before
+  ; it was closed. There we reposition them before closing the window
+  ; so that it does not look like it's tiled while it is not.
+  WinGetPos, , , w, h, A
+  Random, newX, 100, % A_ScreenWidth - 100 - w
+  Random, newY, 100, % A_ScreenHeight - 100 - h
   removeWindowFromArray()
   autoTile()
+  WinMove, A, , %newX%, %newY%
   WinClose, A
 }
 

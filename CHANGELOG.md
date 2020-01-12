@@ -11,11 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Custom icon
 
-## [1.0.1] - xxxx-xx-xx
+## [1.0.2] - xxxx-xx-xx
 
 ### Fixed
 
 - Keep the rest of the cascaded windows cascaded when tiling one of them
+
+- Reposition windows before moving them to make it harder to mistake
+  them for tiled windows when they are re-opened
 
 ## [1.0.1] - 2019-12-30
 
