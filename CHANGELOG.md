@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Limit the number of options available in the right-click menu of the tray icon
 
+### Fixed
+
+- Minimising and maximising windows affects tiling as expected
+
 ## [1.0.2] - xxxx-xx-xx
 
 ### Fixed
