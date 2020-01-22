@@ -23,8 +23,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Keep the rest of the cascaded windows cascaded when tiling one of them
 
-- Reposition windows before moving them to make it harder to mistake
+- Reposition tiled windows before moving them to make it harder to mistake
   them for tiled windows when they are re-opened
+
+- Randomly position window when untiling it
 
 ## [1.0.1] - 2019-12-30
 
