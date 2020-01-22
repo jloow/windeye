@@ -356,6 +356,12 @@ toggleMin() {
     WinMinimize, ahk_id %win%
 }
 
+randomlyPositionWindow() {
+  WinGetPos, , , w, h, A
+  Random, newX, 100, % A_ScreenWidth - 100 - w
+  Random, newY, 100, % A_ScreenHeight - 100 - h
+}
+
 ; =====================================================================
 ;  TILER
 ; =====================================================================
@@ -381,7 +387,7 @@ tileWindows() {
 
 untileCurrentWindow() {
   removeWindowFromArray()
-  WinMove, A, , 200, 200, 1000, 1000 ; Some cascading thing here?
+  randomlyPositionWindow()
   autoTile()
 }
 
@@ -390,7 +396,6 @@ removeWindowFromArray(win := ""){
     WinGet, win, ID, A
   currentDesktopNumber := getCurrentDesktopNumber()
   found := False
-  ; Todo: Here we could loop until found is false
   Loop % arrayLeft%currentDesktopNumber%.Length() {
     if (arrayLeft%currentDesktopNumber%[A_Index] == win) {
       found := True
@@ -402,6 +407,7 @@ removeWindowFromArray(win := ""){
     if (arrayRight%currentDesktopNumber%[A_Index] == win) {
       found := True
       arrayRight%currentDesktopNumber%.RemoveAt(A_Index, A_Index + 1)
+      break
     }
   }
 }
@@ -542,12 +548,7 @@ windowIsOnDesktop(window){
 ;  GENERAL THINGS
 ; =====================================================================
 closeWindow() {
-  ; A newly opened window will occupy the same space as it did before
-  ; it was closed. There we reposition them before closing the window
-  ; so that it does not look like it's tiled while it is not.
-  WinGetPos, , , w, h, A
-  Random, newX, 100, % A_ScreenWidth - 100 - w
-  Random, newY, 100, % A_ScreenHeight - 100 - h
+  randomlyPositionWindow()
   removeWindowFromArray()
   autoTile()
   WinMove, A, , %newX%, %newY%
