@@ -356,10 +356,12 @@ toggleMin() {
     WinMinimize, ahk_id %win%
 }
 
+; todo: Decrease window height if too high..
 randomlyPositionWindow() {
   WinGetPos, , , w, h, A
   Random, newX, 100, % A_ScreenWidth - 100 - w
   Random, newY, 100, % A_ScreenHeight - 100 - h
+  WinMove, A, , %newX%, %newY%
 }
 
 ; =====================================================================
@@ -551,7 +553,6 @@ closeWindow() {
   randomlyPositionWindow()
   removeWindowFromArray()
   autoTile()
-  WinMove, A, , %newX%, %newY%
   WinClose, A
 }
 
