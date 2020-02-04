@@ -299,10 +299,15 @@ selectAndCycle() {
 
 selectPrevious() {
   WinGet, listOfAllWindows, List
+  WinGet, currentWin, ID, A ; Get id of current window
   Loop, %listOfAllWindows% {
     thisWin := listOfAllWindows%A_Index%
-    if (windowIsOnDesktop(thisWin) == 1)
+    if (currentWin == thisWin)
+      continue
+    else if (windowIsOnDesktop(thisWin) == 1) {
       WinActivate, ahk_id %thisWin%
+      break
+    }
   }
 }
 
