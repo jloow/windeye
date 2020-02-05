@@ -17,7 +17,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Minimising and maximising windows affects tiling as expected
 
-- Remove ability to select minimised windows
 
 ## [1.0.2] - xxxx-xx-xx
 
@@ -29,6 +28,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   them for tiled windows when they are re-opened
 
 - Randomly position window when untiling it
+
+- Actually select previously selected window with `selectPrevious()`
+
+- Remove ability to select minimised windows when moving focus
 
 ## [1.0.1] - 2019-12-30
 

@@ -126,13 +126,13 @@ moveFocus(direction) {
 
     thisWin := win%A_Index%
 
-    ; Correct desktop?
-    windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, thisWin, UInt, getCurrentDesktopNumber() - 1)
-    if (windowIsOnDesktop != 1)
-      continue
+    WinGet, mmStatus, MinMax, ahk_id %thisWin% ; Get min/max status of current window. Put in a function?
 
-    ; Skip current window
-    if (id == thisWin)
+    ; Skip current window, if its not on current desktop or if
+    ; it is minimised
+    if (windowIsOnDesktop(thisWin) != 1
+        or id == thisWin
+        or mmStatus == -1)
       continue
 
     WinGetPos, nextX, nextY, nextWidth, nextHeight, ahk_id %thisWin% ; Get position of window
@@ -189,17 +189,18 @@ moveFocus(direction) {
   if (candidateWindow == id) {
     firstLoop := True
     Loop, %win% {
+      
       thisWin := win%A_Index%
 
-      ; Correct desktop?
-      windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, thisWin, UInt, getCurrentDesktopNumber() - 1)
-      if (windowIsOnDesktop != 1)
-        continue
+      WinGet, mmStatus, MinMax, ahk_id %thisWin% ; Get min/max status of current window. Put in a function?
 
-      ; Skip current window
-      if (id == thisWin)
-        continue
-      
+      ; Skip current window, if its not on current desktop or if
+      ; it is minimised
+      if (windowIsOnDesktop(thisWin) != 1
+          or id == thisWin
+          or mmStatus == -1)
+      continue
+
       WinGetPos, nextX, nextY, nextWidth, nextHeight, ahk_id %thisWin% ; Get position of window
 
       nextPointX := nextX + nextWidth / 2
