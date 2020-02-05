@@ -349,8 +349,10 @@ toggleMax() {
   WinGet, status, MinMax, ahk_id %win%
   if (status == -1)
     WinRestore, ahk_id %win%
-  else if (status == 0)
+  else if (status == 0) {
+    untileCurrentWindow()
     WinMaximize, ahk_id %win%
+  }
 }
 
 toggleMin() {
@@ -358,8 +360,10 @@ toggleMin() {
   WinGet, status, MinMax, ahk_id %win%
   if (status == 1)
     WinRestore, ahk_id %win%
-  else if (status == 0)
+  else if (status == 0) {
+    untileCurrentWindow()
     WinMinimize, ahk_id %win%
+  }
 }
 
 ; todo: Decrease window height if too high..

@@ -11,11 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Custom icon
 
-- Limit the number of options available in the right-click menu of the tray icon
-
 ### Fixed
 
-- Minimising and maximising windows affects tiling as expected
+- Limit the number of options available in the right-click menu of the tray icon
 
 
 ## [1.0.2] - xxxx-xx-xx
@@ -32,6 +30,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Actually select previously selected window with `selectPrevious()`
 
 - Remove ability to select minimised windows when moving focus
+
+- Minimising and maximising windows affects tiling as expected
 
 ## [1.0.1] - 2019-12-30
 
