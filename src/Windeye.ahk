@@ -326,6 +326,8 @@ desktopIsEmpty() {
 }
 
 moveWindow(deltaX, deltaY) {
+  if (isMaximised())
+    toggleMax()
   WinGetPos, x, y, , , A
   x := x + deltaX
   y := y + deltaY
@@ -333,6 +335,8 @@ moveWindow(deltaX, deltaY) {
 }
 
 resizeWindow(top, bottom, left, right) {
+  if (isMaximised())
+    toggleMax()
   WinGetPos, x, y, w, h, A
   x := x - left
   w := w + right + left
@@ -359,6 +363,9 @@ getNearestEdge(direction, id := ""){
 }
 
 moveToEdge(direction) {
+  
+  if (isMaximised())
+    toggleMax()
   
   nearest := getNearestEdge(direction)
   if (!nearest) 
@@ -397,6 +404,9 @@ moveToEdge(direction) {
 }
 
 resizeToEdge(direction) {
+  
+  if (isMaximised())
+    toggleMax()
 
   nearest := getNearestEdge(direction)
   if (!nearest) 
@@ -434,12 +444,16 @@ resizeToEdge(direction) {
   }
 }
 
+isMaximised() {
+  WinGet, status, MinMax, A
+  return status == 1
+}
+
 toggleMax() {
   WinGet, win, ID, A
-  WinGet, status, MinMax, ahk_id %win%
-  if (status == 1)
+  if (isMaximised())
     WinRestore, ahk_id %win%
-  else if (status == 0)
+  else
     WinMaximize, ahk_id %win%
 }
 
