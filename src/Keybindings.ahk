@@ -89,6 +89,8 @@
 ; ======================================================================
 #If edgeMode
 
+escape:: toggleEdgeMode()
+
 ; Move
 +!h::      moveToEdge("left")
 +!j::      moveToEdge("down")
