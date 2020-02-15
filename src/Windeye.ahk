@@ -19,7 +19,7 @@
   ; --------------------------------------------------------------------
   
   ; DLL-files are not included in the compiled version unless specified
-  ; by FileInstall. It is then easiest if the dll is put in the some
+  ; by FileInstall. It is then easiest if the dll is put in the same
   ; folder as the executable
   if (A_IsCompiled == 1) {
     if !FileExist("VirtualDesktopAccessor.dll")
@@ -35,77 +35,129 @@
   global MoveWindowToDesktopNumberProc := DllCall("GetProcAddress", Ptr, hVirtualDesktopAccessor, AStr, "MoveWindowToDesktopNumber", "Ptr")
   global IsWindowOnDesktopNumberProc := DllCall("GetProcAddress", Ptr, hVirtualDesktopAccessor, AStr, "IsWindowOnDesktopNumber", "Ptr")
 
-  ; -------------------------------------------------------------------
-  ;  WinArrange, credits:
-  ;  https://autohotkey.com/board/topic/80580-how-to-programmatically-tile-cascade-windows/
-  ; -------------------------------------------------------------------
-  global TILE        := 1                  ; for Param 1
-  global CASCADE     := 2                  ; for Param 1
-  global VERTICAL    := 0                  ; for Param 3
-  global HORIZONTAL  := 1                  ; for Param 3
-  global ZORDER      := 4                  ; for Param 3
-  ; ALLWINDOWS (Param 2), ARRAYORDER (Param 3), FULLSCREEN (Param 4) 
-  ; are undeclared variables simulating NULL content.
+  global theWindowsOnDesktop := Array()
 
-  ; Initially split the screen in two; support 9 desktops
-  global Left1  := "0|0|" . A_ScreenWidth / 2 . "|" . A_ScreenHeight
-  global Left2  := "0|0|" . A_ScreenWidth / 2 . "|" . A_ScreenHeight
-  global Left3  := "0|0|" . A_ScreenWidth / 2 . "|" . A_ScreenHeight
-  global Left4  := "0|0|" . A_ScreenWidth / 2 . "|" . A_ScreenHeight
-  global Left5  := "0|0|" . A_ScreenWidth / 2 . "|" . A_ScreenHeight
-  global Left6  := "0|0|" . A_ScreenWidth / 2 . "|" . A_ScreenHeight
-  global Left7  := "0|0|" . A_ScreenWidth / 2 . "|" . A_ScreenHeight
-  global Left8  := "0|0|" . A_ScreenWidth / 2 . "|" . A_ScreenHeight
-  global Left9  := "0|0|" . A_ScreenWidth / 2 . "|" . A_ScreenHeight
-  global Right1 := A_ScreenWidth / 2 . "|0|" . A_ScreenWidth . "|" . A_ScreenHeight
-  global Right2 := A_ScreenWidth / 2 . "|0|" . A_ScreenWidth . "|" . A_ScreenHeight
-  global Right3 := A_ScreenWidth / 2 . "|0|" . A_ScreenWidth . "|" . A_ScreenHeight
-  global Right4 := A_ScreenWidth / 2 . "|0|" . A_ScreenWidth . "|" . A_ScreenHeight
-  global Right5 := A_ScreenWidth / 2 . "|0|" . A_ScreenWidth . "|" . A_ScreenHeight
-  global Right6 := A_ScreenWidth / 2 . "|0|" . A_ScreenWidth . "|" . A_ScreenHeight
-  global Right7 := A_ScreenWidth / 2 . "|0|" . A_ScreenWidth . "|" . A_ScreenHeight
-  global Right8 := A_ScreenWidth / 2 . "|0|" . A_ScreenWidth . "|" . A_ScreenHeight
-  global Right9 := A_ScreenWidth / 2 . "|0|" . A_ScreenWidth . "|" . A_ScreenHeight
-
-  ; Arrays for tiled windows; support 9 virtual desktops
-  global arrayLeft1  := Array()
-  global arrayLeft2  := Array()
-  global arrayLeft3  := Array()
-  global arrayLeft4  := Array()
-  global arrayLeft5  := Array()
-  global arrayLeft6  := Array()
-  global arrayLeft7  := Array()
-  global arrayLeft8  := Array()
-  global arrayLeft9  := Array()
-  global arrayRight1 := Array() 
-  global arrayRight2 := Array()
-  global arrayRight3 := Array() 
-  global arrayRight4 := Array() 
-  global arrayRight5 := Array() 
-  global arrayRight6 := Array() 
-  global arrayRight7 := Array() 
-  global arrayRight8 := Array() 
-  global arrayRight9 := Array() 
-
-  ; Array for selecting windows on the current desktop
-  global theWindowsOnDesktop := {}
-
-  ; Initially cascade all windows (even though this will cascade
-  ; windows on the individual desktops, their placement is in
-  ; relation even to windows *not* on the specific desktop)
-  cascadeAll()
-
+  global edgeMode := false
+  
   ; Includes
   #Include %A_ScriptDir%\Keybindings.ahk
   #Include %A_ScriptDir%\..\lib\WinArrange.ahk
 
 Return
-; = AUTO-EXECUTE END ==================================================
+; ======================================================================
+;  AUTO-EXECUTE END
+; ======================================================================
 
 ; =====================================================================
 ;  SELECT AND MOVE WINDWOS
 ; =====================================================================
-moveFocus(direction) {
+
+toggleEdgeMode() {
+  edgeMode := !edgeMode
+}
+
+getNearestWindowNarrow(direction, id := "") {
+
+  if (!id)
+    WinGet, id, ID, A ; Get id of current window
+  
+  WinGet, win, List ; Get a list of all available windows
+
+  WinGetPos, currentX, currentY, currentWidth, currentHeight, A ; Get position of current window
+  currentWindow := {x: currentX, y: currentY, w: currentWidth, h: currentHeight}
+  
+  ; Some variables to determine which window is closest to
+  ; the current window
+  candidatePointX := 0
+  candidatePointY := 0
+  candidateWindow := id
+  firstLoop := True
+  
+  Loop, %win% {
+
+    thisWin := win%A_Index%
+    WinGet, mmStatus, MinMax, ahk_id %thisWin% ; Get min/max status of current window. Put in a function?
+
+    ; Skip current window, if its not on current desktop or if
+    ; it is minimised or maximised
+    if (   windowIsOnDesktop(thisWin) != 1
+        || id       == thisWin
+        || mmStatus == -1
+        || mmStatus == 1   )
+      continue
+
+    WinGetPos, nextX, nextY, nextWidth, nextHeight, ahk_id %thisWin% ; Get position of window
+    nextWindow := {x: nextX, y: nextY, w: nextWidth, h: nextHeight}
+
+    ; Up
+    if (direction == "up") {
+      if (nextWindow.y < currentWindow.y && windowsOverlap("x", currentWindow, nextWindow)) {
+        if (firstLoop OR candidatePointY < nextPointY) {
+          firstLoop       := False
+          candidateWindow := thisWin
+          candidatePointY := nextPointY
+        }
+      }
+    }
+
+    ; Down
+    else if (direction == "down") {
+      if (nextWindow.y > currentWindow.y && windowsOverlap("x", currentWindow, nextWindow)) {
+        if (firstLoop OR candidatePointY > nextPointY) {
+          firstLoop       := False
+          candidateWindow := thisWin
+          candidatePointY := nextPointY
+        }
+      }
+    }
+    
+    ; Right
+    else if (direction == "right") {
+      if (nextWindow.x > currentWindow.x && windowsOverlap("y", currentWindow, nextWindow)) {
+        if (firstLoop OR candidatePointX > nextPointX) {
+          firstLoop       := False
+          candidateWindow := thisWin
+          candidatePointX := nextPointX
+        }
+      }
+    }
+
+    ; Left
+    else if (direction == "left") {
+      if (nextWindow.x < currentWindow.x && windowsOverlap("y", currentWindow, nextWindow)) {
+        if (firstLoop OR candidatePointX < nextPointX) {
+          firstLoop       := False
+          candidateWindow := thisWin
+          candidatePointX := nextPointX
+        }
+      }
+    }
+  }
+
+  if (candidateWindow != id)
+    return candidateWindow
+  else
+    return ""
+}
+
+windowsOverlap(dimension, currentWindow, nextWindow) {
+  if (dimension == "y") {
+    return (  (   currentWindow.y < nextWindow.y    + nextWindow.h
+               && currentWindow.y + currentWindow.h > nextWindow.y)
+           || (   nextWindow.y < currentWindow.y + currentWindow.h
+               && nextWindow.y + nextWindow.h    > currentWindow.y)  )
+  }
+  else if (dimension == "x") {
+    return (  (   currentWindow.x < nextWindow.x    + nextWindow.w
+               && currentWindow.x + currentWindow.w > nextWindow.x)
+           || (   nextWindow.x < currentWindow.x + currentWindow.w
+               && nextWindow.x + nextWindow.w    > currentWindow.x)  )
+  }
+  else
+    return false
+}
+
+getNearestWindowWide(direction) {
 
   WinGet, id, ID, A ; Get id of current window
   WinGetPos, currentX, currentY, currentWidth, currentHeight, A ; Get position of current window
@@ -120,12 +172,10 @@ moveFocus(direction) {
   candidatePointY := 0
   candidateWindow := id
   firstLoop := True
-  
-  ; First we try to make a narrow selection
+
   Loop, %win% {
-
+    
     thisWin := win%A_Index%
-
     WinGet, mmStatus, MinMax, ahk_id %thisWin% ; Get min/max status of current window. Put in a function?
 
     ; Skip current window, if its not on current desktop or if
@@ -133,16 +183,16 @@ moveFocus(direction) {
     if (windowIsOnDesktop(thisWin) != 1
         or id == thisWin
         or mmStatus == -1)
-      continue
+    continue
 
     WinGetPos, nextX, nextY, nextWidth, nextHeight, ahk_id %thisWin% ; Get position of window
 
     nextPointX := nextX + nextWidth / 2
     nextPointY := nextY + nextHeight / 2
 
-    ; Go up
+    ; Up
     if (direction == "up") {
-      if (nextPointY < currentPointY AND nextPointX > currentX AND nextPointX < currentX + currentWidth) {
+      if (nextPointY < currentPointY) {
         if (firstLoop OR candidatePointY < nextPointY) {
           firstLoop       := False
           candidateWindow := thisWin
@@ -151,9 +201,9 @@ moveFocus(direction) {
       }
     }
 
-    ; Go down
+    ; Down
     else if (direction == "down") {
-      if (nextPointY > currentPointY AND nextPointX > currentX AND nextPointX < currentX + currentWidth) {
+      if (nextPointY > currentPointY) {
         if (firstLoop OR candidatePointY > nextPointY) {
           firstLoop       := False
           candidateWindow := thisWin
@@ -162,96 +212,43 @@ moveFocus(direction) {
       }
     }
 
-    ; Go right
+    ; Right
     else if (direction == "right") {
-      if (nextPointX > currentPointX AND nextPointY > currentY AND nextPointY < currentY + currentHeight) {
-        if (firstLoop OR candidatePointX > nextPointX) {
+      if (nextPointX > currentPointX) {
+        if (firstLoop OR candidatePointX > nextPointY) {
           firstLoop       := False
           candidateWindow := thisWin
-          candidatePointX := nextPointX
+          candidatePointY := nextPointY
         }
       }
     }
 
-    ; Go left
+    ; Left
     else if (direction == "left") {
-      if (nextPointX < currentPointX AND nextPointY > currentY AND nextPointY < currentY + currentHeight) {
-        if (firstLoop OR candidatePointX < nextPointX) {
+      if (nextPointX < currentPointX) {
+        if (firstLoop OR candidatePointX < nextPointY) {
           firstLoop       := False
           candidateWindow := thisWin
-          candidatePointX := nextPointX
+          candidatePointY := nextPointY
         }
       }
     }
   }
 
-  ; Lastly we are very loose with the criteria
-  if (candidateWindow == id) {
-    firstLoop := True
-    Loop, %win% {
-      
-      thisWin := win%A_Index%
+  if (candidateWindow != id)
+    return candidateWindow
+  else
+    return ""
+}
 
-      WinGet, mmStatus, MinMax, ahk_id %thisWin% ; Get min/max status of current window. Put in a function?
-
-      ; Skip current window, if its not on current desktop or if
-      ; it is minimised
-      if (windowIsOnDesktop(thisWin) != 1
-          or id == thisWin
-          or mmStatus == -1)
-      continue
-
-      WinGetPos, nextX, nextY, nextWidth, nextHeight, ahk_id %thisWin% ; Get position of window
-
-      nextPointX := nextX + nextWidth / 2
-      nextPointY := nextY + nextHeight / 2
-
-      ; Go up
-      if (direction == "up") {
-        if (nextPointY < currentPointY) {
-          if (firstLoop OR candidatePointY < nextPointY) {
-            firstLoop       := False
-            candidateWindow := thisWin
-            candidatePointY := nextPointY
-          }
-        }
-      }
-
-      ; Go down
-      else if (direction == "down") {
-        if (nextPointY > currentPointY) {
-          if (firstLoop OR candidatePointY > nextPointY) {
-            firstLoop       := False
-            candidateWindow := thisWin
-            candidatePointY := nextPointY
-          }
-        }
-      }
-
-      ; Go right
-      else if (direction == "right") {
-        if (nextPointX > currentPointX) {
-          if (firstLoop OR candidatePointX > nextPointY) {
-            firstLoop       := False
-            candidateWindow := thisWin
-            candidatePointY := nextPointY
-          }
-        }
-      }
-
-      ; Go left
-      else if (direction == "left") {
-        if (nextPointX < currentPointX) {
-          if (firstLoop OR candidatePointX < nextPointY) {
-            firstLoop       := False
-            candidateWindow := thisWin
-            candidatePointY := nextPointY
-          }
-        }
-      }
-    }
-  }
-  WinActivate, ahk_id %candidateWindow%
+; Can be implemented more efficiently
+moveFocus(direction) {
+  narrow := getNearestWindowNarrow(direction)
+  wide := getNearestWindowWide(direction)
+  if (narrow)
+    WinActivate, ahk_id %narrow%
+  else if (wide)
+    WinActivate, ahk_id %wide%
 }
 
 selectAndCycle() {
@@ -267,6 +264,8 @@ selectAndCycle() {
   }
 
   ; Compare this list to our old list
+  ; (This solution is needed because, as far as I know, there is no way
+  ; of getting or setting the window's "z-value", beyond top or bottom.)
   found := False
   if (theWindowsOnDesktop.Length() == windowsOnDesktop.Length()) {
     Loop, % theWindowsOnDesktop.Length() {
@@ -319,40 +318,129 @@ desktopIsEmpty() {
     WinGetTitle, t, ahk_id %thisWin%
     if (t == "")
       continue
-    windowIsOnDesktop := DllCall(IsWindowOnDesktopNumberProc, UInt, thisWin, UInt, getCurrentDesktopNumber() - 1)
+    windowIsOnDesktop(window)
     if (windowIsOnDesktop == 1)
-      return False
+      return false
   }
-  return True
+  return true
 }
 
 moveWindow(deltaX, deltaY) {
-  removeWindowFromArray()
-  AutoTile()
   WinGetPos, x, y, , , A
   x := x + deltaX
   y := y + deltaY
   WinMove, A, , x, y
 }
 
-resizeWindow(deltaW, deltaH) {
-  removeWindowFromArray() 
-  AutoTile()
-  WinGetPos, , , w, h, A
-  w := w + deltaW
-  h := h + deltaH
+resizeWindow(top, bottom, left, right) {
+  WinGetPos, x, y, w, h, A
+  x := x - left
+  w := w + right + left
+  y := y - top
+  h := h + bottom + top
   WinMove, A, , x, y, w, h
+}
+
+getNearestEdge(direction, id := ""){
+  if (!id)
+    WinGet, id, ID, A
+  WinGetPos, x, y, w, h, ahk_id %id%
+  nearest := getNearestWindowNarrow(direction)
+  if (!nearest)
+    return ""
+  WinGetPos, edgeX, edgeY, edgeW, edgeH, ahk_id %nearest%
+  if (   (direction == "right" && edgeX         == x + w)
+      || (direction == "left"  && edgeX + edgeW == x    )
+      || (direction == "up"    && edgeY + edgeH == y    )
+      || (direction == "down"  && edgeY         == y + h) )
+    getNearestEdge(direction, nearest)
+  else
+    return nearest
+}
+
+moveToEdge(direction) {
+  
+  nearest := getNearestEdge(direction)
+  if (!nearest) 
+    useDesktopEdges := True
+  
+  WinGetPos, x, y, w, h, A
+  
+  if (direction == "right") {
+    if (useDesktopEdges)
+      edgeX := A_ScreenWidth
+    else
+      WinGetPos, edgeX, , , , ahk_id %nearest%
+    WinMove, A, , edgeX - w
+  }
+  else if (direction == "left") {
+    if (useDesktopEdges)
+      edgeX := 0, edgeW := 0
+    else
+      WinGetPos, edgeX, , edgeW, , ahk_id %nearest%
+    WinMove, A, , edgeX + edgeW
+  }
+  else if (direction == "up") {
+    if (useDesktopEdges)
+      edgeY := 0, edgeH := 0
+    else
+      WinGetPos, , edgeY, , edgeH, ahk_id %nearest%
+    WinMove, A, , , edgeY + edgeH
+  }
+  else if (direction == "down") {
+    if (useDesktopEdges)
+      edgeY := A_ScreenHeight
+    else
+      WinGetPos, , edgeY, , , ahk_id %nearest%
+    WinMove, A, , , edgeY - h
+  }
+}
+
+resizeToEdge(direction) {
+
+  nearest := getNearestEdge(direction)
+  if (!nearest) 
+    useDesktopEdges := True
+  
+  WinGetPos, x, y, w, h, A
+  
+  if (direction == "right") {
+    if (useDesktopEdges)
+      edgeX := A_ScreenWidth
+    else
+      WinGetPos, edgeX, , , , ahk_id %nearest%
+    WinMove, A, , , , edgeX - x
+  }
+  else if (direction == "left") {
+    if (useDesktopEdges)
+      edgeX := 0, edgeW := 0
+    else
+      WinGetPos, edgeX, , edgeW, , ahk_id %nearest%
+    WinMove, A, , edgeX + edgeW, , w + x - edgeX - edgeW
+  }
+  else if (direction == "up") {
+    if (useDesktopEdges)
+      edgeY := 0, edgeH := 0
+    else
+      WinGetPos, , edgeY, , edgeH, ahk_id %nearest%
+    WinMove, A, , , edgeY + edgeH, , h + y - edgeY - edgeH
+  }
+  else if (direction == "down") {
+    if (useDesktopEdges)
+      edgeY := A_ScreenHeight
+    else
+      WinGetPos, , edgeY, , , ahk_id %nearest%
+    WinMove, A, , , , , edgeY - y
+  }
 }
 
 toggleMax() {
   WinGet, win, ID, A
   WinGet, status, MinMax, ahk_id %win%
-  if (status == -1)
+  if (status == 1)
     WinRestore, ahk_id %win%
-  else if (status == 0) {
-    untileCurrentWindow()
+  else if (status == 0)
     WinMaximize, ahk_id %win%
-  }
 }
 
 toggleMin() {
@@ -360,120 +448,8 @@ toggleMin() {
   WinGet, status, MinMax, ahk_id %win%
   if (status == 1)
     WinRestore, ahk_id %win%
-  else if (status == 0) {
-    untileCurrentWindow()
+  else if (status == 0)
     WinMinimize, ahk_id %win%
-  }
-}
-
-; todo: Decrease window height if too high..
-randomlyPositionWindow() {
-  WinGetPos, , , w, h, A
-  Random, newX, 100, % A_ScreenWidth - 100 - w
-  Random, newY, 100, % A_ScreenHeight - 100 - h
-  WinMove, A, , %newX%, %newY%
-}
-
-; =====================================================================
-;  TILER
-; =====================================================================
-tileCurrentWindow(side) {
-  WinGet, win, ID, A
-  currentDesktopNumber := getCurrentDesktopNumber()
-  removeWindowFromArray()
-  ; For some reason, WinArrange does not work as it should
-  ; unless the window ids are repeated
-  array%side%%currentDesktopNumber%.Push(win, win)
-  tileWindows()
-}
-
-tileWindows() {
-  currentDesktopNumber := getCurrentDesktopNumber()
-  theLeftArray := makeTheArray(arrayLeft%currentDesktopNumber%)
-  if (theLeftArray != "")
-    WinArrange(TILE, theLeftArray, HORIZONTAL, left%currentDesktopNumber%)
-  theRightArray := makeTheArray(arrayRight%currentDesktopNumber%)
-  if (theRightArray != "")
-    WinArrange(TILE, theRightArray, HORIZONTAL, right%currentDesktopNumber%)
-}
-
-untileCurrentWindow() {
-  removeWindowFromArray()
-  randomlyPositionWindow()
-  autoTile()
-}
-
-removeWindowFromArray(win := ""){
-  if (win == "")
-    WinGet, win, ID, A
-  currentDesktopNumber := getCurrentDesktopNumber()
-  found := False
-  Loop % arrayLeft%currentDesktopNumber%.Length() {
-    if (arrayLeft%currentDesktopNumber%[A_Index] == win) {
-      found := True
-      arrayLeft%currentDesktopNumber%.RemoveAt(A_Index, A_Index + 1)
-      break
-    }
-  }
-  Loop % arrayRight%currentDesktopNumber%.Length() {
-    if (arrayRight%currentDesktopNumber%[A_Index] == win) {
-      found := True
-      arrayRight%currentDesktopNumber%.RemoveAt(A_Index, A_Index + 1)
-      break
-    }
-  }
-}
-
-makeTheArray(a){
-  theArray := ""
-  Loop % a.Length(){
-    if (A_Index == a.Length())
-      theArray := theArray . a[A_Index]
-    else
-      theArray := theArray . a[A_Index] . "|"
-  }
-  return theArray
-}
-
-cascadeAll() {
-  WinArrange(CASCADE, ALLWINDOWS, VERTICAL, FULLSCREEN)
-}
-
-cascadeCurrentDesktop() {
-  WinGet, win, List
-  currentDesktop := getCurrentDesktopNumber()
-  theWindows := Array()
-  Loop, %win% {
-    thisWin := win%A_Index%
-    if (windowIsOnDesktop(ThisWin) == 1) {
-      theWindows.Push(thisWin, thisWin)
-      removeWindowFromArray(thisWin)
-    }
-  }
-  TheArray := makeTheArray(TheWindows)
-  WinArrange(CASCADE, TheArray, VERTICAL, FULLSCREEN)
-}
-
-autoTile() {
-  currentDesktopNumber := getCurrentDesktopNumber()
-  theLeftArray := makeTheArray(arrayLeft%currentDesktopNumber%)
-  theRightArray := makeTheArray(arrayRight%CurrentDesktopNumber%)
-  if (theLeftArray != "")
-    WinArrange(TILE, theLeftArray, HORIZONTAL, left%currentDesktopNumber%)
-  if (theRightArray != "")
-    WinArrange(TILE, theRightArray, HORIZONTAL, right%currentDesktopNumber%)
-}
-
-modifyWidth(delta) {
-  currentDesktop := getCurrentDesktopNumber()
-  left := left%CurrentDesktop%
-  divide := ""
-  Loop, Parse, left, |
-    if (A_Index == 3)
-      divide := A_LoopField + delta
-  left%currentDesktop%  := "0|0|" . divide . "|" . A_ScreenHeight
-  right%currentDesktop% := divide . "|0|"  . A_ScreenWidth . "|" . A_ScreenHeight
-  tileWindows()
 }
 
 ; =====================================================================
@@ -517,7 +493,6 @@ goToNextDesktop() {
   if (!desktopIsEmpty()) {
     selectAndCycle()
   }
-  autoTile()
 }
 
 goToPrevDesktop() {
@@ -530,13 +505,10 @@ goToPrevDesktop() {
   if (!desktopIsEmpty()) {
     selectAndCycle()
   }
-  autoTile()
 }
 
 moveCurrentWindowToNextDesktop(){
   WinGet, winId, ID, A
-  removeWindowFromArray(winId)
-  autoTile()
   DllCall(MoveWindowToDesktopNumberProc, UInt, winId, UInt, getCurrentDesktopNumber())
   goToNextDesktop()
   WinMove, ahk_id %winId%, , 100, 100
@@ -545,8 +517,6 @@ moveCurrentWindowToNextDesktop(){
 
 moveCurrentWindowToPreviousDesktop(){
   WinGet, winId, ID, A
-  removeWindowFromArray(winId)
-  autoTile()
   DllCall(MoveWindowToDesktopNumberProc, UInt, winId, UInt, getCurrentDesktopNumber()-2)
   goToPrevDesktop()
   WinMove, ahk_id %winId%, , 100, 100
@@ -560,13 +530,9 @@ windowIsOnDesktop(window){
 ;  GENERAL THINGS
 ; =====================================================================
 closeWindow() {
-  randomlyPositionWindow()
-  removeWindowFromArray()
-  autoTile()
   WinClose, A
 }
 
 reloadScript() {
   Reload
-  cascadeAll()
 }
