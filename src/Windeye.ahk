@@ -71,7 +71,7 @@ getNearestWindowNarrow(direction, id := "") {
   candidatePointX := 0
   candidatePointY := 0
   candidateWindow := id
-  firstLoop := True
+  firstLoop := true
   
   Loop, %win% {
 
@@ -89,46 +89,52 @@ getNearestWindowNarrow(direction, id := "") {
     WinGetPos, nextX, nextY, nextWidth, nextHeight, ahk_id %thisWin% ; Get position of window
     nextWindow := {x: nextX, y: nextY, w: nextWidth, h: nextHeight}
 
+    currentBest := ""
+
     ; Up
     if (direction == "up") {
-      if (nextWindow.y < currentWindow.y && windowsOverlap("x", currentWindow, nextWindow)) {
-        if (firstLoop OR candidatePointY < nextPointY) {
-          firstLoop       := False
+      if (nextWindow.y + nextWindow.h <= currentWindow.y
+          && windowsOverlap("x", currentWindow, nextWindow)) {
+        if (firstLoop || currentBest < nextWindow.y + nextWindow.h) {
+          firstLoop       := false
           candidateWindow := thisWin
-          candidatePointY := nextPointY
+          currentBest     := nextWindow.y + nextWindow.h
         }
       }
     }
 
     ; Down
     else if (direction == "down") {
-      if (nextWindow.y > currentWindow.y && windowsOverlap("x", currentWindow, nextWindow)) {
-        if (firstLoop OR candidatePointY > nextPointY) {
-          firstLoop       := False
+      if (nextWindow.y >= currentWindow.y + currentWindow.h
+          && windowsOverlap("x", currentWindow, nextWindow)) {
+        if (firstLoop || currentBest > nextWindow.y) {
+          firstLoop       := false
           candidateWindow := thisWin
-          candidatePointY := nextPointY
+          currentBest     := nextWindow.y
         }
       }
     }
     
     ; Right
     else if (direction == "right") {
-      if (nextWindow.x > currentWindow.x && windowsOverlap("y", currentWindow, nextWindow)) {
-        if (firstLoop OR candidatePointX > nextPointX) {
-          firstLoop       := False
+      if (nextWindow.x >= currentWindow.x + currentWindow.w
+          && windowsOverlap("y", currentWindow, nextWindow)) {
+        if (firstLoop || currentBest > nextWindow.x + nextWindow.w) {
+          firstLoop       := false
           candidateWindow := thisWin
-          candidatePointX := nextPointX
+          currentBest     := nextWindow.x + nextWindow.w
         }
       }
     }
 
     ; Left
     else if (direction == "left") {
-      if (nextWindow.x < currentWindow.x && windowsOverlap("y", currentWindow, nextWindow)) {
-        if (firstLoop OR candidatePointX < nextPointX) {
-          firstLoop       := False
+      if (nextWindow.x + nextWindow.w <= currentWindow.x
+          && windowsOverlap("y", currentWindow, nextWindow)) {
+        if (firstLoop || currentBest < nextWindow.x + nextWindow.w) {
+          firstLoop       := false
           candidateWindow := thisWin
-          candidatePointX := nextPointX
+          currentBest     := nextWindow.x + nextWindow.w        
         }
       }
     }
