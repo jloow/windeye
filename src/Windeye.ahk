@@ -351,11 +351,11 @@ resizeWindow(top, bottom, left, right) {
   WinMove, A, , x, y, w, h
 }
 
-getNearestEdge(direction, id := ""){
+getNearestEdge(direction, id := "", shrink := false){
   if (!id)
     WinGet, id, ID, A
   WinGetPos, x, y, w, h, ahk_id %id%
-  nearest := getNearestWindowNarrow(direction)
+  nearest := (shrink ? getNearestWindowNarrowShrink(direction) : getNearestWindowNarrow(direction))
   if (!nearest)
     return ""
   WinGetPos, edgeX, edgeY, edgeW, edgeH, ahk_id %nearest%
@@ -363,7 +363,7 @@ getNearestEdge(direction, id := ""){
       || (direction == "left"  && edgeX + edgeW == x    )
       || (direction == "up"    && edgeY + edgeH == y    )
       || (direction == "down"  && edgeY         == y + h) )
-    getNearestEdge(direction, nearest)
+    getNearestEdge(direction, nearest, shrink)
   else
     return nearest
 }
@@ -409,12 +409,12 @@ moveToEdge(direction) {
   }
 }
 
-resizeToEdge(direction) {
+resizeToEdge(direction, shrink := false) {
   
   if (isMaximised())
     toggleMax()
 
-  nearest := getNearestEdge(direction)
+  nearest := getNearestEdge(direction, , shrink)
   if (!nearest) 
     useDesktopEdges := True
   
@@ -449,6 +449,98 @@ resizeToEdge(direction) {
     WinMove, A, , , , , edgeY - y
   }
 }
+
+; Shrinking to edge is a special case...
+getNearestWindowNarrowShrink(direction, id := "") {
+
+  if (!id)
+    WinGet, id, ID, A ; Get id of current window
+  
+  WinGet, win, List ; Get a list of all available windows
+
+  WinGetPos, currentX, currentY, currentWidth, currentHeight, A ; Get position of current window
+  currentWindow := {x: currentX, y: currentY, w: currentWidth, h: currentHeight}
+  
+  ; Some variables to determine which window is closest to
+  ; the current window
+  candidatePointX := 0
+  candidatePointY := 0
+  candidateWindow := id
+  firstLoop := true
+  
+  Loop, %win% {
+
+    thisWin := win%A_Index%
+    WinGet, mmStatus, MinMax, ahk_id %thisWin% ; Get min/max status of current window. Put in a function?
+
+    ; Skip current window, if its not on current desktop or if
+    ; it is minimised or maximised
+    if (   windowIsOnDesktop(thisWin) != 1
+        || id       == thisWin
+        || mmStatus == -1
+        || mmStatus == 1   )
+      continue
+
+    WinGetPos, nextX, nextY, nextWidth, nextHeight, ahk_id %thisWin% ; Get position of window
+    nextWindow := {x: nextX, y: nextY, w: nextWidth, h: nextHeight}
+
+    currentBest := ""
+
+    ; Up
+    if (direction == "up") {
+      if (nextWindow.y <= currentWindow.y
+          && windowsOverlap("x", currentWindow, nextWindow)) {
+        if (firstLoop || currentBest < nextWindow.y + nextWindow.h) {
+          firstLoop       := false
+          candidateWindow := thisWin
+          currentBest     := nextWindow.y + nextWindow.h
+        }
+      }
+    }
+
+    ; Down
+    else if (direction == "down") {
+      if (nextWindow.y >= currentWindow.y
+          && windowsOverlap("x", currentWindow, nextWindow)) {
+        if (firstLoop || currentBest > nextWindow.y) {
+          firstLoop       := false
+          candidateWindow := thisWin
+          currentBest     := nextWindow.y
+        }
+      }
+    }
+    
+    ; Right
+    else if (direction == "right") {
+      if (nextWindow.x >= currentWindow.x
+          && windowsOverlap("y", currentWindow, nextWindow)) {
+        if (firstLoop || currentBest > nextWindow.x + nextWindow.w) {
+          firstLoop       := false
+          candidateWindow := thisWin
+          currentBest     := nextWindow.x + nextWindow.w
+        }
+      }
+    }
+
+    ; Left
+    else if (direction == "left") {
+      if (nextWindow.x <= currentWindow.x
+          && windowsOverlap("y", currentWindow, nextWindow)) {
+        if (firstLoop || currentBest < nextWindow.x + nextWindow.w) {
+          firstLoop       := false
+          candidateWindow := thisWin
+          currentBest     := nextWindow.x + nextWindow.w        
+        }
+      }
+    }
+  }
+
+  if (candidateWindow != id)
+    return candidateWindow
+  else
+    return ""
+}
+
 
 isMaximised() {
   WinGet, status, MinMax, A

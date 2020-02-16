@@ -114,14 +114,14 @@
 ^!right::  resizeToEdge("right")
 
 ; Shrink
-+^!h::      resizeToEdge("right")
-+^!j::      resizeToEdge("up")
-+^!k::      resizeToEdge("down")
-+^!l::      resizeToEdge("left")
++^!h::      resizeToEdge("right", true)
++^!j::      resizeToEdge("up", true)
++^!k::      resizeToEdge("down", true)
++^!l::      resizeToEdge("left", true)
 
-+^!left::   resizeToEdge("right")
-+^!down::   resizeToEdge("up")
-+^!up::     resizeToEdge("down")
-+^!right::  resizeToEdge("left")
++^!left::   resizeToEdge("right", true)
++^!down::   resizeToEdge("up", true)
++^!up::     resizeToEdge("down", true)
++^!right::  resizeToEdge("left", true)
 
 
