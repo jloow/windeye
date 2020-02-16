@@ -40,8 +40,8 @@
   global edgeMode := false
   
   ; Includes
+  #Include %A_ScriptDir%\Gui.ahk
   #Include %A_ScriptDir%\Keybindings.ahk
-  #Include %A_ScriptDir%\..\lib\WinArrange.ahk
 
 Return
 ; ======================================================================
@@ -177,7 +177,7 @@ getNearestWindowWide(direction) {
   candidatePointX := 0
   candidatePointY := 0
   candidateWindow := id
-  firstLoop := True
+  firstLoop := true
 
   Loop, %win% {
     
@@ -200,7 +200,7 @@ getNearestWindowWide(direction) {
     if (direction == "up") {
       if (nextPointY < currentPointY) {
         if (firstLoop OR candidatePointY < nextPointY) {
-          firstLoop       := False
+          firstLoop       := false
           candidateWindow := thisWin
           candidatePointY := nextPointY
         }
@@ -211,7 +211,7 @@ getNearestWindowWide(direction) {
     else if (direction == "down") {
       if (nextPointY > currentPointY) {
         if (firstLoop OR candidatePointY > nextPointY) {
-          firstLoop       := False
+          firstLoop       := false
           candidateWindow := thisWin
           candidatePointY := nextPointY
         }
@@ -222,7 +222,7 @@ getNearestWindowWide(direction) {
     else if (direction == "right") {
       if (nextPointX > currentPointX) {
         if (firstLoop OR candidatePointX > nextPointY) {
-          firstLoop       := False
+          firstLoop       := false
           candidateWindow := thisWin
           candidatePointY := nextPointY
         }
@@ -233,7 +233,7 @@ getNearestWindowWide(direction) {
     else if (direction == "left") {
       if (nextPointX < currentPointX) {
         if (firstLoop OR candidatePointX < nextPointY) {
-          firstLoop       := False
+          firstLoop       := false
           candidateWindow := thisWin
           candidatePointY := nextPointY
         }

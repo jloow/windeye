@@ -89,7 +89,7 @@
 ; ======================================================================
 #If edgeMode
 
-escape:: toggleEdgeMode()
+; escape:: toggleEdgeMode()
 
 ; Move
 +!h::      moveToEdge("left")
