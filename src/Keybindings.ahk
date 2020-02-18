@@ -92,36 +92,42 @@
 ; escape:: toggleEdgeMode()
 
 ; Move
-+!h::      moveToEdge("left")
-+!j::      moveToEdge("down")
-+!k::      moveToEdge("up")
-+!l::      moveToEdge("right")
++!h::      moveToEdge("west", "left")
++!j::      moveToEdge("south", "bottom")
++!k::      moveToEdge("north", "top")
++!l::      moveToEdge("east", "right")
 
-+!left::   moveToEdge("left")
-+!down::   moveToEdge("down")
-+!up::     moveToEdge("up")
-+!right::  moveToEdge("right")
+; +!left::   moveToEdge("left")
+; +!down::   moveToEdge("down")
+; +!up::     moveToEdge("up")
+; +!right::  moveToEdge("right")
 
 ; Grow
-^!h::      resizeToEdge("left")
-^!j::      resizeToEdge("down")
-^!k::      resizeToEdge("up")
-^!l::      resizeToEdge("right")
+^!h::      resizeToEdge("west", "left")
+^!j::      resizeToEdge("south", "bottom")
+^!k::      resizeToEdge("north", "top")
+^!l::      resizeToEdge("east", "right")
 
-^!left::   resizeToEdge("left")
-^!down::   resizeToEdge("down")
-^!up::     resizeToEdge("up")
-^!right::  resizeToEdge("right")
+;^!left::   resizeToEdge("left")
+;^!down::   resizeToEdge("down")
+;^!up::     resizeToEdge("up")
+;^!right::  resizeToEdge("right")
 
 ; Shrink
-+^!h::      resizeToEdge("right", true)
-+^!j::      resizeToEdge("up", true)
-+^!k::      resizeToEdge("down", true)
-+^!l::      resizeToEdge("left", true)
++^!h::      resizeToEdge("west", "right", "shrink")
++^!j::      resizeToEdge("south", "top", "shrink")
++^!k::      resizeToEdge("north", "bottom", "shrink")
++^!l::      resizeToEdge("east", "left", "shrink")
 
-+^!left::   resizeToEdge("right", true)
-+^!down::   resizeToEdge("up", true)
-+^!up::     resizeToEdge("down", true)
-+^!right::  resizeToEdge("left", true)
+; Shrink
+;+^!h::      resizeToEdge("right", true)
+;+^!j::      resizeToEdge("up", true)
+;+^!k::      resizeToEdge("down", true)
+;+^!l::      resizeToEdge("left", true)
+;
+;+^!left::   resizeToEdge("right", true)
+;+^!down::   resizeToEdge("up", true)
+;+^!up::     resizeToEdge("down", true)
+;+^!right::  resizeToEdge("left", true)
 
 

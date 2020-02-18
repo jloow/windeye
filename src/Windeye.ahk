@@ -56,6 +56,122 @@ toggleEdgeMode() {
   edgeMode := !edgeMode
 }
 
+getNearestEdge(searchDirection, searchFrom := "middle", id := "", returnWhat := "id") {
+
+  if (!id)
+    WinGet, id, ID, A
+  
+  WinGet, win, List ; Get a list of all available windows
+
+  WinGetPos, currentX, currentY, currentWidth, currentHeight, A ; Get position of current window
+  current := {x: currentX, y: currentY, w: currentWidth, h: currentHeight}
+  
+  best := {point: ((searchDirection == "east" || searchDirection == "south") ? 9999 : 0), id: ""}
+
+  if (searchFrom == "left")
+    point := current.x
+  else if (searchFrom == "right")
+    point := current.x + current.w
+  else if (searchFrom == "top")
+    point := current.y
+  else if (searchFrom == "bottom")
+    point := current.y + current.h
+  else if (searchFrom == "middle") {
+    if (searchDirection == "west" || searchDirection == "east")
+      point := (current.x*2 + current.w) / 2
+    else if (searchDirection == "north" || searchDirection == "south")
+      point := (current.y*2 + current.h) / 2
+  }
+  else
+    return ""
+  
+  Loop, %win% {
+
+    thisWin := win%A_Index%
+    WinGet, mmStatus, MinMax, ahk_id %thisWin% ; Get min/max status of current window. Put in a function?
+
+    ; Skip current window, if its not on current desktop or if
+    ; it is minimised or maximised
+    if (   windowIsOnDesktop(thisWin) != 1
+        || id       == thisWin
+        || mmStatus == -1
+        || mmStatus == 1   )
+      continue
+
+    WinGetPos, nextX, nextY, nextWidth, nextHeight, ahk_id %thisWin% ; Get position of window
+    next := {x: nextX, y: nextY, w: nextWidth, h: nextHeight}
+
+    left   := next.x
+    right  := next.x + next.w
+    top    := next.y
+    bottom := next.y + next.h
+      
+    if (searchDirection == "west") {
+      if (!windowsOverlap("y", current, next))
+        continue
+      if (point > right && best.point < right) {
+        best.point := right
+        best.id    := thisWin
+      }
+      else if (point > left && best.point < left) {
+        best.point := left
+        best.id    := thisWin
+      }
+    }
+    
+    else if (searchDirection == "east") {
+      if (!windowsOverlap("y", current, next))
+        continue
+      ; MsgBox % "Current x: " . current.x . "`nCurrent y: " . current.y . "`nPoint: " . point . "`nLeft: " . left . "`nRight: " . right
+      if (point < left && best.point > left) {
+        best.point := left
+        best.id    := thisWin
+      }
+      else if (point < right && best.point > right) {
+        best.point := right
+        best.id    := thisWin
+      }
+    }
+
+    else if (searchDirection == "north") {
+      if (!windowsOverlap("x", current, next))
+        continue
+      if (point > bottom && best.point < bottom) {
+        best.point := bottom
+        best.id    := thisWin
+      }
+      else if (point > top && best.point < top) {
+        best.point := top
+        best.id    := thisWin
+      }
+    }
+    
+    else if (searchDirection == "south") {
+      if (!windowsOverlap("x", current, next))
+        continue
+      if (point < top && best.point > top) {
+        best.point := top
+        best.id    := thisWin
+      }
+      else if (point < bottom && best.point > bottom) {
+        best.point := bottom
+        best.id    := thisWin
+      }
+    }
+  }
+
+  if (best.id) {
+    if (returnWhat == "id")
+      return best.id
+    else if (returnWhat == "edge")
+      return best.point
+    else
+      return ""
+  }
+  else
+    return ""
+}
+
 getNearestWindowNarrow(direction, id := "") {
 
   if (!id)
@@ -71,6 +187,7 @@ getNearestWindowNarrow(direction, id := "") {
   candidatePointX := 0
   candidatePointY := 0
   candidateWindow := id
+  currentBest := ""
   firstLoop := true
   
   Loop, %win% {
@@ -89,11 +206,9 @@ getNearestWindowNarrow(direction, id := "") {
     WinGetPos, nextX, nextY, nextWidth, nextHeight, ahk_id %thisWin% ; Get position of window
     nextWindow := {x: nextX, y: nextY, w: nextWidth, h: nextHeight}
 
-    currentBest := ""
-
     ; Up
     if (direction == "up") {
-      if (nextWindow.y + nextWindow.h <= currentWindow.y
+      if (nextWindow.y < currentWindow.y
           && windowsOverlap("x", currentWindow, nextWindow)) {
         if (firstLoop || currentBest < nextWindow.y + nextWindow.h) {
           firstLoop       := false
@@ -105,7 +220,8 @@ getNearestWindowNarrow(direction, id := "") {
 
     ; Down
     else if (direction == "down") {
-      if (nextWindow.y >= currentWindow.y + currentWindow.h
+      if (nextWindow.y + nextWindow.h > currentWindow.y + currentWindow.h
+          && nextWindow.y > currentWindow.y
           && windowsOverlap("x", currentWindow, nextWindow)) {
         if (firstLoop || currentBest > nextWindow.y) {
           firstLoop       := false
@@ -117,19 +233,20 @@ getNearestWindowNarrow(direction, id := "") {
     
     ; Right
     else if (direction == "right") {
-      if (nextWindow.x >= currentWindow.x + currentWindow.w
+      if (nextWindow.x + nextWindow.w > currentWindow.x
+          && nextWindow.x > currentWindow.x
           && windowsOverlap("y", currentWindow, nextWindow)) {
-        if (firstLoop || currentBest > nextWindow.x + nextWindow.w) {
+        if (firstLoop || currentBest > nextWindow.x) {
           firstLoop       := false
           candidateWindow := thisWin
-          currentBest     := nextWindow.x + nextWindow.w
+          currentBest     := nextWindow.x
         }
       }
     }
 
     ; Left
     else if (direction == "left") {
-      if (nextWindow.x + nextWindow.w <= currentWindow.x
+      if (nextWindow.x < currentWindow.x
           && windowsOverlap("y", currentWindow, nextWindow)) {
         if (firstLoop || currentBest < nextWindow.x + nextWindow.w) {
           firstLoop       := false
@@ -148,19 +265,35 @@ getNearestWindowNarrow(direction, id := "") {
 
 windowsOverlap(dimension, currentWindow, nextWindow) {
   if (dimension == "y") {
-    return (  (   currentWindow.y < nextWindow.y    + nextWindow.h
-               && currentWindow.y + currentWindow.h > nextWindow.y)
-           || (   nextWindow.y < currentWindow.y + currentWindow.h
-               && nextWindow.y + nextWindow.h    > currentWindow.y)  )
+    return (  (   currentWindow.y <= nextWindow.y    + nextWindow.h
+               && currentWindow.y + currentWindow.h >= nextWindow.y)
+           || (   nextWindow.y <= currentWindow.y + currentWindow.h
+               && nextWindow.y + nextWindow.h    >= currentWindow.y)  )
   }
   else if (dimension == "x") {
-    return (  (   currentWindow.x < nextWindow.x    + nextWindow.w
-               && currentWindow.x + currentWindow.w > nextWindow.x)
-           || (   nextWindow.x < currentWindow.x + currentWindow.w
-               && nextWindow.x + nextWindow.w    > currentWindow.x)  )
+    return (  (   currentWindow.x <= nextWindow.x    + nextWindow.w
+               && currentWindow.x + currentWindow.w >= nextWindow.x)
+           || (   nextWindow.x <= currentWindow.x + currentWindow.w
+               && nextWindow.x + nextWindow.w    >= currentWindow.x)  )
   }
   else
     return false
+}
+
+isContainedByTargetWindow(targetWindow, currentWindow := "") {
+  if (!currentWindow)
+    WinGet, currentWindow, ID, A
+  WinGetPos, tx, ty, tw, th, ahk_id %targetWindow%
+  WinGetPos, cx, cy, cw, ch, ahk_id %currentWindow%
+  ; Is the upper left corner contained?
+  upperLeft  := cx >= tx && cx <= tx + tw           && cy >= ty && cy <= ty + th
+  ; Is the upper right corner contained?
+  upperRight := cx + cw >= tx && cx + cw <= tx + tw && cy >= ty && cy <= ty + th
+  ; Is the lower left corner contained?
+  lowerLeft  := cx >= tx && cx <= tx + tw           && cy + ch >= ty && cy + ch <= ty + th
+  ; Is the lower right corner contained?
+  lowerRight := cx + cw >= tx && cx + cw <= tx + tw && cy + ch >= ty && cy + ch <= ty + th
+  return (upperLeft || upperRight || lowerLeft || lowerRight)
 }
 
 getNearestWindowWide(direction) {
@@ -248,12 +381,12 @@ getNearestWindowWide(direction) {
 }
 
 ; Can be implemented more efficiently
-moveFocus(direction) {
-  narrow := getNearestWindowNarrow(direction)
-  wide := getNearestWindowWide(direction)
-  if (narrow)
+moveFocus(searchDirection) {
+  narrow := getNearestWindowNarrow(searchDirection)
+  wide   := getNearestWindowWide(searchDirection)
+  if narrow
     WinActivate, ahk_id %narrow%
-  else if (wide)
+  else if wide
     WinActivate, ahk_id %wide%
 }
 
@@ -351,102 +484,106 @@ resizeWindow(top, bottom, left, right) {
   WinMove, A, , x, y, w, h
 }
 
-getNearestEdge(direction, id := "", shrink := false){
-  if (!id)
-    WinGet, id, ID, A
-  WinGetPos, x, y, w, h, ahk_id %id%
-  nearest := (shrink ? getNearestWindowNarrowShrink(direction) : getNearestWindowNarrow(direction))
-  if (!nearest)
-    return ""
-  WinGetPos, edgeX, edgeY, edgeW, edgeH, ahk_id %nearest%
-  if (   (direction == "right" && edgeX         == x + w)
-      || (direction == "left"  && edgeX + edgeW == x    )
-      || (direction == "up"    && edgeY + edgeH == y    )
-      || (direction == "down"  && edgeY         == y + h) )
-    getNearestEdge(direction, nearest, shrink)
-  else
-    return nearest
-}
+; getNearestEdge(direction, id := "", shrink := false){
+;   if (!id)
+;     WinGet, id, ID, A
+;   WinGetPos, x, y, w, h, ahk_id %id%
+;   nearest := (shrink ? getNearestWindowNarrowShrink(direction) : getNearestWindowNarrow(direction))
+;   if (!nearest)
+;     return ""
+;   WinGetPos, edgeX, edgeY, edgeW, edgeH, ahk_id %nearest%
+;   if (   (direction == "right" && edgeX         == x + w)
+;       || (direction == "left"  && edgeX + edgeW == x    )
+;       || (direction == "up"    && edgeY + edgeH == y    )
+;       || (direction == "down"  && edgeY         == y + h) )
+;     return nearest
+;     ; getNearestEdge(direction, nearest, shrink)
+;   else
+;     return nearest
+; }
+; 
+; nextIsNearer(id, direction){
+;   next := getNearestWindowNarrow(direction, id)
+;   if (!next)
+;     return ""
+;   WinGetPos, nx, ny, nw, nh, ahk_id %next%
+;   WinGetPos, cx, cy, cw, ch, ahk_id %id%
+;   if (direction == "right"
+;       && cx + cw > nx)
+;     return nx
+; }
 
-moveToEdge(direction) {
+moveToEdge(searchDirection, searchFrom) {
   
   if (isMaximised())
     toggleMax()
   
-  nearest := getNearestEdge(direction)
-  if (!nearest) 
-    useDesktopEdges := True
+  next := getNearestEdge(searchDirection, searchFrom, , "edge")
+  if !next {
+    if (searchDirection == "west" || searchDirection == "north")
+      next := 0
+    else if (searchDirection == "east")
+      next := A_ScreenWidth
+    else if (searchDirection == "south")
+      next := A_ScreenHeight
+  }
   
   WinGetPos, x, y, w, h, A
   
-  if (direction == "right") {
-    if (useDesktopEdges)
-      edgeX := A_ScreenWidth
-    else
-      WinGetPos, edgeX, , , , ahk_id %nearest%
-    WinMove, A, , edgeX - w
+  if (searchDirection == "east") {
+    WinMove, A, , next - w
   }
-  else if (direction == "left") {
-    if (useDesktopEdges)
-      edgeX := 0, edgeW := 0
-    else
-      WinGetPos, edgeX, , edgeW, , ahk_id %nearest%
-    WinMove, A, , edgeX + edgeW
+  else if (searchDirection == "west") {
+    WinMove, A, , next
   }
-  else if (direction == "up") {
-    if (useDesktopEdges)
-      edgeY := 0, edgeH := 0
-    else
-      WinGetPos, , edgeY, , edgeH, ahk_id %nearest%
-    WinMove, A, , , edgeY + edgeH
+  else if (searchDirection == "north") {
+    WinMove, A, , , next
   }
-  else if (direction == "down") {
-    if (useDesktopEdges)
-      edgeY := A_ScreenHeight
-    else
-      WinGetPos, , edgeY, , , ahk_id %nearest%
-    WinMove, A, , , edgeY - h
+  else if (searchDirection == "south") {
+    WinMove, A, , , next - h
   }
 }
 
-resizeToEdge(direction, shrink := false) {
+resizeToEdge(searchDirection, searchFrom, how := "grow") {
   
   if (isMaximised())
     toggleMax()
 
-  nearest := getNearestEdge(direction, , shrink)
-  if (!nearest) 
-    useDesktopEdges := True
+  next := getNearestEdge(searchDirection, searchFrom, , "edge")
+  if !next {
+    if (searchDirection == "west" || searchDirection == "north")
+      next := 0
+    else if (searchDirection == "east")
+      next := A_ScreenWidth
+    else if (searchDirection == "south")
+      next := A_ScreenHeight
+  }
   
   WinGetPos, x, y, w, h, A
   
-  if (direction == "right") {
-    if (useDesktopEdges)
-      edgeX := A_ScreenWidth
+  if (searchDirection == "east") {
+    if (how == "shrink")
+      WinMove, A, , next, , w + x - next
     else
-      WinGetPos, edgeX, , , , ahk_id %nearest%
-    WinMove, A, , , , edgeX - x
+      WinMove, A, , x, , next - x
   }
-  else if (direction == "left") {
-    if (useDesktopEdges)
-      edgeX := 0, edgeW := 0
+  else if (searchDirection == "west") {
+    if (how == "shrink")
+      WinMove, A, , x, , next - x
     else
-      WinGetPos, edgeX, , edgeW, , ahk_id %nearest%
-    WinMove, A, , edgeX + edgeW, , w + x - edgeX - edgeW
+      WinMove, A, , next, , w + x - next
   }
-  else if (direction == "up") {
-    if (useDesktopEdges)
-      edgeY := 0, edgeH := 0
+  else if (searchDirection == "north") {
+    if (how == "shrink")
+      WinMove, A, , , , , next - y
     else
-      WinGetPos, , edgeY, , edgeH, ahk_id %nearest%
-    WinMove, A, , , edgeY + edgeH, , h + y - edgeY - edgeH
+      WinMove, A, , , next, , h + y - next
   }
-  else if (direction == "down") {
-    if (useDesktopEdges)
-      edgeY := A_ScreenHeight
+  else if (searchDirection == "south") {
+    if (how == "how")
+      WinMove, A, , , next, , h + y - next
     else
-      WinGetPos, , edgeY, , , ahk_id %nearest%
-    WinMove, A, , , , , edgeY - y
+      WinMove, A, , , , , next - y
   }
 }
 
@@ -466,6 +603,7 @@ getNearestWindowNarrowShrink(direction, id := "") {
   candidatePointX := 0
   candidatePointY := 0
   candidateWindow := id
+  currentBest := ""
   firstLoop := true
   
   Loop, %win% {
@@ -483,8 +621,6 @@ getNearestWindowNarrowShrink(direction, id := "") {
 
     WinGetPos, nextX, nextY, nextWidth, nextHeight, ahk_id %thisWin% ; Get position of window
     nextWindow := {x: nextX, y: nextY, w: nextWidth, h: nextHeight}
-
-    currentBest := ""
 
     ; Up
     if (direction == "up") {
