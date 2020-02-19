@@ -42,13 +42,14 @@
 !up::       moveFocus("north", "bottom")
 !right::    moveFocus("east", "left")
 
-; Toggle mode
+; Toggle modes
 !space::    toggleEdgeMode()
+!g::        toggleGlueMode()
 
 ; ======================================================================
 ;  NORMAL MODE
 ; ======================================================================
-#If !edgeMode
+#If !edgeMode && !glueMode
 
 ; Move window
 +!l::       moveWindow(80, 0)
@@ -88,8 +89,6 @@
 ; ======================================================================
 #If edgeMode
 
-; escape:: toggleEdgeMode()
-
 ; Move
 +!h::      moveToEdge("west", "left")
 +!j::      moveToEdge("south", "bottom")
@@ -122,3 +121,21 @@
 +^!down::   resizeToEdge("south", "top", "shrink")
 +^!up::     resizeToEdge("north", "bottom", "shrink")
 +^!right::  resizeToEdge("east", "left", "shrink")
+
+; ======================================================================
+;  GLUE MODE
+; ======================================================================
+
+#If glueMode
+
+; Move windows
++!l::       moveGluedWindows(80, 0)
++!h::       moveGluedWindows(-80, 0)
++!k::       moveGluedWindows(0, -80)
++!j::       moveGluedWindows(0, 80)
+
++!right::   moveGluedWindows(80, 0) 
++!left::    moveGluedWindows(-80, 0) 
++!up::      moveGluedWindows(0, -80) 
++!down::    moveGluedWindows(0, 80)
+

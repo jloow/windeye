@@ -38,6 +38,7 @@
   global theWindowsOnDesktop := Array()
 
   global edgeMode := false
+  global glueMode := false
   
   ; Includes
   #Include %A_ScriptDir%\Gui.ahk
@@ -54,6 +55,12 @@ Return
 
 toggleEdgeMode() {
   edgeMode := !edgeMode
+  glueMode := false
+}
+
+toggleGlueMode() {
+  glueMode := !glueMode
+  edgeMode := false
 }
 
 getNearestEdge(searchDirection, searchFrom := "middle", id := "", returnWhat := "id", oneEdge := false) {
@@ -492,4 +499,42 @@ closeWindow() {
 
 reloadScript() {
   Reload
+}
+
+; Test
+
+moveGluedWindows(deltaX, deltaY) {
+  windows := getTouchingWindows()
+  Loop, % windows.Length() {
+    id := windows[A_Index]
+    WinGetPos, x, y, w, h, ahk_id %id%
+    WinMove, ahk_id %id%, , x + deltaX, y + deltaY
+  }
+}
+
+getTouchingWindows() {
+  WinGet, cid, ID, A
+  WinGetPos, cx, cy, cw, ch, ahk_id %cid%
+  currentWindow := {id: cid, x: cx, y: cy, w: cw, h: ch}
+  
+  WinGet, windows, List
+  touchingWindows := Array()
+  touchingWindows.Push(currentWindow.id)
+
+  Loop, %windows% {
+    tmp := windows%A_Index%
+    WinGetPos, tx, ty, tw, th, ahk_id %tmp%
+    thisWindow := {id: tmp, x: tx, y: ty, w: tw, h: th}
+    if (windowIsOnDesktop(thisWindow.id) != 1)
+      continue
+    if ((currentWindow.x == thisWindow.x + thisWindow.w 
+        || currentWindow.x + currentWindow.w == thisWindow.x)
+        && windowsOverlap("y", currentWindow, thisWindow))
+      touchingWindows.Push(thisWindow.id)
+    else if ((currentWindow.y == thisWindow.y + thisWindow.h 
+        || currentWindow.y + currentWindow.h == thisWindow.y)
+        && windowsOverlap("x", currentWindow, thisWindow))
+      touchingWindows.Push(thisWindow.id)
+  }
+  return touchingWindows
 }
