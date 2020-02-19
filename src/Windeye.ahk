@@ -56,7 +56,6 @@ toggleEdgeMode() {
   edgeMode := !edgeMode
 }
 
-; Todo: Fix so that the `point` can be equal to the candidate 
 getNearestEdge(searchDirection, searchFrom := "middle", id := "", returnWhat := "id", oneEdge := false) {
 
   if (!id)
@@ -173,97 +172,6 @@ getNearestEdge(searchDirection, searchFrom := "middle", id := "", returnWhat := 
     return ""
 }
 
-getNearestWindowNarrow(direction, id := "") {
-
-  if (!id)
-    WinGet, id, ID, A ; Get id of current window
-  
-  WinGet, win, List ; Get a list of all available windows
-
-  WinGetPos, currentX, currentY, currentWidth, currentHeight, A ; Get position of current window
-  currentWindow := {x: currentX, y: currentY, w: currentWidth, h: currentHeight}
-  
-  ; Some variables to determine which window is closest to
-  ; the current window
-  candidatePointX := 0
-  candidatePointY := 0
-  candidateWindow := id
-  currentBest := ""
-  firstLoop := true
-  
-  Loop, %win% {
-
-    thisWin := win%A_Index%
-    WinGet, mmStatus, MinMax, ahk_id %thisWin% ; Get min/max status of current window. Put in a function?
-
-    ; Skip current window, if its not on current desktop or if
-    ; it is minimised or maximised
-    if (   windowIsOnDesktop(thisWin) != 1
-        || id       == thisWin
-        || mmStatus == -1
-        || mmStatus == 1   )
-      continue
-
-    WinGetPos, nextX, nextY, nextWidth, nextHeight, ahk_id %thisWin% ; Get position of window
-    nextWindow := {x: nextX, y: nextY, w: nextWidth, h: nextHeight}
-
-    ; Up
-    if (direction == "up") {
-      if (nextWindow.y < currentWindow.y
-          && windowsOverlap("x", currentWindow, nextWindow)) {
-        if (firstLoop || currentBest < nextWindow.y + nextWindow.h) {
-          firstLoop       := false
-          candidateWindow := thisWin
-          currentBest     := nextWindow.y + nextWindow.h
-        }
-      }
-    }
-
-    ; Down
-    else if (direction == "down") {
-      if (nextWindow.y + nextWindow.h > currentWindow.y + currentWindow.h
-          && nextWindow.y > currentWindow.y
-          && windowsOverlap("x", currentWindow, nextWindow)) {
-        if (firstLoop || currentBest > nextWindow.y) {
-          firstLoop       := false
-          candidateWindow := thisWin
-          currentBest     := nextWindow.y
-        }
-      }
-    }
-    
-    ; Right
-    else if (direction == "right") {
-      if (nextWindow.x + nextWindow.w > currentWindow.x
-          && nextWindow.x > currentWindow.x
-          && windowsOverlap("y", currentWindow, nextWindow)) {
-        if (firstLoop || currentBest > nextWindow.x) {
-          firstLoop       := false
-          candidateWindow := thisWin
-          currentBest     := nextWindow.x
-        }
-      }
-    }
-
-    ; Left
-    else if (direction == "left") {
-      if (nextWindow.x < currentWindow.x
-          && windowsOverlap("y", currentWindow, nextWindow)) {
-        if (firstLoop || currentBest < nextWindow.x + nextWindow.w) {
-          firstLoop       := false
-          candidateWindow := thisWin
-          currentBest     := nextWindow.x + nextWindow.w        
-        }
-      }
-    }
-  }
-
-  if (candidateWindow != id)
-    return candidateWindow
-  else
-    return ""
-}
-
 windowsOverlap(dimension, currentWindow, nextWindow) {
   if (dimension == "y") {
     return (  (   currentWindow.y <= nextWindow.y    + nextWindow.h
@@ -287,98 +195,14 @@ isContainedByTargetWindow(targetWindow, currentWindow := "") {
   WinGetPos, tx, ty, tw, th, ahk_id %targetWindow%
   WinGetPos, cx, cy, cw, ch, ahk_id %currentWindow%
   ; Is the upper left corner contained?
-  upperLeft  := cx >= tx && cx <= tx + tw           && cy >= ty && cy <= ty + th
+  upperLeft  := cx >= tx      && cx <= tx + tw      && cy >= ty && cy <= ty + th
   ; Is the upper right corner contained?
   upperRight := cx + cw >= tx && cx + cw <= tx + tw && cy >= ty && cy <= ty + th
   ; Is the lower left corner contained?
-  lowerLeft  := cx >= tx && cx <= tx + tw           && cy + ch >= ty && cy + ch <= ty + th
+  lowerLeft  := cx >= tx      && cx <= tx + tw      && cy + ch >= ty && cy + ch <= ty + th
   ; Is the lower right corner contained?
   lowerRight := cx + cw >= tx && cx + cw <= tx + tw && cy + ch >= ty && cy + ch <= ty + th
   return (upperLeft || upperRight || lowerLeft || lowerRight)
-}
-
-getNearestWindowWide(direction) {
-
-  WinGet, id, ID, A ; Get id of current window
-  WinGetPos, currentX, currentY, currentWidth, currentHeight, A ; Get position of current window
-  WinGet, win, List ; Get a list of all available windows
-
-  currentPointX := currentX + currentWidth / 2
-  currentPointY := currentY + currentHeight / 2
-  
-  ; Some variables to determine which window is closest to
-  ; the current window
-  candidatePointX := 0
-  candidatePointY := 0
-  candidateWindow := id
-  firstLoop := true
-
-  Loop, %win% {
-    
-    thisWin := win%A_Index%
-    WinGet, mmStatus, MinMax, ahk_id %thisWin% ; Get min/max status of current window. Put in a function?
-
-    ; Skip current window, if its not on current desktop or if
-    ; it is minimised
-    if (windowIsOnDesktop(thisWin) != 1
-        or id == thisWin
-        or mmStatus == -1)
-    continue
-
-    WinGetPos, nextX, nextY, nextWidth, nextHeight, ahk_id %thisWin% ; Get position of window
-
-    nextPointX := nextX + nextWidth / 2
-    nextPointY := nextY + nextHeight / 2
-
-    ; Up
-    if (direction == "up") {
-      if (nextPointY < currentPointY) {
-        if (firstLoop OR candidatePointY < nextPointY) {
-          firstLoop       := false
-          candidateWindow := thisWin
-          candidatePointY := nextPointY
-        }
-      }
-    }
-
-    ; Down
-    else if (direction == "down") {
-      if (nextPointY > currentPointY) {
-        if (firstLoop OR candidatePointY > nextPointY) {
-          firstLoop       := false
-          candidateWindow := thisWin
-          candidatePointY := nextPointY
-        }
-      }
-    }
-
-    ; Right
-    else if (direction == "right") {
-      if (nextPointX > currentPointX) {
-        if (firstLoop OR candidatePointX > nextPointY) {
-          firstLoop       := false
-          candidateWindow := thisWin
-          candidatePointY := nextPointY
-        }
-      }
-    }
-
-    ; Left
-    else if (direction == "left") {
-      if (nextPointX < currentPointX) {
-        if (firstLoop OR candidatePointX < nextPointY) {
-          firstLoop       := false
-          candidateWindow := thisWin
-          candidatePointY := nextPointY
-        }
-      }
-    }
-  }
-
-  if (candidateWindow != id)
-    return candidateWindow
-  else
-    return ""
 }
 
 moveFocus(searchDirection, searchFrom) {
@@ -387,12 +211,6 @@ moveFocus(searchDirection, searchFrom) {
     WinActivate, ahk_id %next%
   else
     selectAndCycle()
-  ; narrow := getNearestWindowNarrow(searchDirection)
-  ; wide   := getNearestWindowWide(searchDirection)
-  ; if narrow
-  ;   WinActivate, ahk_id %narrow%
-  ; else if wide
-  ;   WinActivate, ahk_id %wide%
 }
 
 selectAndCycle() {
@@ -443,7 +261,7 @@ selectAndCycle() {
 
 selectPrevious() {
   WinGet, listOfAllWindows, List
-  WinGet, currentWin, ID, A ; Get id of current window
+  WinGet, currentWin, ID, A
   Loop, %listOfAllWindows% {
     thisWin := listOfAllWindows%A_Index%
     if (currentWin == thisWin)
@@ -488,35 +306,6 @@ resizeWindow(top, bottom, left, right) {
   h := h + bottom + top
   WinMove, A, , x, y, w, h
 }
-
-; getNearestEdge(direction, id := "", shrink := false){
-;   if (!id)
-;     WinGet, id, ID, A
-;   WinGetPos, x, y, w, h, ahk_id %id%
-;   nearest := (shrink ? getNearestWindowNarrowShrink(direction) : getNearestWindowNarrow(direction))
-;   if (!nearest)
-;     return ""
-;   WinGetPos, edgeX, edgeY, edgeW, edgeH, ahk_id %nearest%
-;   if (   (direction == "right" && edgeX         == x + w)
-;       || (direction == "left"  && edgeX + edgeW == x    )
-;       || (direction == "up"    && edgeY + edgeH == y    )
-;       || (direction == "down"  && edgeY         == y + h) )
-;     return nearest
-;     ; getNearestEdge(direction, nearest, shrink)
-;   else
-;     return nearest
-; }
-; 
-; nextIsNearer(id, direction){
-;   next := getNearestWindowNarrow(direction, id)
-;   if (!next)
-;     return ""
-;   WinGetPos, nx, ny, nw, nh, ahk_id %next%
-;   WinGetPos, cx, cy, cw, ch, ahk_id %id%
-;   if (direction == "right"
-;       && cx + cw > nx)
-;     return nx
-; }
 
 moveToEdge(searchDirection, searchFrom) {
   
@@ -591,97 +380,6 @@ resizeToEdge(searchDirection, searchFrom, how := "grow") {
       WinMove, A, , , , , next - y
   }
 }
-
-; Shrinking to edge is a special case...
-getNearestWindowNarrowShrink(direction, id := "") {
-
-  if (!id)
-    WinGet, id, ID, A ; Get id of current window
-  
-  WinGet, win, List ; Get a list of all available windows
-
-  WinGetPos, currentX, currentY, currentWidth, currentHeight, A ; Get position of current window
-  currentWindow := {x: currentX, y: currentY, w: currentWidth, h: currentHeight}
-  
-  ; Some variables to determine which window is closest to
-  ; the current window
-  candidatePointX := 0
-  candidatePointY := 0
-  candidateWindow := id
-  currentBest := ""
-  firstLoop := true
-  
-  Loop, %win% {
-
-    thisWin := win%A_Index%
-    WinGet, mmStatus, MinMax, ahk_id %thisWin% ; Get min/max status of current window. Put in a function?
-
-    ; Skip current window, if its not on current desktop or if
-    ; it is minimised or maximised
-    if (   windowIsOnDesktop(thisWin) != 1
-        || id       == thisWin
-        || mmStatus == -1
-        || mmStatus == 1   )
-      continue
-
-    WinGetPos, nextX, nextY, nextWidth, nextHeight, ahk_id %thisWin% ; Get position of window
-    nextWindow := {x: nextX, y: nextY, w: nextWidth, h: nextHeight}
-
-    ; Up
-    if (direction == "up") {
-      if (nextWindow.y <= currentWindow.y
-          && windowsOverlap("x", currentWindow, nextWindow)) {
-        if (firstLoop || currentBest < nextWindow.y + nextWindow.h) {
-          firstLoop       := false
-          candidateWindow := thisWin
-          currentBest     := nextWindow.y + nextWindow.h
-        }
-      }
-    }
-
-    ; Down
-    else if (direction == "down") {
-      if (nextWindow.y >= currentWindow.y
-          && windowsOverlap("x", currentWindow, nextWindow)) {
-        if (firstLoop || currentBest > nextWindow.y) {
-          firstLoop       := false
-          candidateWindow := thisWin
-          currentBest     := nextWindow.y
-        }
-      }
-    }
-    
-    ; Right
-    else if (direction == "right") {
-      if (nextWindow.x >= currentWindow.x
-          && windowsOverlap("y", currentWindow, nextWindow)) {
-        if (firstLoop || currentBest > nextWindow.x + nextWindow.w) {
-          firstLoop       := false
-          candidateWindow := thisWin
-          currentBest     := nextWindow.x + nextWindow.w
-        }
-      }
-    }
-
-    ; Left
-    else if (direction == "left") {
-      if (nextWindow.x <= currentWindow.x
-          && windowsOverlap("y", currentWindow, nextWindow)) {
-        if (firstLoop || currentBest < nextWindow.x + nextWindow.w) {
-          firstLoop       := false
-          candidateWindow := thisWin
-          currentBest     := nextWindow.x + nextWindow.w        
-        }
-      }
-    }
-  }
-
-  if (candidateWindow != id)
-    return candidateWindow
-  else
-    return ""
-}
-
 
 isMaximised() {
   WinGet, status, MinMax, A
@@ -764,7 +462,6 @@ moveCurrentWindowToNextDesktop(){
   WinGet, winId, ID, A
   DllCall(MoveWindowToDesktopNumberProc, UInt, winId, UInt, getCurrentDesktopNumber())
   goToNextDesktop()
-  WinMove, ahk_id %winId%, , 100, 100
 }
 
 
@@ -772,7 +469,6 @@ moveCurrentWindowToPreviousDesktop(){
   WinGet, winId, ID, A
   DllCall(MoveWindowToDesktopNumberProc, UInt, winId, UInt, getCurrentDesktopNumber()-2)
   goToPrevDesktop()
-  WinMove, ahk_id %winId%, , 100, 100
 }
 
 windowIsOnDesktop(window){
