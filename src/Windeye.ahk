@@ -37,8 +37,7 @@
 
   global theWindowsOnDesktop := Array()
 
-  global edgeMode := false
-  global glueMode := false
+  global mode := "Normal"
   
   ; Includes
   #Include %A_ScriptDir%\Gui.ahk
@@ -54,13 +53,11 @@ Return
 ; =====================================================================
 
 toggleEdgeMode() {
-  edgeMode := !edgeMode
-  glueMode := false
+  mode := mode != "Edge" ? "Edge" : "Normal"
 }
 
 toggleGlueMode() {
-  glueMode := !glueMode
-  edgeMode := false
+  mode := mode != "Glue" ? "Glue" : "Normal"
 }
 
 getNearestEdge(searchDirection, searchFrom := "middle", id := "", returnWhat := "id", oneEdge := false) {
