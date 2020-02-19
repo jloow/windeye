@@ -33,15 +33,15 @@
 #+x::       ExitApp
 
 ; Move focus
-!h::        moveFocus("left")
-!j::        moveFocus("down")
-!k::        moveFocus("up")
-!l::        moveFocus("right")
+!h::        moveFocus("west", "right")
+!j::        moveFocus("south", "top")
+!k::        moveFocus("north", "bottom")
+!l::        moveFocus("east", "left")
 
-!left::     moveFocus("left") 
-!down::     moveFocus("down") 
-!up::       moveFocus("up") 
-!right::    moveFocus("right")
+!left::     moveFocus("west", "right")
+!down::     moveFocus("south", "top")
+!up::       moveFocus("north", "bottom")
+!right::    moveFocus("east", "left")
 
 ; Toggle mode
 !space::    toggleEdgeMode()
@@ -97,10 +97,10 @@
 +!k::      moveToEdge("north", "top")
 +!l::      moveToEdge("east", "right")
 
-; +!left::   moveToEdge("left")
-; +!down::   moveToEdge("down")
-; +!up::     moveToEdge("up")
-; +!right::  moveToEdge("right")
++!left::   moveToEdge("west", "left")
++!down::   moveToEdge("south", "bottom")
++!up::     moveToEdge("north", "top")
++!right::  moveToEdge("east", "right")
 
 ; Grow
 ^!h::      resizeToEdge("west", "left")
@@ -108,10 +108,10 @@
 ^!k::      resizeToEdge("north", "top")
 ^!l::      resizeToEdge("east", "right")
 
-;^!left::   resizeToEdge("left")
-;^!down::   resizeToEdge("down")
-;^!up::     resizeToEdge("up")
-;^!right::  resizeToEdge("right")
+^!left::   resizeToEdge("west", "left")
+^!down::   resizeToEdge("south", "bottom")
+^!up::     resizeToEdge("north", "top")
+^!right::  resizeToEdge("east", "right")
 
 ; Shrink
 +^!h::      resizeToEdge("west", "right", "shrink")
@@ -119,15 +119,7 @@
 +^!k::      resizeToEdge("north", "bottom", "shrink")
 +^!l::      resizeToEdge("east", "left", "shrink")
 
-; Shrink
-;+^!h::      resizeToEdge("right", true)
-;+^!j::      resizeToEdge("up", true)
-;+^!k::      resizeToEdge("down", true)
-;+^!l::      resizeToEdge("left", true)
-;
-;+^!left::   resizeToEdge("right", true)
-;+^!down::   resizeToEdge("up", true)
-;+^!up::     resizeToEdge("down", true)
-;+^!right::  resizeToEdge("left", true)
-
-
++^!left::  resizeToEdge("west", "right", "shrink")
++^!down::   resizeToEdge("south", "top", "shrink")
++^!up::     resizeToEdge("north", "bottom", "shrink")
++^!right::  resizeToEdge("east", "left", "shrink")

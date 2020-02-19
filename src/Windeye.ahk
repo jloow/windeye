@@ -56,7 +56,8 @@ toggleEdgeMode() {
   edgeMode := !edgeMode
 }
 
-getNearestEdge(searchDirection, searchFrom := "middle", id := "", returnWhat := "id") {
+; Todo: Fix so that the `point` can be equal to the candidate 
+getNearestEdge(searchDirection, searchFrom := "middle", id := "", returnWhat := "id", oneEdge := false) {
 
   if (!id)
     WinGet, id, ID, A
@@ -113,7 +114,7 @@ getNearestEdge(searchDirection, searchFrom := "middle", id := "", returnWhat := 
         best.point := right
         best.id    := thisWin
       }
-      else if (point > left && best.point < left) {
+      else if (point > left && best.point < left && !oneEdge) {
         best.point := left
         best.id    := thisWin
       }
@@ -127,7 +128,7 @@ getNearestEdge(searchDirection, searchFrom := "middle", id := "", returnWhat := 
         best.point := left
         best.id    := thisWin
       }
-      else if (point < right && best.point > right) {
+      else if (point < right && best.point > right && !oneEdge) {
         best.point := right
         best.id    := thisWin
       }
@@ -140,7 +141,7 @@ getNearestEdge(searchDirection, searchFrom := "middle", id := "", returnWhat := 
         best.point := bottom
         best.id    := thisWin
       }
-      else if (point > top && best.point < top) {
+      else if (point > top && best.point < top && !oneEdge) {
         best.point := top
         best.id    := thisWin
       }
@@ -153,7 +154,7 @@ getNearestEdge(searchDirection, searchFrom := "middle", id := "", returnWhat := 
         best.point := top
         best.id    := thisWin
       }
-      else if (point < bottom && best.point > bottom) {
+      else if (point < bottom && best.point > bottom && !oneEdge) {
         best.point := bottom
         best.id    := thisWin
       }
@@ -380,14 +381,18 @@ getNearestWindowWide(direction) {
     return ""
 }
 
-; Can be implemented more efficiently
-moveFocus(searchDirection) {
-  narrow := getNearestWindowNarrow(searchDirection)
-  wide   := getNearestWindowWide(searchDirection)
-  if narrow
-    WinActivate, ahk_id %narrow%
-  else if wide
-    WinActivate, ahk_id %wide%
+moveFocus(searchDirection, searchFrom) {
+  next := getNearestEdge(searchDirection, searchFrom, , , true)
+  if next
+    WinActivate, ahk_id %next%
+  else
+    selectAndCycle()
+  ; narrow := getNearestWindowNarrow(searchDirection)
+  ; wide   := getNearestWindowWide(searchDirection)
+  ; if narrow
+  ;   WinActivate, ahk_id %narrow%
+  ; else if wide
+  ;   WinActivate, ahk_id %wide%
 }
 
 selectAndCycle() {
