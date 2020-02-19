@@ -9,9 +9,8 @@
 ; Desktop switching
 !n::        goToNextDesktop()
 !b::        goToPrevDesktop()
-
-!+n::       Send, #^d ; Todo: Implement using the DLL
-; !+q::deletevirtualDesktop()
+!+n::       newDesktop()
+!+q::       deleteDesktop()
 !^n::       moveCurrentWindowToNextDesktop()
 !^b::       moveCurrentWindowToPreviousDesktop()
 

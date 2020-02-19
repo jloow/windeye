@@ -475,6 +475,14 @@ windowIsOnDesktop(window){
   return DllCall(IsWindowOnDesktopNumberProc, UInt, Window, UInt, getCurrentDesktopNumber() - 1)
 }
 
+newDesktop() {
+  Send, #^d
+}
+
+deleteDesktop() {
+  Send, #^{F4}
+}
+
 ; =====================================================================
 ;  GENERAL THINGS
 ; =====================================================================
